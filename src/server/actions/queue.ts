@@ -1,16 +1,15 @@
 "use server";
 
-import { and, eq, max } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { getDb, schema as s } from "@/db";
 import * as q from "@/domain/queue";
 import { shopDate } from "@/domain/time";
+import { enqueue, numberSetting, type Tx } from "@/server/enqueue";
 import { requireStaff, type Staff } from "@/server/session";
 
 export type QueueActionState = { error?: string; ok?: number };
-
-type Tx = Parameters<Parameters<Awaited<ReturnType<typeof getDb>>["transaction"]>[0]>[0];
 
 const DEFAULT_GRACE_MIN = 5;
 
@@ -83,28 +82,16 @@ export async function addWalkIn(_prev: QueueActionState, form: FormData): Promis
         throw new q.QueueError("Barber ini tidak jaga hari ini.");
       assertBranch(staff, shift.branchId);
 
-      const entries = await tx
-        .select()
-        .from(s.queueEntries)
-        .where(and(eq(s.queueEntries.barberId, barberId), eq(s.queueEntries.date, date)))
-        .for("update");
-      const [{ last } = { last: 0 }] = await tx
-        .select({ last: max(s.queueEntries.ticketNo) })
-        .from(s.queueEntries)
-        .where(and(eq(s.queueEntries.branchId, shift.branchId), eq(s.queueEntries.date, date)));
       const [haircut] = await tx
         .select({ durationMin: s.services.durationMin })
         .from(s.services)
         .where(eq(s.services.slug, "haircut"));
-
-      await tx.insert(s.queueEntries).values({
+      await enqueue(tx, {
         branchId: shift.branchId,
         barberId,
         date,
-        position: q.nextPosition(entries),
-        ticketNo: (last ?? 0) + 1,
-        displayName: name ?? null,
         source: "walkin",
+        displayName: name ?? null,
         estimatedMin: haircut?.durationMin ?? 30,
       });
     });
@@ -125,7 +112,6 @@ function assertBranch(staff: Staff, branchId: string) {
   }
 }
 
-async function graceMinutes(tx: Tx): Promise<number> {
-  const [row] = await tx.select().from(s.settings).where(eq(s.settings.key, "queue_grace_minutes"));
-  return typeof row?.value === "number" ? row.value : DEFAULT_GRACE_MIN;
+function graceMinutes(tx: Tx): Promise<number> {
+  return numberSetting(tx, "queue_grace_minutes", DEFAULT_GRACE_MIN);
 }

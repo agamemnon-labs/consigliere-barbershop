@@ -1,13 +1,16 @@
 import type { Metadata } from "next";
-import { Placeholder } from "@/components/placeholder";
+import { Suspense } from "react";
 import { StaffShell } from "@/components/staff-shell";
+import { CashierBoard } from "./board";
 
 export const metadata: Metadata = { title: "Kasir", robots: { index: false } };
 
-export default function CashierPage() {
+export default function CashierPage({ searchParams }: PageProps<"/kasir">) {
   return (
     <StaffShell title="Kasir" allow={["cashier", "admin", "owner"]}>
-      <Placeholder phase="3" what="Kolom antrean per barber, panggil, selesai, walk-in, dan scan member." />
+      <Suspense fallback={<p className="p-6 text-muted">Memuat antrean…</p>}>
+        <CashierBoard searchParams={searchParams} />
+      </Suspense>
     </StaffShell>
   );
 }

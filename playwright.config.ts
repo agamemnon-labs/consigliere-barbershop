@@ -18,8 +18,13 @@ export default defineConfig({
   },
   projects: [
     // The customer web is phone-first, so the phone is the default device.
-    { name: "phone", use: { ...devices["iPhone 13"], browserName: "chromium" } },
-    { name: "desktop", use: { ...devices["Desktop Chrome"] }, testMatch: /staff\..*/ },
+    {
+      name: "phone",
+      use: { ...devices["iPhone 13"], browserName: "chromium" },
+      // The cashier board and the counter tablet are not phone screens.
+      testIgnore: /(cashier|display)\./,
+    },
+    { name: "desktop", use: { ...devices["Desktop Chrome"] }, testMatch: /(staff|cashier|display)\./ },
   ],
   webServer: {
     command: `pnpm start -p ${port}`,

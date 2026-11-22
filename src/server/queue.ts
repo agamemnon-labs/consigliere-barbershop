@@ -25,7 +25,7 @@ export type LiveEntry = {
 };
 
 export type BarberQueue = {
-  barber: { id: string; slug: string; name: string; level: string };
+  barber: { id: string; slug: string; name: string; level: string; haircutPrice: number };
   entries: LiveEntry[];
   /** Minutes a newcomer would wait. */
   waitMin: number;
@@ -74,6 +74,7 @@ export async function getBranchQueue(
             slug: s.barbers.slug,
             name: s.barbers.name,
             level: s.barberLevels.name,
+            haircutPrice: s.barberLevels.haircutPrice,
             levelSort: s.barberLevels.sort,
           })
           .from(s.barbers)

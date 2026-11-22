@@ -42,6 +42,9 @@ export async function CashierBoard({ searchParams }: Props) {
           {queue.branch.name} <span className="text-muted italic">· {shortDate(date)}</span>
         </p>
         <div className="flex items-center gap-6">
+          <Link href="/kasir/member" className="label min-h-11 content-center hover:text-fg">
+            Member
+          </Link>
           {staff.role !== "cashier" ? (
             <nav className="flex gap-4" aria-label="Pilih cabang">
               {branches.map((b) => (

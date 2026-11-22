@@ -42,3 +42,16 @@ export function isStaffRole(role: string): role is StaffRole {
 export function homeFor(role: StaffRole): "/kasir" | "/admin" {
   return role === "cashier" ? "/kasir" : "/admin";
 }
+
+/** The signed-in member's user id, or null. Same Suspense rule as `getStaff`. */
+export async function getMemberUserId(): Promise<string | null> {
+  const session = await (await auth()).api.getSession({ headers: await headers() });
+  const user = session?.user;
+  return user?.isActive && user.role === "member" ? user.id : null;
+}
+
+export async function requireMemberUserId(): Promise<string> {
+  const id = await getMemberUserId();
+  if (id) return id;
+  redirect("/masuk");
+}

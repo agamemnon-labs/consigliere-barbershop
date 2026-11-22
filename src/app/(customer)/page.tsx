@@ -84,11 +84,16 @@ export default async function Home() {
         </ButtonLink>
       </div>
 
-      <p className="label mt-16 text-center leading-relaxed">
-        Segera hadir
-        <br />
-        <span className="text-fg">Kartu member · Poin · Saldo</span>
+      <Rule label="Kartu member" className="mt-16" />
+      <p className="mt-5 text-muted">
+        Satu poin tiap Rp50.000, diskon haircut setengah harga di bulan ulang tahunmu, dan saldo dengan bonus.
+        Daftar di kasir cabang mana saja.
       </p>
+      <div className="mt-6">
+        <ButtonLink href="/masuk" variant="quiet" block>
+          Buka kartu member
+        </ButtonLink>
+      </div>
 
       <Credits />
     </div>

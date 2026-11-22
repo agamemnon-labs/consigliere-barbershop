@@ -346,7 +346,10 @@ export const bookings = pgTable(
     amount: integer().notNull(),
     status: bookingStatus().notNull().default("pending"),
     paymentId: text().unique(),
+    /** The QRIS payload to render while the booking waits for payment. */
+    qrString: text(),
     expiresAt: timestamp({ withTimezone: true }).notNull(),
+    paidAt: timestamp({ withTimezone: true }),
     createdAt: createdAt(),
   },
   (t) => [index().on(t.status, t.expiresAt)],

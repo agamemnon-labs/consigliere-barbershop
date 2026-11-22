@@ -2,13 +2,14 @@ import { getSessionCookie } from "better-auth/cookies";
 import { type NextRequest, NextResponse } from "next/server";
 
 /**
- * Optimistic gate for staff areas: no session cookie, no entry. The real check
+ * Optimistic gate for staff areas and the member card: no session cookie, no entry. The real check
  * (valid session, right role) happens on the server in `requireStaff`.
  */
 export function proxy(request: NextRequest) {
   const cookie = getSessionCookie(request, { cookiePrefix: "consigliere" });
   if (!cookie) {
-    const login = new URL("/staf/masuk", request.url);
+    const member = request.nextUrl.pathname.startsWith("/kartu");
+    const login = new URL(member ? "/masuk" : "/staf/masuk", request.url);
     login.searchParams.set("lanjut", request.nextUrl.pathname);
     return NextResponse.redirect(login);
   }
@@ -16,5 +17,5 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/kasir/:path*", "/admin/:path*"],
+  matcher: ["/kasir/:path*", "/admin/:path*", "/kartu/:path*"],
 };

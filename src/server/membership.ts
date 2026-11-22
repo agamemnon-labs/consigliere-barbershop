@@ -343,3 +343,12 @@ export async function memberCard(db: Database, userId: string, now: Date) {
   const rule = await pointsRule(db);
   return { ...summary, visits, rule };
 }
+
+/** What the counter sells: the sign-up fee and the active top-up packages. */
+export async function memberDesk(db: Database) {
+  const [fee, packages] = await Promise.all([
+    numberSetting(db, "membership_fee", 30_000),
+    db.select().from(s.topupPackages).where(eq(s.topupPackages.isActive, true)),
+  ]);
+  return { fee, packages: packages.sort((a, b) => a.pay - b.pay) };
+}

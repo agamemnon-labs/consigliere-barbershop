@@ -57,7 +57,7 @@ export function PriceList({ only }: Props) {
         );
       })}
       <p className="text-sm text-muted">
-        Harga dalam ribu rupiah. Tanda <span className="num">+</span> berarti harga mulai dari. Pembayaran
+        K berarti ribu rupiah. Tanda <span className="num">+</span> berarti harga mulai dari. Pembayaran
         non-tunai.
       </p>
     </div>

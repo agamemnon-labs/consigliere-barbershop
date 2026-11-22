@@ -2,20 +2,25 @@ import "server-only";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { nextCookies } from "better-auth/next-js";
-import { db, schema } from "@/db";
+import { type Database, db, schema } from "@/db";
 import { env } from "@/server/env";
 
 export const STAFF_ROLES = ["cashier", "admin", "owner"] as const;
 export type StaffRole = (typeof STAFF_ROLES)[number];
 export type Role = "member" | StaffRole;
 
-function create() {
-  const { BETTER_AUTH_SECRET, BETTER_AUTH_URL } = env();
+type Options = { secret: string; baseURL?: string | undefined };
+
+/** Builds the auth instance for any Drizzle Postgres database (postgres.js in the app, PGlite in tests). */
+export function createAuth(
+  database: Database | Parameters<typeof drizzleAdapter>[0],
+  { secret, baseURL }: Options,
+) {
   return betterAuth({
     appName: "Consigliere",
-    secret: BETTER_AUTH_SECRET,
-    ...(BETTER_AUTH_URL ? { baseURL: BETTER_AUTH_URL } : {}),
-    database: drizzleAdapter(db(), {
+    secret,
+    ...(baseURL ? { baseURL } : {}),
+    database: drizzleAdapter(database, {
       provider: "pg",
       schema: {
         user: schema.users,
@@ -72,12 +77,13 @@ function create() {
   });
 }
 
-export type Auth = ReturnType<typeof create>;
+export type Auth = ReturnType<typeof createAuth>;
 
 let instance: Auth | undefined;
 
 /** Created on first use so builds and static pages never need database credentials. */
 export function auth(): Auth {
-  instance ??= create();
+  const { BETTER_AUTH_SECRET, BETTER_AUTH_URL } = env();
+  instance ??= createAuth(db(), { secret: BETTER_AUTH_SECRET, baseURL: BETTER_AUTH_URL });
   return instance;
 }

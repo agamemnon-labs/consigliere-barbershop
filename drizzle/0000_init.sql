@@ -118,6 +118,15 @@ CREATE TABLE "branches" (
 );
 --> statement-breakpoint
 ALTER TABLE "branches" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
+CREATE TABLE "closures" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"branch_id" uuid,
+	"date" date NOT NULL,
+	"reason" text NOT NULL,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL
+);
+--> statement-breakpoint
+ALTER TABLE "closures" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
 CREATE TABLE "credit_ledger" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"phone" text NOT NULL,
@@ -330,6 +339,7 @@ ALTER TABLE "barbers" ADD CONSTRAINT "barbers_level_id_barber_levels_id_fk" FORE
 ALTER TABLE "bookings" ADD CONSTRAINT "bookings_customer_id_customers_id_fk" FOREIGN KEY ("customer_id") REFERENCES "public"."customers"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "bookings" ADD CONSTRAINT "bookings_branch_id_branches_id_fk" FOREIGN KEY ("branch_id") REFERENCES "public"."branches"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "bookings" ADD CONSTRAINT "bookings_barber_id_barbers_id_fk" FOREIGN KEY ("barber_id") REFERENCES "public"."barbers"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "closures" ADD CONSTRAINT "closures_branch_id_branches_id_fk" FOREIGN KEY ("branch_id") REFERENCES "public"."branches"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "credit_ledger" ADD CONSTRAINT "credit_ledger_booking_id_bookings_id_fk" FOREIGN KEY ("booking_id") REFERENCES "public"."bookings"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "display_devices" ADD CONSTRAINT "display_devices_branch_id_branches_id_fk" FOREIGN KEY ("branch_id") REFERENCES "public"."branches"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "members" ADD CONSTRAINT "members_customer_id_customers_id_fk" FOREIGN KEY ("customer_id") REFERENCES "public"."customers"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
@@ -357,6 +367,7 @@ CREATE INDEX "balance_ledger_member_id_index" ON "balance_ledger" USING btree ("
 CREATE UNIQUE INDEX "barber_shifts_barber_id_date_index" ON "barber_shifts" USING btree ("barber_id","date");--> statement-breakpoint
 CREATE INDEX "barber_shifts_branch_id_date_index" ON "barber_shifts" USING btree ("branch_id","date");--> statement-breakpoint
 CREATE INDEX "bookings_status_expires_at_index" ON "bookings" USING btree ("status","expires_at");--> statement-breakpoint
+CREATE INDEX "closures_date_index" ON "closures" USING btree ("date");--> statement-breakpoint
 CREATE INDEX "credit_ledger_phone_index" ON "credit_ledger" USING btree ("phone");--> statement-breakpoint
 CREATE INDEX "point_ledger_member_id_index" ON "point_ledger" USING btree ("member_id");--> statement-breakpoint
 CREATE INDEX "queue_entries_barber_id_date_position_index" ON "queue_entries" USING btree ("barber_id","date","position");--> statement-breakpoint

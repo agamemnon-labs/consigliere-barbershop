@@ -237,17 +237,50 @@ export async function getReceipt(db: Database, id: string) {
     .select({ spent: sql<number>`coalesce(sum(-${s.creditLedger.delta}), 0)::int` })
     .from(s.creditLedger)
     .where(eq(s.creditLedger.transactionId, row.tx.id));
-  return { ...row, creditUsed: credit?.spent ?? 0 };
+  const [balance, points, member] = await Promise.all([
+    db
+      .select({ delta: s.balanceLedger.delta })
+      .from(s.balanceLedger)
+      .where(eq(s.balanceLedger.transactionId, row.tx.id)),
+    db
+      .select({ delta: s.pointLedger.delta, reason: s.pointLedger.reason })
+      .from(s.pointLedger)
+      .where(eq(s.pointLedger.transactionId, row.tx.id)),
+    row.tx.memberId
+      ? db
+          .select({ memberNo: s.members.memberNo, name: s.customers.name })
+          .from(s.members)
+          .innerJoin(s.customers, eq(s.members.customerId, s.customers.id))
+          .where(eq(s.members.id, row.tx.memberId))
+      : Promise.resolve([]),
+  ]);
+  const spentFromBalance = -balance.filter((b) => b.delta < 0).reduce((sum, b) => sum + b.delta, 0);
+  return {
+    ...row,
+    creditUsed: credit?.spent ?? 0,
+    // A top-up's own rows are positive; only spending shows as "paid with balance".
+    balanceUsed: spentFromBalance,
+    pointsEarned: points.filter((p) => p.reason === "earn").reduce((sum, p) => sum + p.delta, 0),
+    pointsRedeemed: -points.filter((p) => p.reason === "redeem").reduce((sum, p) => sum + p.delta, 0),
+    member: member[0] ?? null,
+  };
 }
 
-export type Takings = { count: number; total: number; byMethod: Partial<Record<Method | string, number>> };
+export type Takings = {
+  count: number;
+  /** New money today: the EDC part of counter bills plus online QRIS. */
+  total: number;
+  byMethod: Partial<Record<Method | string, number>>;
+  /** Paid from money that came in earlier (member balance, credit); not in `total`. */
+  prepaid: { balance: number; credit: number };
+};
 
 /** What a branch took today (WITA), by payment method. Online QRIS counts on the day it was paid. */
 export async function todayTakings(db: Database, branchId: string, date: string): Promise<Takings> {
   const start = new Date(`${date}T00:00:00+08:00`);
   const end = new Date(`${addDays(date, 1)}T00:00:00+08:00`);
   const counter = await db
-    .select({ method: s.transactions.method, total: s.transactions.total })
+    .select({ id: s.transactions.id, method: s.transactions.method, total: s.transactions.total })
     .from(s.transactions)
     .where(
       and(
@@ -267,11 +300,34 @@ export async function todayTakings(db: Database, branchId: string, date: string)
         lt(s.bookings.paidAt, end),
       ),
     );
+  const ids = counter.map((t) => t.id);
+  const [balanceRows, creditRows] = ids.length
+    ? await Promise.all([
+        db
+          .select({ transactionId: s.balanceLedger.transactionId, delta: s.balanceLedger.delta })
+          .from(s.balanceLedger)
+          .where(and(inArray(s.balanceLedger.transactionId, ids), lt(s.balanceLedger.delta, 0))),
+        db
+          .select({ transactionId: s.creditLedger.transactionId, delta: s.creditLedger.delta })
+          .from(s.creditLedger)
+          .where(and(inArray(s.creditLedger.transactionId, ids), lt(s.creditLedger.delta, 0))),
+      ])
+    : [[], []];
+  const spent = (rows: { transactionId: string | null; delta: number }[], id: string) =>
+    rows.filter((r) => r.transactionId === id).reduce((sum, r) => sum - r.delta, 0);
   const byMethod: Takings["byMethod"] = {};
-  for (const t of counter) byMethod[t.method] = (byMethod[t.method] ?? 0) + t.total;
+  const prepaid = { balance: 0, credit: 0 };
+  for (const t of counter) {
+    const balance = spent(balanceRows, t.id);
+    const credit = spent(creditRows, t.id);
+    prepaid.balance += balance;
+    prepaid.credit += credit;
+    const edc = t.total - balance - credit;
+    if (edc > 0) byMethod[t.method] = (byMethod[t.method] ?? 0) + edc;
+  }
   if (online.length) byMethod.online_qris = online.reduce((sum, b) => sum + b.amount, 0);
   const total = Object.values(byMethod).reduce((sum: number, v) => sum + (v ?? 0), 0);
-  return { count: counter.length + online.length, total, byMethod };
+  return { count: counter.length + online.length, total, byMethod, prepaid };
 }
 
 /** Services the cashier can put on a bill, read fresh (ids must match the live database). */
@@ -289,6 +345,7 @@ export async function counterCatalog(db: Database) {
       priceType: svc.priceType,
       price: svc.price,
       priceFrom: svc.priceFrom,
+      category: svc.category,
       variants: variants
         .filter((v) => v.serviceId === svc.id)
         .sort((a, b) => a.sort - b.sort)

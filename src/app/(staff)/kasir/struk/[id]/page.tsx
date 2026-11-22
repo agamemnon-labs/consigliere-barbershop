@@ -35,6 +35,7 @@ async function Receipt({ params }: { params: PageProps<"/kasir/struk/[id]">["par
   if (staff.role === "cashier" && staff.branchId !== receipt.tx.branchId) notFound();
   const { tx, branch } = receipt;
   const no = tx.id.slice(0, 8).toUpperCase();
+  const edc = tx.total - receipt.creditUsed - receipt.balanceUsed;
 
   return (
     <div className="px-6 py-8">
@@ -78,21 +79,52 @@ async function Receipt({ params }: { params: PageProps<"/kasir/struk/[id]">["par
         <dl className="mt-3 grid grid-cols-[1fr_auto] gap-y-0.5 border-t border-dashed border-rule-strong pt-3">
           {tx.discounts > 0 ? (
             <>
-              <dt>Diskon</dt>
+              <dt>
+                {receipt.pointsRedeemed > 0 ? `Diskon (tukar ${receipt.pointsRedeemed} poin)` : "Diskon"}
+              </dt>
               <dd className="num">−{formatRupiah(tx.discounts)}</dd>
-            </>
-          ) : null}
-          {receipt.creditUsed > 0 ? (
-            <>
-              <dt>Dibayar dengan kredit</dt>
-              <dd className="num">−{formatRupiah(receipt.creditUsed)}</dd>
             </>
           ) : null}
           <dt className="font-medium">Total</dt>
           <dd className="num text-base font-medium">{formatRupiah(tx.total)}</dd>
-          <dt className="text-muted">Dibayar</dt>
-          <dd className="text-right">{METHOD_LABEL[tx.method]}</dd>
+          {receipt.creditUsed > 0 ? (
+            <>
+              <dt className="text-muted">Kredit</dt>
+              <dd className="num">{formatRupiah(receipt.creditUsed)}</dd>
+            </>
+          ) : null}
+          {receipt.balanceUsed > 0 ? (
+            <>
+              <dt className="text-muted">Saldo member</dt>
+              <dd className="num">{formatRupiah(receipt.balanceUsed)}</dd>
+            </>
+          ) : null}
+          {edc > 0 ? (
+            <>
+              <dt className="text-muted">
+                {receipt.creditUsed || receipt.balanceUsed ? "Sisa di EDC" : "Dibayar"}
+              </dt>
+              <dd className="text-right">
+                {receipt.creditUsed || receipt.balanceUsed ? (
+                  <span className="num">{formatRupiah(edc)}</span>
+                ) : (
+                  METHOD_LABEL[tx.method]
+                )}
+              </dd>
+            </>
+          ) : null}
         </dl>
+
+        {receipt.member ? (
+          <p className="mt-3 border-t border-dashed border-rule-strong pt-3 text-center">
+            Member <span className="num">{receipt.member.memberNo}</span> · {receipt.member.name}
+            {receipt.pointsEarned > 0 ? (
+              <>
+                <br />+{receipt.pointsEarned} poin dari kunjungan ini
+              </>
+            ) : null}
+          </p>
+        ) : null}
 
         <footer className="mt-6 text-center text-muted">
           <p>Terima kasih. Sampai jumpa lagi.</p>

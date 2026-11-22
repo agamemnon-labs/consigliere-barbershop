@@ -8,6 +8,13 @@
       "when": 1795362494940,
       "tag": "0000_init",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1795363798007,
+      "tag": "0001_realtime_queue_broadcast",
+      "breakpoints": true
     }
   ]
 }

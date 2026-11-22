@@ -85,9 +85,7 @@ export default async function BranchPage({ params }: PageProps<"/cabang/[slug]">
           <LiveBarberRows slug={branch.slug} branchId={branch.id} barbers={onDutyToday} />
         </Suspense>
       ) : (
-        <p className="mt-6 text-muted italic">
-          {closed ? "Sampai jumpa besok." : "Jadwal hari ini belum diisi."}
-        </p>
+        <p className="mt-6 text-muted">{closed ? "Sampai jumpa besok" : "Jadwal hari ini belum diisi"}</p>
       )}
       {onDutyToday.length > 0 && !closed ? (
         <ButtonLink href={`/antre?cabang=${branch.slug}`} className="mt-8" block>
@@ -95,14 +93,13 @@ export default async function BranchPage({ params }: PageProps<"/cabang/[slug]">
         </ButtonLink>
       ) : null}
       <p className="mt-6 text-sm text-muted">
-        Harga potong mengikuti level barber. Barber bergiliran antar cabang; cek jadwal seminggu di{" "}
+        Barber bergiliran antar cabang.{" "}
         <Link
           href="/barber"
           className="underline decoration-rule-strong underline-offset-4 hover:decoration-fg"
         >
-          halaman barber
+          Lihat jadwal seminggu
         </Link>
-        .
       </p>
 
       <Credits />

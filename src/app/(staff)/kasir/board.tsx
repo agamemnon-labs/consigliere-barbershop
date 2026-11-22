@@ -39,7 +39,7 @@ export async function CashierBoard({ searchParams }: Props) {
     <div className="px-4 py-5 sm:px-6">
       <div className="mb-5 flex flex-wrap items-baseline justify-between gap-4 border-b border-rule pb-4">
         <p className="font-display text-2xl">
-          {queue.branch.name} <span className="text-muted italic">· {shortDate(date)}</span>
+          {queue.branch.name} <span className="text-muted">· {shortDate(date)}</span>
         </p>
         <div className="flex items-center gap-6">
           <Link href="/kasir/member" className="label min-h-11 content-center hover:text-fg">
@@ -65,7 +65,7 @@ export async function CashierBoard({ searchParams }: Props) {
       {queue.closedReason ? (
         <Notice title="Cabang tutup hari ini">{queue.closedReason}</Notice>
       ) : queue.barbers.length === 0 ? (
-        <p className="py-16 text-center text-muted italic">Belum ada barber yang dijadwalkan hari ini.</p>
+        <p className="py-16 text-center text-muted">Belum ada barber yang dijadwalkan hari ini.</p>
       ) : (
         <div className="grid gap-4 [grid-template-columns:repeat(auto-fill,minmax(17rem,1fr))]">
           {queue.barbers.map((b) => (
@@ -170,7 +170,7 @@ function Column({ queue, catalog }: { queue: BarberQueue; catalog: CatalogServic
             )}
           </>
         ) : (
-          <p className="mt-2 text-muted italic">Kursi kosong</p>
+          <p className="mt-2 text-muted">Kursi kosong</p>
         )}
       </div>
 
@@ -229,7 +229,5 @@ function Column({ queue, catalog }: { queue: BarberQueue; catalog: CatalogServic
 }
 
 function nameOf(e: LiveEntry) {
-  return (
-    e.displayName ?? <span className="text-muted italic">{e.source === "walkin" ? "Walk-in" : "Online"}</span>
-  );
+  return e.displayName ?? <span className="text-muted">{e.source === "walkin" ? "Walk-in" : "Online"}</span>;
 }

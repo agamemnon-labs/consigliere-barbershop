@@ -50,7 +50,7 @@ async function Board({ slug }: { slug: string }) {
   if (queue.closedReason) {
     return (
       <div className="py-24 text-center">
-        <p className="font-display text-5xl italic">Hari ini kami tutup.</p>
+        <p className="font-display text-5xl">Hari ini kami tutup</p>
         <p className="mt-4 text-2xl text-muted">{queue.closedReason}</p>
       </div>
     );
@@ -67,7 +67,7 @@ async function Board({ slug }: { slug: string }) {
           {called.map((c) => (
             <p key={c.ticket} className="border-l-4 border-accent py-2 pl-5 text-3xl" role="status">
               <span className="num text-accent-ink">{c.ticket}</span>, silakan ke kursi{" "}
-              <span className="font-display italic">{c.barber}</span>
+              <span className="font-display">{c.barber}</span>
             </p>
           ))}
         </div>
@@ -95,7 +95,7 @@ async function Board({ slug }: { slug: string }) {
                     <p className="num mt-1 text-lg text-muted">± {next.waitMin} mnt</p>
                   </>
                 ) : (
-                  <p className="text-2xl text-muted italic">Langsung duduk</p>
+                  <p className="text-2xl text-muted">Langsung duduk</p>
                 )}
               </div>
               <p className="num border-t border-rule py-6 text-right text-4xl sm:text-5xl">{waiting}</p>

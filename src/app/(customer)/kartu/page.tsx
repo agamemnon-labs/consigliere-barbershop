@@ -19,7 +19,7 @@ export default function MemberCardPage() {
   return (
     <div className="mx-auto flex max-w-md flex-col px-6 pt-[calc(1rem+env(safe-area-inset-top))]">
       <BackLink href="/">Beranda</BackLink>
-      <Suspense fallback={<p className="py-16 text-muted italic">Membuka kartu…</p>}>
+      <Suspense fallback={<p className="py-16 text-muted">Membuka kartu…</p>}>
         <Card />
       </Suspense>
       <Credits />
@@ -54,7 +54,7 @@ async function Card() {
           <QrCode value={card.memberNo} label={`QR kartu member ${card.memberNo}`} />
         </div>
         <figcaption className="mt-4 text-center text-sm opacity-70">
-          Tunjukkan ke kasir sebelum bayar.
+          Tunjukkan ke kasir sebelum bayar
         </figcaption>
       </figure>
 
@@ -73,19 +73,19 @@ async function Card() {
         </div>
       </dl>
       <p className="mt-4 text-[0.9375rem] text-muted">
-        {vouchers > 0 ? `Bisa ditukar ${vouchers} × ${formatRupiah(rule.redeemValue)} di kasir. ` : ""}
-        {toNext} poin lagi ke potongan {formatRupiah(rule.redeemValue)} berikutnya. Satu poin tiap{" "}
-        {formatRupiah(rule.earnPer)} yang dibayar.
+        {vouchers > 0
+          ? `Bisa ditukar ${vouchers} × ${formatRupiah(rule.redeemValue)} di kasir`
+          : `${toNext} poin lagi ke potongan ${formatRupiah(rule.redeemValue)}`}
       </p>
       {card.birthday ? (
         <p className="mt-4 border-l-2 border-accent pl-4">
-          Selamat ulang tahun. Sepanjang bulan ini haircut-mu diskon setengah harga, tinggal bilang ke kasir.
+          Selamat ulang tahun. Haircut bulan ini setengah harga
         </p>
       ) : null}
 
       <Rule label="Kunjungan terakhir" className="mt-12" />
       {card.visits.length === 0 ? (
-        <p className="mt-5 text-muted italic">Belum ada kunjungan.</p>
+        <p className="mt-5 text-muted">Belum ada kunjungan.</p>
       ) : (
         <ul className="mt-3">
           {card.visits.map((v) => (

@@ -36,6 +36,7 @@ test("a price change shows on the public pricelist", async ({ page }) => {
   await expect(form.getByRole("status")).toHaveText("Tersimpan");
 
   await page.goto("/");
+  await page.getByText("Harga lainnya").click();
   await expect(page.getByText("Classic Shaving").locator("..").locator("..")).toContainText("75K");
 });
 

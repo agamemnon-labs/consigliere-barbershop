@@ -25,7 +25,7 @@ export default function TicketPage({ params }: PageProps<"/tiket/[id]">) {
   return (
     <div className="mx-auto flex max-w-md flex-col px-6 pt-[calc(1rem+env(safe-area-inset-top))]">
       <BackLink href="/">Beranda</BackLink>
-      <Suspense fallback={<p className="py-16 text-muted italic">Membuka tiket…</p>}>
+      <Suspense fallback={<p className="py-16 text-muted">Membuka tiket…</p>}>
         <TicketView params={params} />
       </Suspense>
       <Credits />
@@ -49,19 +49,19 @@ async function TicketView({ params }: { params: PageProps<"/tiket/[id]">["params
         <InLine ticket={ticket} now={now} />
       ) : ticket.status === "expired" ? (
         <Ended
-          title="Waktu bayar habis."
+          title="Waktu bayar habis"
           body="Pembayarannya tidak kami terima, jadi belum ada nomor. Silakan ambil nomor lagi."
           branch={ticket.branch.slug}
         />
       ) : ticket.status === "credited" ? (
         <Ended
-          title="Pembayaran jadi kredit."
+          title="Pembayaran jadi kredit"
           body={`Pembayaran ${formatRupiah(ticket.amount)} masuk setelah waktunya habis, jadi kami simpan sebagai kredit di nomor WhatsApp-mu. Berlaku 30 hari di semua cabang.`}
           branch={ticket.branch.slug}
         />
       ) : (
         <Ended
-          title="Booking ini sudah ditutup."
+          title="Booking ini sudah ditutup"
           body="Ada pertanyaan? Hubungi kami lewat WhatsApp."
           branch={ticket.branch.slug}
         />
@@ -94,7 +94,7 @@ function Pending({ ticket, demo }: { ticket: Ticket; demo: boolean }) {
   return (
     <section className="pt-10">
       <p className="label">Satu langkah lagi, {ticket.name}</p>
-      <h1 className="mt-3 text-4xl leading-tight">Bayar dengan QRIS.</h1>
+      <h1 className="mt-3 text-4xl leading-tight">Bayar dengan QRIS</h1>
       <p className="mt-4 text-muted">
         Pindai dengan aplikasi bank atau dompet digital mana pun. Nomormu masuk antrean begitu pembayaran
         berhasil.
@@ -103,7 +103,7 @@ function Pending({ ticket, demo }: { ticket: Ticket; demo: boolean }) {
         {ticket.qrString ? (
           <QrCode value={ticket.qrString} label={`QRIS untuk membayar ${formatRupiah(ticket.amount)}`} />
         ) : (
-          <p className="text-muted italic">Menyiapkan QRIS…</p>
+          <p className="text-muted">Menyiapkan QRIS…</p>
         )}
       </div>
       <p className="mt-6 flex items-baseline justify-between">
@@ -136,14 +136,14 @@ function InLine({ ticket, now }: { ticket: Ticket; now: Date }) {
       <p className="label">{headline(place.status)}</p>
       <h1 className="mt-3 text-4xl leading-tight">
         {place.status === "called"
-          ? `Giliranmu, ${ticket.name}.`
+          ? `Giliranmu, ${ticket.name}`
           : place.status === "in_service"
-            ? "Selamat menikmati."
+            ? "Selamat menikmati"
             : place.status === "done"
-              ? "Terima kasih."
+              ? "Terima kasih"
               : place.status === "waiting"
-                ? `Kamu di antrean, ${ticket.name}.`
-                : "Nomor ini sudah lewat."}
+                ? `Kamu di antrean, ${ticket.name}`
+                : "Nomor ini sudah lewat"}
       </h1>
       <TicketStub
         className="mt-8"
@@ -159,12 +159,9 @@ function InLine({ ticket, now }: { ticket: Ticket; now: Date }) {
           <>
             <p>
               {place.ahead === 0 ? "Tidak ada yang di depanmu." : `${place.ahead} orang di depanmu.`}{" "}
-              Perkiraan giliran sekitar <span className="num">{hint.turnAt}</span>, bisa maju atau mundur
-              sedikit.
+              {hint.leave}
             </p>
-            <p className="mt-3 text-muted">
-              {hint.leave} Kalau dipanggil dan belum datang, kami tunggu 5 menit.
-            </p>
+            <p className="mt-2 text-muted">Telat dipanggil? Kami tunggu 5 menit.</p>
           </>
         ) : place.status === "called" ? (
           <Notice title="Dipanggil">Silakan ke kursi {barber}. Kami tunggu 5 menit.</Notice>

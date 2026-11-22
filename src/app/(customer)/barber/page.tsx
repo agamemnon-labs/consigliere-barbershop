@@ -33,10 +33,7 @@ export default async function BarbersPage() {
 
       <header className="pt-10 pb-12">
         <h1 className="text-5xl">Para barber</h1>
-        <p className="mt-4 text-muted">
-          Harga potong mengikuti level. Barber bergiliran antar cabang, jadi ketuk nama untuk melihat di mana
-          mereka seminggu ini.
-        </p>
+        <p className="mt-4 text-muted">Ketuk nama untuk melihat jadwalnya minggu ini</p>
       </header>
 
       <div className="flex flex-col gap-12">
@@ -92,7 +89,7 @@ function BarberRow({
         </span>
       </summary>
       <div id={barber.slug} className="scroll-mt-6 pr-7 pb-6">
-        {barber.bio ? <p className="font-display text-lg italic">{barber.bio}</p> : null}
+        {barber.bio ? <p className="font-display text-lg">{barber.bio}</p> : null}
         {off.length > 0 ? <p className="label mt-4">Libur rutin · {off.join(", ")}</p> : null}
         <ol className="mt-4 grid gap-y-2 text-[0.9375rem]">
           {week.map((d) => (
@@ -113,7 +110,7 @@ function TodayLabel({ day, branchName }: { day: DayPlan; branchName: Map<string,
     case "working":
       return <>{branchName.get(day.branchId)}</>;
     case "off":
-      return <span className="text-muted italic">Libur</span>;
+      return <span className="text-muted">Libur</span>;
     case "closed":
       return <span className="text-accent-ink">Tutup</span>;
     case "unknown":
@@ -126,7 +123,7 @@ function DayLabel({ day, branchName }: { day: DayPlan; branchName: Map<string, s
     case "working":
       return <span>{branchName.get(day.branchId)}</span>;
     case "off":
-      return <span className="text-muted italic">Libur</span>;
+      return <span className="text-muted">Libur</span>;
     case "closed":
       return <span className="text-accent-ink">Tutup · {day.reason}</span>;
     case "unknown":

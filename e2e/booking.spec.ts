@@ -3,7 +3,7 @@ import { expect, test } from "@playwright/test";
 test("a customer takes a number, pays by (demo) QRIS and lands in the queue", async ({ page }) => {
   await page.goto("/");
   await page.getByRole("link", { name: "Ambil nomor antrean" }).click();
-  await expect(page.getByRole("heading", { name: "Ambil nomor." })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Ambil nomor", exact: true })).toBeVisible();
   await page.getByRole("link", { name: /Tepian/ }).click();
   await expect(page).toHaveURL(/\/antre\?cabang=tepian$/);
 
@@ -17,11 +17,11 @@ test("a customer takes a number, pays by (demo) QRIS and lands in the queue", as
   await page.getByRole("button", { name: /^Bayar Rp/ }).click();
 
   await expect(page).toHaveURL(/\/tiket\/[0-9a-f-]{36}$/);
-  await expect(page.getByRole("heading", { name: "Bayar dengan QRIS." })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Bayar dengan QRIS" })).toBeVisible();
   await expect(page.getByRole("img", { name: /^QRIS untuk membayar/ })).toBeVisible();
 
   await page.getByRole("button", { name: "Simulasikan pembayaran" }).click();
-  await expect(page.getByRole("heading", { name: "Kamu di antrean, Bima." })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Kamu di antrean, Bima" })).toBeVisible();
   await expect(page.getByRole("figure", { name: /^Nomor antrean T \d{3}/ })).toBeVisible();
   await expect(
     page.getByRole("listitem").filter({ hasText: "Classic Shaving", visible: true }),

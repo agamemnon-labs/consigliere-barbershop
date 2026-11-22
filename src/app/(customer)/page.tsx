@@ -21,11 +21,8 @@ export default async function Home() {
     <div className="mx-auto flex max-w-md flex-col px-6">
       <header className="flex flex-col items-center pt-[calc(4.5rem+env(safe-area-inset-top))] pb-16 text-center">
         <Wordmark size="lg" />
-        <p className="mt-14 font-display text-[1.9rem] italic leading-tight">{brand.tagline}</p>
-        <p className="mt-5 max-w-[30ch] text-muted">
-          Tiga cabang di {brand.city}. Lihat harga dan barber tanpa perlu bertanya, lalu datang saat giliran
-          Anda.
-        </p>
+        <p className="mt-14 font-display text-[1.9rem] leading-tight">{brand.tagline}</p>
+        <p className="mt-5 text-muted">Tiga cabang di {brand.city}</p>
         <ButtonLink href="/antre" className="mt-10" block>
           Ambil nomor antrean
         </ButtonLink>
@@ -76,7 +73,7 @@ export default async function Home() {
       </ul>
 
       <Rule label="Daftar harga" className="mb-8" />
-      <PriceList />
+      <PriceList folded />
 
       <div className="mt-12">
         <ButtonLink href="/barber" variant="quiet" block>
@@ -85,10 +82,7 @@ export default async function Home() {
       </div>
 
       <Rule label="Kartu member" className="mt-16" />
-      <p className="mt-5 text-muted">
-        Satu poin tiap Rp50.000, diskon haircut setengah harga di bulan ulang tahunmu, dan saldo dengan bonus.
-        Daftar di kasir cabang mana saja.
-      </p>
+      <p className="mt-5 text-muted">Poin, saldo bonus, dan diskon ulang tahun. Daftar di kasir</p>
       <div className="mt-6">
         <ButtonLink href="/masuk" variant="quiet" block>
           Buka kartu member

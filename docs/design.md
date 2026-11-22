@@ -143,6 +143,10 @@ Balances and points are **ledgers** (sum of rows), never a single mutable number
 
 **Payment recording**
 - EDC (card or QRIS): cashier selects method, enters amount, taps **Mark paid**. No integration with the EDC machine.
+  - Built as **Selesai & bayar** under the chair: the haircut is on the bill already (priced by the barber's level), other services are added from a list, "from" services take a typed price (at least the list price, at most 5 million). One tap on **Lunas** records the transaction and finishes the queue entry in one database transaction; a chair can't be paid twice.
+  - Prepaid online customers get a plain **Selesai**, plus **Selesai + tagih tambahan** for services added on the spot.
+  - Credit: the cashier types the WhatsApp number and taps **Cek kredit**; credit pays first, the rest goes to the EDC (`method` credit or mixed). Spends are linked to the transaction (`credit_ledger.transaction_id`) and use the credit that expires first.
+  - The cashier screen shows today's takings by method (online QRIS counted on the day it was paid) and the last receipts. Receipts (`/kasir/struk/<id>`) print on 58 mm thermal paper through the browser.
 - Online QRIS: gateway webhook only. Cashier cannot mark an online booking paid.
 - Balance: deducted from ledger after PIN confirmation on the cashier screen (member types PIN on a small keypad or scans QR + PIN).
 
@@ -171,7 +175,7 @@ Each phase ends deployed and usable.
 2. **Public read-only site** ✅ — services & prices, branches, barbers with level/today's branch/days off. (Covers the "shy" and "loyal" personas already.)
 3. **Queue core** ✅ — cashier screen (columns, call/done/late, add walk-in), tablet display, live queue on the phone. Realtime. *This is the heart; demo-able on its own.*
 4. **Online booking + QRIS (sandbox)** ✅ — booking flow, webhook, pay-then-queue, expiry.
-5. **Cashier payments** — EDC recording, transactions, receipts.
+5. **Cashier payments** ✅ — EDC recording, transactions, receipts.
 6. **Membership** — sign-up, PIN login, QR card, points, birthday discount, balance + top-up, forgot-PIN OTP.
 7. **Admin back office** — rotation, prices, members, rules, reports.
 8. **Polish & portfolio** — demo mode ribbon, guided demo accounts ("login as cashier / tablet / owner"), Playwright e2e, Lighthouse ≥ 90 on mobile, case-study page for Agamemnon.

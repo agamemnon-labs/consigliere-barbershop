@@ -11,6 +11,8 @@ import * as schema from "./schema.ts";
 import { seed } from "./seed/seed.ts";
 
 export const DEMO_STAFF_PASSWORD = "consigliere-demo";
+/** PIN for the demo members (Bram 0812-0000-0001, Rizal 0812-0000-0002). */
+export const DEMO_MEMBER_PIN = "482913";
 
 export async function createDemoDb(options: { from?: string; days?: number; staffPassword?: string } = {}) {
   const client = new PGlite();
@@ -24,6 +26,7 @@ export async function createDemoDb(options: { from?: string; days?: number; staf
   await seed(db, {
     staffPassword: options.staffPassword ?? DEMO_STAFF_PASSWORD,
     demoQueueAt: new Date(),
+    memberPin: DEMO_MEMBER_PIN,
     ...options,
   });
   return db;

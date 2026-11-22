@@ -11,13 +11,14 @@ describe("bill", () => {
       discounts: 0,
       total: 445_000,
       credit: 0,
+      balance: 0,
       due: 445_000,
       method: "edc_qris",
     });
   });
 
   it("uses credit first and records a mixed payment", () => {
-    expect(bill([haircut], "edc_card", 50_000)).toMatchObject({
+    expect(bill([haircut], "edc_card", { credit: 50_000 })).toMatchObject({
       credit: 50_000,
       due: 45_000,
       method: "mixed",
@@ -25,7 +26,21 @@ describe("bill", () => {
   });
 
   it("never uses more credit than the bill", () => {
-    expect(bill([haircut], "edc_card", 500_000)).toMatchObject({ credit: 95_000, due: 0, method: "credit" });
+    expect(bill([haircut], "edc_card", { credit: 500_000 })).toMatchObject({
+      credit: 95_000,
+      due: 0,
+      method: "credit",
+    });
+  });
+
+  it("takes balance after credit, and only what is left", () => {
+    expect(bill([haircut], "edc_qris", { credit: 20_000, balance: 500_000 })).toMatchObject({
+      credit: 20_000,
+      balance: 75_000,
+      due: 0,
+      method: "mixed",
+    });
+    expect(bill([haircut], "edc_qris", { balance: 95_000 }).method).toBe("balance");
   });
 
   it("refuses empty bills, zero prices and a slipped extra zero", () => {

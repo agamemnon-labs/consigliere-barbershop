@@ -3,9 +3,11 @@ import { and, desc, eq, gte, inArray, lt, sql } from "drizzle-orm";
 import { type Database, schema as s } from "@/db";
 import { normalizePhone } from "@/domain/booking";
 import { type BillItem, bill, CheckoutError, creditAvailable, type Method } from "@/domain/checkout";
+import { applyBirthday, applyVoucher, pointsEarned, redeemableUnits } from "@/domain/membership";
 import * as q from "@/domain/queue";
 import { addDays } from "@/domain/time";
 import type { Tx } from "@/server/enqueue";
+import { birthdayRule, checkPin, findMemberById, pointsRule } from "@/server/membership";
 
 export type PayInput = {
   entryId: string;
@@ -14,6 +16,8 @@ export type PayInput = {
   /** WhatsApp number to look up credit and link the customer. Optional. */
   phone?: string;
   useCredit?: number;
+  /** A member scanned at the counter, and what they chose to use. */
+  member?: { id: string; birthday?: boolean; redeemUnits?: number; balance?: number; pin?: string };
 };
 
 export type Cashier = { id: string; role: string; branchId: string | null };
@@ -28,6 +32,9 @@ export async function payAndFinish(
   cashier: Cashier,
   now: Date,
 ): Promise<string> {
+  // Checked before the transaction so a wrong PIN still counts toward the lock.
+  if (input.member?.balance) await checkPin(db, input.member.id, input.member.pin ?? "", now);
+
   return db.transaction(async (tx) => {
     const [entry] = await tx.select().from(s.queueEntries).where(eq(s.queueEntries.id, input.entryId));
     if (!entry) throw new CheckoutError("Antrean tidak ditemukan.");
@@ -47,9 +54,34 @@ export async function payAndFinish(
       .for("update");
     const patches = q.finish(line, entry.id, now);
 
-    const items = await priceAtCounter(tx, entry.barberId, input.items);
+    let items = await priceAtCounter(tx, entry.barberId, input.items);
 
     let customerId = entry.customerId;
+    let member: Awaited<ReturnType<typeof findMemberById>> = null;
+    let redeemed = 0;
+    let earned = 0;
+    const rule = await pointsRule(tx);
+    if (input.member) {
+      member = await findMemberById(tx, input.member.id, now);
+      if (member?.status !== "active") throw new CheckoutError("Member tidak aktif.");
+      customerId = member.customerId;
+      const birthday = await birthdayRule(tx);
+      const usesBirthday = Boolean(input.member.birthday);
+      if (usesBirthday) {
+        if (!member.birthday) throw new CheckoutError("Bukan bulan ulang tahun member ini.");
+        items = applyBirthday(items, birthday);
+      }
+      const units = Math.floor(input.member.redeemUnits ?? 0);
+      if (units > 0) {
+        if (usesBirthday && !birthday.stacksWithPoints) {
+          throw new CheckoutError("Diskon ulang tahun tidak bisa digabung dengan tukar poin.");
+        }
+        const left = items.reduce((sum, i) => sum + i.price - i.discount, 0);
+        if (units > redeemableUnits(member.points, left, rule)) throw new CheckoutError("Poin tidak cukup.");
+        items = applyVoucher(items, units * rule.redeemValue);
+        redeemed = units * rule.redeemPoints;
+      }
+    }
     let available = 0;
     const phone = input.phone ? normalizePhone(input.phone) : null;
     if (input.phone && !phone) throw new CheckoutError("Nomor WhatsApp belum benar.");
@@ -59,7 +91,11 @@ export async function payAndFinish(
       const [customer] = await tx.select().from(s.customers).where(eq(s.customers.phone, phone));
       customerId ??= customer?.id ?? null;
     }
-    const totals = bill(items, input.edc, Math.min(input.useCredit ?? 0, available));
+    const totals = bill(items, input.edc, {
+      credit: Math.min(input.useCredit ?? 0, available),
+      balance: member ? Math.min(input.member?.balance ?? 0, member.balance) : 0,
+    });
+    earned = member ? pointsEarned(totals.total, rule) : 0;
 
     const [row] = await tx
       .insert(s.transactions)
@@ -67,8 +103,9 @@ export async function payAndFinish(
         branchId: entry.branchId,
         barberId: entry.barberId,
         customerId,
+        memberId: member?.id ?? null,
         queueEntryId: entry.id,
-        items,
+        items: items.map(({ category: _, ...item }) => item),
         subtotal: totals.subtotal,
         discounts: totals.discounts,
         total: totals.total,
@@ -84,6 +121,33 @@ export async function payAndFinish(
         phone,
         delta: -totals.credit,
         reason: "spend",
+        transactionId: row.id,
+        createdAt: now,
+      });
+    }
+    if (member && totals.balance > 0) {
+      await tx.insert(s.balanceLedger).values({
+        memberId: member.id,
+        delta: -totals.balance,
+        reason: "spend",
+        transactionId: row.id,
+        createdAt: now,
+      });
+    }
+    if (member && redeemed > 0) {
+      await tx.insert(s.pointLedger).values({
+        memberId: member.id,
+        delta: -redeemed,
+        reason: "redeem",
+        transactionId: row.id,
+        createdAt: now,
+      });
+    }
+    if (member && earned > 0) {
+      await tx.insert(s.pointLedger).values({
+        memberId: member.id,
+        delta: earned,
+        reason: "earn",
         transactionId: row.id,
         createdAt: now,
       });
@@ -108,7 +172,9 @@ export async function payAndFinish(
 }
 
 /** Prices what the cashier picked. Haircut by the barber's level; "from" services take the typed price. */
-async function priceAtCounter(tx: Tx, barberId: string, picks: PayInput["items"]): Promise<BillItem[]> {
+type PricedItem = BillItem & { category: string };
+
+async function priceAtCounter(tx: Tx, barberId: string, picks: PayInput["items"]): Promise<PricedItem[]> {
   if (picks.length === 0) throw new CheckoutError("Tagihan masih kosong.");
   const ids = [...new Set(picks.map((p) => p.serviceId))];
   const [services, variants, [barber]] = await Promise.all([
@@ -120,11 +186,13 @@ async function priceAtCounter(tx: Tx, barberId: string, picks: PayInput["items"]
       .innerJoin(s.barberLevels, eq(s.barbers.levelId, s.barberLevels.id))
       .where(eq(s.barbers.id, barberId)),
   ]);
-  return picks.map((pick): BillItem => {
-    const svc = services.find((x) => x.id === pick.serviceId);
-    if (!svc) throw new CheckoutError("Layanan tidak ditemukan.");
-    return priceOne(svc, pick);
-  });
+  return picks.map((pick): PricedItem => ({ ...priceOne(svc(pick), pick), category: svc(pick).category }));
+
+  function svc(pick: PayInput["items"][number]) {
+    const found = services.find((x) => x.id === pick.serviceId);
+    if (!found) throw new CheckoutError("Layanan tidak ditemukan.");
+    return found;
+  }
 
   function priceOne(svc: (typeof services)[number], pick: PayInput["items"][number]): BillItem {
     switch (svc.priceType) {

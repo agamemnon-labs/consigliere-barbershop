@@ -6,7 +6,7 @@
 
 export type BillItem = { serviceId: string; name: string; price: number; discount: number };
 
-export type Method = "edc_card" | "edc_qris" | "credit" | "mixed";
+export type Method = "edc_card" | "edc_qris" | "credit" | "balance" | "mixed";
 
 export class CheckoutError extends Error {
   override name = "CheckoutError";
@@ -31,26 +31,34 @@ export type Bill = {
   subtotal: number;
   discounts: number;
   total: number;
-  /** Paid from credit. */
+  /** Paid from credit (non-members, by phone number). */
   credit: number;
+  /** Paid from a member's prepaid balance. */
+  balance: number;
   /** Left for the EDC machine. */
   due: number;
   method: Method;
 };
 
 /**
- * Totals a bill and splits it between credit and the EDC.
- * `useCredit` is what the customer agreed to use; it never exceeds the total.
+ * Totals a bill and splits it: credit first, then balance, the rest on the EDC.
+ * Each amount is what the customer agreed to use and never exceeds what is left.
  */
-export function bill(items: BillItem[], edc: "edc_card" | "edc_qris", useCredit = 0): Bill {
+export function bill(
+  items: BillItem[],
+  edc: "edc_card" | "edc_qris",
+  use: { credit?: number; balance?: number } = {},
+): Bill {
   checkItems(items);
   const subtotal = items.reduce((s, i) => s + i.price, 0);
   const discounts = items.reduce((s, i) => s + i.discount, 0);
   const total = subtotal - discounts;
-  const credit = Math.max(0, Math.min(Math.floor(useCredit), total));
-  const due = total - credit;
-  const method: Method = credit === 0 ? edc : due === 0 ? "credit" : "mixed";
-  return { subtotal, discounts, total, credit, due, method };
+  const credit = Math.max(0, Math.min(Math.floor(use.credit ?? 0), total));
+  const balance = Math.max(0, Math.min(Math.floor(use.balance ?? 0), total - credit));
+  const due = total - credit - balance;
+  const sources = [credit > 0, balance > 0, due > 0].filter(Boolean).length;
+  const method: Method = sources > 1 ? "mixed" : credit > 0 ? "credit" : balance > 0 ? "balance" : edc;
+  return { subtotal, discounts, total, credit, balance, due, method };
 }
 
 export type CreditRow = { delta: number; expiresAt: Date | null; createdAt: Date };
@@ -83,11 +91,11 @@ export function creditAvailable(rows: CreditRow[], now: Date): number {
   return grants.filter((g) => !g.expiresAt || g.expiresAt > now).reduce((s, g) => s + g.left, 0);
 }
 
-export const METHOD_LABEL: Record<Method | "online_qris" | "balance", string> = {
+export const METHOD_LABEL: Record<Method | "online_qris", string> = {
   edc_card: "EDC · kartu",
   edc_qris: "EDC · QRIS",
   online_qris: "QRIS online",
   credit: "Kredit",
   balance: "Saldo member",
-  mixed: "Kredit + EDC",
+  mixed: "Gabungan",
 };

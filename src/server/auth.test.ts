@@ -36,3 +36,23 @@ describe("staff auth against the real schema", () => {
     ).rejects.toThrow();
   });
 });
+
+describe("member auth", () => {
+  it("signs a member in with phone number and PIN", async () => {
+    const res = await auth.api.signInPhoneNumber({
+      body: { phoneNumber: "6281200000001", password: "482913" },
+      asResponse: true,
+    });
+    expect(res.status).toBe(200);
+    const session = await auth.api.getSession({
+      headers: new Headers({ cookie: res.headers.get("set-cookie") ?? "" }),
+    });
+    expect(session?.user.role).toBe("member");
+  });
+
+  it("rejects a wrong PIN", async () => {
+    await expect(
+      auth.api.signInPhoneNumber({ body: { phoneNumber: "6281200000001", password: "000001" } }),
+    ).rejects.toThrow();
+  });
+});

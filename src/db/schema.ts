@@ -235,6 +235,9 @@ export const users = pgTable("users", {
   name: text().notNull(),
   email: text().notNull().unique(),
   emailVerified: boolean().notNull().default(false),
+  /** Members sign in with this (62…) and a 6-digit PIN. Staff leave it empty. */
+  phoneNumber: text().unique(),
+  phoneNumberVerified: boolean(),
   image: text(),
   role: userRole().notNull().default("member"),
   /** Home branch for cashiers; null for admin, owner and members. */
@@ -451,6 +454,7 @@ export const balanceLedger = pgTable(
     delta: integer().notNull(),
     reason: balanceReason().notNull(),
     ref: text(),
+    transactionId: uuid().references(() => transactions.id),
     createdAt: createdAt(),
   },
   (t) => [index().on(t.memberId)],

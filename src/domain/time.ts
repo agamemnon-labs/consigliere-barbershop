@@ -39,3 +39,8 @@ export function addDays(date: string, days: number): string {
 export function weekday(date: string): number {
   return new Date(`${date}T00:00:00Z`).getUTCDay();
 }
+
+/** "10:00" (database time) → "10.00" (how Indonesians write it). */
+export function clockLabel(time: string): string {
+  return time.slice(0, 5).replace(":", ".");
+}

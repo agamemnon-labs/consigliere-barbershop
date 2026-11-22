@@ -8,6 +8,7 @@ import { Rule } from "@/components/rule";
 import { brand } from "@/config/brand";
 import { formatShort } from "@/domain/money";
 import { closureFor, onDuty, shortDate } from "@/domain/schedule";
+import { clockLabel } from "@/domain/time";
 import { getBarbers, getBranches, getRotation, getToday } from "@/server/catalog";
 
 export async function generateStaticParams() {
@@ -52,7 +53,9 @@ export default async function BranchPage({ params }: PageProps<"/cabang/[slug]">
         <p className="mt-4 text-muted">{branch.address}</p>
         <dl className="mt-8 grid grid-cols-[auto_1fr] gap-x-6 gap-y-3 text-[0.9375rem]">
           <dt className="label self-center">Buka</dt>
-          <dd className="num">{hours ? `Setiap hari, ${hours[0]}–${hours[1]}` : "—"}</dd>
+          <dd className="num">
+            {hours ? `Setiap hari, ${clockLabel(hours[0])}–${clockLabel(hours[1])}` : "—"}
+          </dd>
           <dt className="label self-center">Peta</dt>
           <dd>
             <a

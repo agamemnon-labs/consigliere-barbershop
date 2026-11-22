@@ -52,3 +52,5 @@ All four of check, typecheck, test and build must pass before a push. CI runs th
 - **Banned:** gradients, gold/brass, neon, glow, glassmorphism, drop shadows, pill buttons, emoji, stock illustrations, default shadcn look, lucide icon confetti, centred-hero-with-three-feature-cards layouts.
 - Phone-first, vertical only: no carousels, no sideways swipe; details expand downward. Tap targets ≥ 48 px.
 - Fonts: Bodoni Moda (display), Libre Franklin (text), IBM Plex Mono (numbers, tabular).
+- **User friendly is a hard requirement.** One job per screen, little text, nothing overwhelming. Say it in fewer words; hide detail behind a tap (`<details>`) instead of printing it. If a screen feels full, cut before adding.
+- Use the design skills for any UI work (frontend-design, design-skills:design-elevation / design-critique / ux-writing, accessibility-audit) and review screenshots before shipping.

@@ -1,8 +1,8 @@
 import { verifyPassword } from "better-auth/crypto";
 import { and, eq, sql } from "drizzle-orm";
 import { beforeAll, describe, expect, it } from "vitest";
-import * as s from "../schema";
 import { createDemoDb } from "../demo";
+import * as s from "../schema";
 
 let db: Awaited<ReturnType<typeof createDemoDb>>;
 

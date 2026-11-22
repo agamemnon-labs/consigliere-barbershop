@@ -34,7 +34,7 @@ export async function requireStaff(allowed: readonly StaffRole[] = STAFF_ROLES):
   redirect("/staf/masuk");
 }
 
-function isStaffRole(role: string): role is StaffRole {
+export function isStaffRole(role: string): role is StaffRole {
   return (STAFF_ROLES as readonly string[]).includes(role);
 }
 

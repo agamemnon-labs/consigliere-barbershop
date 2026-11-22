@@ -1,11 +1,16 @@
 "use server";
 
 import { APIError } from "better-auth/api";
+import { eq } from "drizzle-orm";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { z } from "zod";
+import { getDb } from "@/db";
+import { users } from "@/db/schema";
 import { auth } from "@/server/auth";
-import { getStaff, homeFor } from "@/server/session";
+import { homeFor, isStaffRole } from "@/server/session";
+
+const WRONG = "Email atau kata sandi salah.";
 
 export type SignInState = { error?: string; email?: string };
 
@@ -19,6 +24,15 @@ export async function signInStaff(_prev: SignInState, form: FormData): Promise<S
   const email = String(form.get("email") ?? "");
   if (!parsed.success) return { error: parsed.error.issues[0]?.message, email };
 
+  // Only staff may sign in here. Members get their own phone + PIN login (phase 6).
+  const db = await getDb();
+  const [user] = await db
+    .select({ role: users.role, isActive: users.isActive })
+    .from(users)
+    .where(eq(users.email, parsed.data.email.toLowerCase()));
+  const role = user?.isActive ? user.role : undefined;
+  if (!role || !isStaffRole(role)) return { error: WRONG, email };
+
   try {
     await (await auth()).api.signInEmail({ body: parsed.data, headers: await headers() });
   } catch (error) {
@@ -27,19 +41,14 @@ export async function signInStaff(_prev: SignInState, form: FormData): Promise<S
         error:
           error.status === "TOO_MANY_REQUESTS"
             ? "Terlalu banyak percobaan. Coba lagi dalam 15 menit."
-            : "Email atau kata sandi salah.",
+            : WRONG,
         email,
       };
     }
     throw error;
   }
 
-  const staff = await getStaff();
-  if (!staff) {
-    await (await auth()).api.signOut({ headers: await headers() });
-    return { error: "Akun ini bukan akun staf.", email };
-  }
-  redirect(homeFor(staff.role));
+  redirect(homeFor(role));
 }
 
 export async function signOut() {

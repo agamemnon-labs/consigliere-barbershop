@@ -225,3 +225,14 @@
     interpolate-size: allow-keywords;
   }
 }
+
+/* Receipts print on 58 mm thermal paper: only the receipt, no shell, ink on white. */
+@media print {
+  @page {
+    size: 58mm auto;
+    margin: 3mm;
+  }
+  body:has(.receipt) header {
+    display: none;
+  }
+}

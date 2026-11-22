@@ -1,11 +1,16 @@
 import Link from "next/link";
 import { LiveRefresh } from "@/components/live-refresh";
 import { Notice } from "@/components/notice";
+import { getDb } from "@/db";
+import { METHOD_LABEL } from "@/domain/checkout";
+import { formatRupiah } from "@/domain/money";
 import { shortDate } from "@/domain/schedule";
 import { shopClock, shopDate } from "@/domain/time";
 import { getBranches } from "@/server/catalog";
+import { counterCatalog, recentTransactions, todayTakings } from "@/server/checkout";
 import { type BarberQueue, getBranchQueue, type LiveEntry } from "@/server/queue";
 import { requireStaff } from "@/server/session";
+import { type CatalogService, CheckoutPanel } from "./checkout-panel";
 import { QueueButton, WalkInForm } from "./queue-controls";
 
 type Props = { searchParams: PageProps<"/kasir">["searchParams"] };
@@ -23,6 +28,12 @@ export async function CashierBoard({ searchParams }: Props) {
   const date = shopDate(now);
   const queue = await getBranchQueue(chosen.slug, date, now);
   if (!queue) return null;
+  const db = await getDb();
+  const [catalog, takings, recent] = await Promise.all([
+    counterCatalog(db),
+    todayTakings(db, queue.branch.id, date),
+    recentTransactions(db, queue.branch.id, date),
+  ]);
 
   return (
     <div className="px-4 py-5 sm:px-6">
@@ -55,15 +66,48 @@ export async function CashierBoard({ searchParams }: Props) {
       ) : (
         <div className="grid gap-4 [grid-template-columns:repeat(auto-fill,minmax(17rem,1fr))]">
           {queue.barbers.map((b) => (
-            <Column key={b.barber.id} queue={b} />
+            <Column key={b.barber.id} queue={b} catalog={catalog} />
           ))}
         </div>
       )}
+
+      <section className="mt-8 border-t border-rule pt-5" aria-label="Pemasukan hari ini">
+        <div className="flex flex-wrap items-baseline justify-between gap-4">
+          <p className="label">Pemasukan hari ini · {takings.count} transaksi</p>
+          <p className="num text-2xl">{formatRupiah(takings.total)}</p>
+        </div>
+        <dl className="mt-3 flex flex-wrap gap-x-8 gap-y-1 text-sm text-muted">
+          {Object.entries(takings.byMethod).map(([method, amount]) => (
+            <div key={method} className="flex gap-2">
+              <dt>{METHOD_LABEL[method as keyof typeof METHOD_LABEL] ?? method}</dt>
+              <dd className="num text-fg">{formatRupiah(amount ?? 0)}</dd>
+            </div>
+          ))}
+        </dl>
+        {recent.length > 0 ? (
+          <ul className="mt-4 grid gap-x-6 sm:grid-cols-2 lg:grid-cols-3">
+            {recent.map((t) => (
+              <li key={t.id} className="border-b border-rule">
+                <Link
+                  href={`/kasir/struk/${t.id}`}
+                  className="flex min-h-11 items-baseline gap-3 text-sm hover:text-accent-ink"
+                >
+                  <span className="num text-muted">{shopClock(t.createdAt)}</span>
+                  <span className="flex-1">{t.barber ?? "—"}</span>
+                  <span className="num">{formatRupiah(t.total)}</span>
+                  <span className="label">Struk</span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        ) : null}
+      </section>
     </div>
   );
 }
 
-function Column({ queue }: { queue: BarberQueue }) {
+function Column({ queue, catalog }: { queue: BarberQueue; catalog: CatalogService[] }) {
+  const haircut = catalog.find((c) => c.priceType === "by_level");
   const chair = queue.entries.find((e) => e.status === "in_service");
   const line = queue.entries.filter((e) => e.status !== "in_service");
   const someoneCalled = line.some((e) => e.status === "called");
@@ -90,9 +134,29 @@ function Column({ queue }: { queue: BarberQueue }) {
                 <p className="num text-sm text-muted">sejak {shopClock(chair.startedAt)}</p>
               ) : null}
             </div>
-            <div className="mt-3">
-              <QueueButton op="finish" entryId={chair.id} label="Selesai" block />
-            </div>
+            {chair.source === "walkin" ? (
+              <CheckoutPanel
+                entryId={chair.id}
+                haircutPrice={queue.barber.haircutPrice}
+                catalog={catalog}
+                preset={haircut ? [haircut.id] : []}
+                label="Selesai & bayar"
+              />
+            ) : (
+              <>
+                <p className="label mt-2">Sudah lunas online</p>
+                <div className="mt-3">
+                  <QueueButton op="finish" entryId={chair.id} label="Selesai" block />
+                </div>
+                <CheckoutPanel
+                  entryId={chair.id}
+                  haircutPrice={queue.barber.haircutPrice}
+                  catalog={catalog}
+                  preset={[]}
+                  label="Selesai + tagih tambahan"
+                />
+              </>
+            )}
           </>
         ) : (
           <p className="mt-2 text-muted italic">Kursi kosong</p>

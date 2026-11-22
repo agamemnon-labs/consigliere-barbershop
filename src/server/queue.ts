@@ -1,6 +1,6 @@
 import "server-only";
 import { and, asc, eq, inArray } from "drizzle-orm";
-import { getDb, schema as s } from "@/db";
+import { type Database, getDb, schema as s } from "@/db";
 import { activeEntries, estimates, ticketLabel, waitForNewcomer } from "@/domain/queue";
 import { closureFor, onDuty } from "@/domain/schedule";
 
@@ -42,8 +42,9 @@ export async function getBranchQueue(
   branchSlug: string,
   date: string,
   now: Date,
+  database?: Database,
 ): Promise<BranchQueue | null> {
-  const db = await getDb();
+  const db = database ?? (await getDb());
   const [branch] = await db.select().from(s.branches).where(eq(s.branches.slug, branchSlug));
   if (!branch) return null;
 

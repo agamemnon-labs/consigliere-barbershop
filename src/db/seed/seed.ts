@@ -3,7 +3,7 @@
  * Works with any Drizzle Postgres driver (postgres.js in scripts, PGlite in tests).
  */
 import { hashPassword } from "better-auth/crypto";
-import { sql } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import type { PgDatabase, PgQueryResultHKT } from "drizzle-orm/pg-core";
 import { addDays, shopDate, weekday } from "../../domain/time.ts";
 import * as s from "../schema.ts";
@@ -195,7 +195,9 @@ export async function seed(db: AnyDb, options: SeedOptions) {
     }
 
     if (options.demoQueueAt) {
+      await seedDemoSales(tx, from, branchRows, barberRows, levelRows);
       await seedDemoQueue(tx, from, options.demoQueueAt, shifts, branchRows);
+      await payDoneVisits(tx, from);
     }
   });
 }
@@ -308,4 +310,119 @@ async function seedDemoQueue(
     });
     if (rows.length) await tx.insert(s.queueEntries).values(rows);
   }
+}
+
+/** Small deterministic generator so the demo history is the same on every reset. */
+function lcg(seed: number) {
+  let x = seed >>> 0;
+  return () => {
+    x = (Math.imul(x, 1_664_525) + 1_013_904_223) >>> 0;
+    return x / 2 ** 32;
+  };
+}
+
+/**
+ * Four weeks of finished, paid visits before the first seeded day, so the back
+ * office report and commission have something real to show. Each barber works
+ * at home on their working days; a few add a second service.
+ */
+async function seedDemoSales(
+  tx: Tx,
+  from: string,
+  branches: { id: string; slug: string }[],
+  barbers: { id: string; slug: string }[],
+  levels: { id: string; slug: string; haircutPrice: number }[],
+) {
+  const services = await tx
+    .select({ id: s.services.id, slug: s.services.slug, name: s.services.name, price: s.services.price })
+    .from(s.services);
+  const haircut = services.find((x) => x.slug === "haircut");
+  const extras = services.filter((x) => x.price !== null && x.slug !== "haircut");
+  if (!haircut) return;
+  const rand = lcg(20_261_123);
+  const methods = ["edc_qris", "edc_qris", "edc_card"] as const;
+  for (let d = 28; d >= 1; d--) {
+    const date = addDays(from, -d);
+    const entries: (typeof s.queueEntries.$inferInsert & { id: string })[] = [];
+    const txs: (typeof s.transactions.$inferInsert)[] = [];
+    const tickets = new Map<string, number>();
+    for (const b of barberSeed) {
+      if (weekday(date) === b.offDay) continue;
+      const branch = branches.find((x) => x.slug === b.home);
+      const barber = barbers.find((x) => x.slug === b.slug);
+      const level = levels.find((x) => x.slug === b.level);
+      if (!branch || !barber || !level) continue;
+      const visits = 3 + Math.floor(rand() * 5);
+      for (let v = 0; v < visits; v++) {
+        const ticketNo = (tickets.get(branch.id) ?? 0) + 1;
+        tickets.set(branch.id, ticketNo);
+        const minute = 10 * 60 + Math.floor(rand() * 10.5 * 60);
+        const hh = String(Math.floor(minute / 60)).padStart(2, "0");
+        const mm = String(minute % 60).padStart(2, "0");
+        const at = new Date(`${date}T${hh}:${mm}:00+08:00`);
+        const items = [{ serviceId: haircut.id, name: haircut.name, price: level.haircutPrice, discount: 0 }];
+        const extra = rand() < 0.25 ? extras[Math.floor(rand() * extras.length)] : undefined;
+        if (extra?.price)
+          items.push({ serviceId: extra.id, name: extra.name, price: extra.price, discount: 0 });
+        const total = items.reduce((sum, i) => sum + i.price, 0);
+        const id = crypto.randomUUID();
+        entries.push({
+          id,
+          branchId: branch.id,
+          barberId: barber.id,
+          date,
+          position: v + 1,
+          ticketNo,
+          source: rand() < 0.3 ? "online" : "walkin",
+          status: "done",
+          estimatedMin: 30,
+          startedAt: new Date(at.getTime() - 30 * 60_000),
+          finishedAt: at,
+        });
+        txs.push({
+          branchId: branch.id,
+          barberId: barber.id,
+          queueEntryId: id,
+          items,
+          subtotal: total,
+          total,
+          method: methods[Math.floor(rand() * methods.length)] ?? "edc_qris",
+          createdAt: at,
+        });
+      }
+    }
+    if (entries.length) await tx.insert(s.queueEntries).values(entries);
+    if (txs.length) await tx.insert(s.transactions).values(txs);
+  }
+}
+
+/** Today's already-finished demo visits get their counter bill, so takings match the board. */
+async function payDoneVisits(tx: Tx, date: string) {
+  const [haircut] = await tx.select().from(s.services).where(eq(s.services.slug, "haircut"));
+  if (!haircut) return;
+  const done = await tx
+    .select({
+      id: s.queueEntries.id,
+      branchId: s.queueEntries.branchId,
+      barberId: s.queueEntries.barberId,
+      finishedAt: s.queueEntries.finishedAt,
+      price: s.barberLevels.haircutPrice,
+    })
+    .from(s.queueEntries)
+    .innerJoin(s.barbers, eq(s.barbers.id, s.queueEntries.barberId))
+    .innerJoin(s.barberLevels, eq(s.barberLevels.id, s.barbers.levelId))
+    .where(and(eq(s.queueEntries.date, date), eq(s.queueEntries.status, "done")));
+  if (done.length === 0) return;
+  await tx.insert(s.transactions).values(
+    done.map((e) => ({
+      branchId: e.branchId,
+      barberId: e.barberId,
+      queueEntryId: e.id,
+      items: [{ serviceId: haircut.id, name: haircut.name, price: e.price, discount: 0 }],
+      subtotal: e.price,
+      total: e.price,
+      method: "edc_qris" as const,
+      ...(e.finishedAt ? { createdAt: e.finishedAt } : {}),
+    })),
+  );
 }

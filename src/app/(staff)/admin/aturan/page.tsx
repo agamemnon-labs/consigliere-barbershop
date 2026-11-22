@@ -129,7 +129,7 @@ async function Rules() {
             required
           />
           <p className="text-sm text-muted sm:col-span-2 sm:self-end sm:pb-3">
-            Komisi haircut diatur per level di halaman Harga.
+            Komisi haircut diatur per level di Harga
           </p>
         </Group>
       </AdminForm>

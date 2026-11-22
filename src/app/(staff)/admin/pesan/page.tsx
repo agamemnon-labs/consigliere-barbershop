@@ -12,9 +12,7 @@ export const metadata: Metadata = { title: "Pesan", robots: { index: false } };
 export default function OutboxPage() {
   return (
     <AdminShell title="Pesan WhatsApp">
-      <p className="text-muted">
-        Pesan yang akan dikirim ke pelanggan. WhatsApp belum tersambung, jadi di demo pesan hanya dicatat.
-      </p>
+      <p className="text-muted">WhatsApp belum tersambung, pesan hanya dicatat</p>
       <Suspense fallback={<p className="mt-6 text-muted">Memuat…</p>}>
         <Messages />
       </Suspense>

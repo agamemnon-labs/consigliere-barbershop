@@ -276,15 +276,25 @@ export type Takings = {
 };
 
 /** What a branch took today (WITA), by payment method. Online QRIS counts on the day it was paid. */
-export async function todayTakings(db: Database, branchId: string, date: string): Promise<Takings> {
-  const start = new Date(`${date}T00:00:00+08:00`);
-  const end = new Date(`${addDays(date, 1)}T00:00:00+08:00`);
+export function todayTakings(db: Database, branchId: string, date: string): Promise<Takings> {
+  return takingsBetween(db, branchId, date, date);
+}
+
+/** New money from `from` to `to` (inclusive, WITA dates), for one branch or all of them. */
+export async function takingsBetween(
+  db: Database,
+  branchId: string | null,
+  from: string,
+  to: string,
+): Promise<Takings> {
+  const start = new Date(`${from}T00:00:00+08:00`);
+  const end = new Date(`${addDays(to, 1)}T00:00:00+08:00`);
   const counter = await db
     .select({ id: s.transactions.id, method: s.transactions.method, total: s.transactions.total })
     .from(s.transactions)
     .where(
       and(
-        eq(s.transactions.branchId, branchId),
+        branchId ? eq(s.transactions.branchId, branchId) : undefined,
         gte(s.transactions.createdAt, start),
         lt(s.transactions.createdAt, end),
       ),
@@ -294,7 +304,7 @@ export async function todayTakings(db: Database, branchId: string, date: string)
     .from(s.bookings)
     .where(
       and(
-        eq(s.bookings.branchId, branchId),
+        branchId ? eq(s.bookings.branchId, branchId) : undefined,
         eq(s.bookings.status, "paid"),
         gte(s.bookings.paidAt, start),
         lt(s.bookings.paidAt, end),

@@ -53,4 +53,14 @@ All four of check, typecheck, test and build must pass before a push. CI runs th
 - Phone-first, vertical only: no carousels, no sideways swipe; details expand downward. Tap targets ≥ 48 px.
 - Fonts: Bodoni Moda (display), Libre Franklin (text), IBM Plex Mono (numbers, tabular).
 - **User friendly is a hard requirement.** One job per screen, little text, nothing overwhelming. Say it in fewer words; hide detail behind a tap (`<details>`) instead of printing it. If a screen feels full, cut before adding.
-- Use the design skills for any UI work (frontend-design, design-skills:design-elevation / design-critique / ux-writing, accessibility-audit) and review screenshots before shipping.
+- UI work follows **unslop** (github.com/heydamir/unslop by Damir Sokolovsky, CC BY 4.0) as the design checklist, on top of the design skills (frontend-design, design-skills:design-elevation / design-critique / ux-writing, accessibility-audit). Review screenshots before shipping. Its rules that matter most here:
+  - Sentence-case labels, not UPPERCASE with wide tracking.
+  - No italic for emphasis.
+  - Spacing on a 4px grid.
+  - Weights 400–500.
+  - One accent used rarely.
+  - One primary and at most one secondary action per screen.
+  - No trailing periods on labels and buttons, no exclamation marks.
+  - Numbers in one tabular format.
+  - Motion only when it explains something.
+  - Final check: the screen should only fit this product.

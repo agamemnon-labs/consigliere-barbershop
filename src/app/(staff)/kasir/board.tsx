@@ -84,6 +84,14 @@ export async function CashierBoard({ searchParams }: Props) {
             </div>
           ))}
         </dl>
+        {takings.prepaid.balance + takings.prepaid.credit > 0 ? (
+          <p className="mt-1 text-sm text-muted">
+            Juga dibayar dari uang yang masuk sebelumnya:
+            {takings.prepaid.balance > 0 ? ` saldo member ${formatRupiah(takings.prepaid.balance)}` : ""}
+            {takings.prepaid.balance > 0 && takings.prepaid.credit > 0 ? "," : ""}
+            {takings.prepaid.credit > 0 ? ` kredit ${formatRupiah(takings.prepaid.credit)}` : ""}.
+          </p>
+        ) : null}
         {recent.length > 0 ? (
           <ul className="mt-4 grid gap-x-6 sm:grid-cols-2 lg:grid-cols-3">
             {recent.map((t) => (

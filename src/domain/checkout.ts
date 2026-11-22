@@ -97,5 +97,5 @@ export const METHOD_LABEL: Record<Method | "online_qris", string> = {
   online_qris: "QRIS online",
   credit: "Kredit",
   balance: "Saldo member",
-  mixed: "Gabungan",
+  mixed: "EDC · gabungan",
 };

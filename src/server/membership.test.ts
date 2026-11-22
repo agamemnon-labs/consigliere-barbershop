@@ -199,3 +199,14 @@ describe("forgot PIN", () => {
     expect(card?.visits.length).toBeGreaterThan(0);
   });
 });
+
+describe("today's takings", () => {
+  it("counts only new money; balance spent is listed apart", async () => {
+    const { todayTakings } = await import("./checkout");
+    const t = await todayTakings(db, branchId, DAY);
+    expect(t.prepaid.balance).toBeGreaterThan(0);
+    const sum = Object.values(t.byMethod).reduce((a: number, b) => a + (b ?? 0), 0);
+    expect(t.total).toBe(sum);
+    expect(t.byMethod.balance).toBeUndefined();
+  });
+});

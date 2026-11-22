@@ -21,6 +21,10 @@ test("a branch lists the barbers on duty today", async ({ page }) => {
   await expect(page).toHaveURL(/\/cabang\/pramuka$/);
   await expect(page.getByRole("heading", { level: 1, name: "Pramuka" })).toBeVisible();
   await expect(page.getByText(/Barber hari ini/)).toBeVisible();
+  // The live line streams in under each barber: who is in the chair, or an empty chair.
+  await expect(
+    page.getByText(/menunggu · giliran baru|Kursi kosong, bisa langsung duduk/).first(),
+  ).toBeVisible();
 });
 
 test("every barber shows a week of rotation and their day off", async ({ page }) => {

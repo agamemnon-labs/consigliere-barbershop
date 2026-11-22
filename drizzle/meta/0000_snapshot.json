@@ -112,12 +112,8 @@
           "name": "accounts_user_id_users_id_fk",
           "tableFrom": "accounts",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -205,12 +201,8 @@
           "name": "audit_log_actor_id_users_id_fk",
           "tableFrom": "audit_log",
           "tableTo": "users",
-          "columnsFrom": [
-            "actor_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["actor_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -287,12 +279,8 @@
           "name": "balance_ledger_member_id_members_id_fk",
           "tableFrom": "balance_ledger",
           "tableTo": "members",
-          "columnsFrom": [
-            "member_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["member_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -332,12 +320,8 @@
           "name": "barber_level_history_barber_id_barbers_id_fk",
           "tableFrom": "barber_level_history",
           "tableTo": "barbers",
-          "columnsFrom": [
-            "barber_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["barber_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -345,12 +329,8 @@
           "name": "barber_level_history_level_id_barber_levels_id_fk",
           "tableFrom": "barber_level_history",
           "tableTo": "barber_levels",
-          "columnsFrom": [
-            "level_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["level_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -358,10 +338,7 @@
       "compositePrimaryKeys": {
         "barber_level_history_barber_id_effective_from_pk": {
           "name": "barber_level_history_barber_id_effective_from_pk",
-          "columns": [
-            "barber_id",
-            "effective_from"
-          ]
+          "columns": ["barber_id", "effective_from"]
         }
       },
       "uniqueConstraints": {},
@@ -419,9 +396,7 @@
         "barber_levels_slug_unique": {
           "name": "barber_levels_slug_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "slug"
-          ]
+          "columns": ["slug"]
         }
       },
       "policies": {},
@@ -527,12 +502,8 @@
           "name": "barber_shifts_barber_id_barbers_id_fk",
           "tableFrom": "barber_shifts",
           "tableTo": "barbers",
-          "columnsFrom": [
-            "barber_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["barber_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -540,12 +511,8 @@
           "name": "barber_shifts_branch_id_branches_id_fk",
           "tableFrom": "barber_shifts",
           "tableTo": "branches",
-          "columnsFrom": [
-            "branch_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["branch_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -623,12 +590,8 @@
           "name": "barbers_level_id_barber_levels_id_fk",
           "tableFrom": "barbers",
           "tableTo": "barber_levels",
-          "columnsFrom": [
-            "level_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["level_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -638,9 +601,7 @@
         "barbers_slug_unique": {
           "name": "barbers_slug_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "slug"
-          ]
+          "columns": ["slug"]
         }
       },
       "policies": {},
@@ -744,12 +705,8 @@
           "name": "bookings_customer_id_customers_id_fk",
           "tableFrom": "bookings",
           "tableTo": "customers",
-          "columnsFrom": [
-            "customer_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["customer_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -757,12 +714,8 @@
           "name": "bookings_branch_id_branches_id_fk",
           "tableFrom": "bookings",
           "tableTo": "branches",
-          "columnsFrom": [
-            "branch_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["branch_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -770,12 +723,8 @@
           "name": "bookings_barber_id_barbers_id_fk",
           "tableFrom": "bookings",
           "tableTo": "barbers",
-          "columnsFrom": [
-            "barber_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["barber_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -785,9 +734,7 @@
         "bookings_paymentId_unique": {
           "name": "bookings_paymentId_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "payment_id"
-          ]
+          "columns": ["payment_id"]
         }
       },
       "policies": {},
@@ -850,9 +797,7 @@
         "branches_slug_unique": {
           "name": "branches_slug_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "slug"
-          ]
+          "columns": ["slug"]
         }
       },
       "policies": {},
@@ -931,12 +876,8 @@
           "name": "credit_ledger_booking_id_bookings_id_fk",
           "tableFrom": "credit_ledger",
           "tableTo": "bookings",
-          "columnsFrom": [
-            "booking_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["booking_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -985,9 +926,7 @@
         "customers_phone_unique": {
           "name": "customers_phone_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "phone"
-          ]
+          "columns": ["phone"]
         }
       },
       "policies": {},
@@ -1049,12 +988,8 @@
           "name": "display_devices_branch_id_branches_id_fk",
           "tableFrom": "display_devices",
           "tableTo": "branches",
-          "columnsFrom": [
-            "branch_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["branch_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1064,9 +999,7 @@
         "display_devices_tokenHash_unique": {
           "name": "display_devices_tokenHash_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "token_hash"
-          ]
+          "columns": ["token_hash"]
         }
       },
       "policies": {},
@@ -1143,12 +1076,8 @@
           "name": "members_customer_id_customers_id_fk",
           "tableFrom": "members",
           "tableTo": "customers",
-          "columnsFrom": [
-            "customer_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["customer_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -1156,12 +1085,8 @@
           "name": "members_user_id_users_id_fk",
           "tableFrom": "members",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1171,23 +1096,17 @@
         "members_customerId_unique": {
           "name": "members_customerId_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "customer_id"
-          ]
+          "columns": ["customer_id"]
         },
         "members_memberNo_unique": {
           "name": "members_memberNo_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "member_no"
-          ]
+          "columns": ["member_no"]
         },
         "members_userId_unique": {
           "name": "members_userId_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "user_id"
-          ]
+          "columns": ["user_id"]
         }
       },
       "policies": {},
@@ -1269,12 +1188,8 @@
           "name": "package_items_package_id_services_id_fk",
           "tableFrom": "package_items",
           "tableTo": "services",
-          "columnsFrom": [
-            "package_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["package_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -1282,12 +1197,8 @@
           "name": "package_items_service_id_services_id_fk",
           "tableFrom": "package_items",
           "tableTo": "services",
-          "columnsFrom": [
-            "service_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["service_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1295,10 +1206,7 @@
       "compositePrimaryKeys": {
         "package_items_package_id_service_id_pk": {
           "name": "package_items_package_id_service_id_pk",
-          "columns": [
-            "package_id",
-            "service_id"
-          ]
+          "columns": ["package_id", "service_id"]
         }
       },
       "uniqueConstraints": {},
@@ -1371,12 +1279,8 @@
           "name": "point_ledger_member_id_members_id_fk",
           "tableFrom": "point_ledger",
           "tableTo": "members",
-          "columnsFrom": [
-            "member_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["member_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -1384,12 +1288,8 @@
           "name": "point_ledger_transaction_id_transactions_id_fk",
           "tableFrom": "point_ledger",
           "tableTo": "transactions",
-          "columnsFrom": [
-            "transaction_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["transaction_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1580,12 +1480,8 @@
           "name": "queue_entries_branch_id_branches_id_fk",
           "tableFrom": "queue_entries",
           "tableTo": "branches",
-          "columnsFrom": [
-            "branch_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["branch_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -1593,12 +1489,8 @@
           "name": "queue_entries_barber_id_barbers_id_fk",
           "tableFrom": "queue_entries",
           "tableTo": "barbers",
-          "columnsFrom": [
-            "barber_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["barber_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -1606,12 +1498,8 @@
           "name": "queue_entries_customer_id_customers_id_fk",
           "tableFrom": "queue_entries",
           "tableTo": "customers",
-          "columnsFrom": [
-            "customer_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["customer_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -1619,12 +1507,8 @@
           "name": "queue_entries_booking_id_bookings_id_fk",
           "tableFrom": "queue_entries",
           "tableTo": "bookings",
-          "columnsFrom": [
-            "booking_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["booking_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1671,9 +1555,7 @@
         "rate_limits_key_unique": {
           "name": "rate_limits_key_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "key"
-          ]
+          "columns": ["key"]
         }
       },
       "policies": {},
@@ -1729,12 +1611,8 @@
           "name": "service_variants_service_id_services_id_fk",
           "tableFrom": "service_variants",
           "tableTo": "services",
-          "columnsFrom": [
-            "service_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["service_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1828,9 +1706,7 @@
         "services_slug_unique": {
           "name": "services_slug_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "slug"
-          ]
+          "columns": ["slug"]
         }
       },
       "policies": {},
@@ -1915,12 +1791,8 @@
           "name": "sessions_user_id_users_id_fk",
           "tableFrom": "sessions",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1930,9 +1802,7 @@
         "sessions_token_unique": {
           "name": "sessions_token_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "token"
-          ]
+          "columns": ["token"]
         }
       },
       "policies": {},
@@ -2139,12 +2009,8 @@
           "name": "transactions_branch_id_branches_id_fk",
           "tableFrom": "transactions",
           "tableTo": "branches",
-          "columnsFrom": [
-            "branch_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["branch_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -2152,12 +2018,8 @@
           "name": "transactions_barber_id_barbers_id_fk",
           "tableFrom": "transactions",
           "tableTo": "barbers",
-          "columnsFrom": [
-            "barber_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["barber_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -2165,12 +2027,8 @@
           "name": "transactions_customer_id_customers_id_fk",
           "tableFrom": "transactions",
           "tableTo": "customers",
-          "columnsFrom": [
-            "customer_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["customer_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -2178,12 +2036,8 @@
           "name": "transactions_member_id_members_id_fk",
           "tableFrom": "transactions",
           "tableTo": "members",
-          "columnsFrom": [
-            "member_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["member_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -2191,12 +2045,8 @@
           "name": "transactions_queue_entry_id_queue_entries_id_fk",
           "tableFrom": "transactions",
           "tableTo": "queue_entries",
-          "columnsFrom": [
-            "queue_entry_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["queue_entry_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -2204,12 +2054,8 @@
           "name": "transactions_cashier_id_users_id_fk",
           "tableFrom": "transactions",
           "tableTo": "users",
-          "columnsFrom": [
-            "cashier_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["cashier_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -2298,12 +2144,8 @@
           "name": "users_branch_id_branches_id_fk",
           "tableFrom": "users",
           "tableTo": "branches",
-          "columnsFrom": [
-            "branch_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["branch_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -2313,9 +2155,7 @@
         "users_email_unique": {
           "name": "users_email_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "email"
-          ]
+          "columns": ["email"]
         }
       },
       "policies": {},
@@ -2395,113 +2235,57 @@
     "public.balance_reason": {
       "name": "balance_reason",
       "schema": "public",
-      "values": [
-        "topup",
-        "bonus",
-        "spend",
-        "refund",
-        "adjust"
-      ]
+      "values": ["topup", "bonus", "spend", "refund", "adjust"]
     },
     "public.booking_status": {
       "name": "booking_status",
       "schema": "public",
-      "values": [
-        "pending",
-        "paid",
-        "expired",
-        "credited",
-        "refunded"
-      ]
+      "values": ["pending", "paid", "expired", "credited", "refunded"]
     },
     "public.credit_reason": {
       "name": "credit_reason",
       "schema": "public",
-      "values": [
-        "cancel",
-        "no_show",
-        "spend",
-        "expire",
-        "manual"
-      ]
+      "values": ["cancel", "no_show", "spend", "expire", "manual"]
     },
     "public.member_status": {
       "name": "member_status",
       "schema": "public",
-      "values": [
-        "active",
-        "suspended"
-      ]
+      "values": ["active", "suspended"]
     },
     "public.payment_method": {
       "name": "payment_method",
       "schema": "public",
-      "values": [
-        "edc_card",
-        "edc_qris",
-        "online_qris",
-        "balance",
-        "credit",
-        "mixed"
-      ]
+      "values": ["edc_card", "edc_qris", "online_qris", "balance", "credit", "mixed"]
     },
     "public.price_type": {
       "name": "price_type",
       "schema": "public",
-      "values": [
-        "fixed",
-        "from",
-        "by_level",
-        "variant"
-      ]
+      "values": ["fixed", "from", "by_level", "variant"]
     },
     "public.queue_source": {
       "name": "queue_source",
       "schema": "public",
-      "values": [
-        "online",
-        "walkin"
-      ]
+      "values": ["online", "walkin"]
     },
     "public.queue_status": {
       "name": "queue_status",
       "schema": "public",
-      "values": [
-        "waiting",
-        "called",
-        "in_service",
-        "done",
-        "no_show",
-        "cancelled"
-      ]
+      "values": ["waiting", "called", "in_service", "done", "no_show", "cancelled"]
     },
     "public.service_category": {
       "name": "service_category",
       "schema": "public",
-      "values": [
-        "haircut",
-        "chemical",
-        "refreshment",
-        "package"
-      ]
+      "values": ["haircut", "chemical", "refreshment", "package"]
     },
     "public.shift_status": {
       "name": "shift_status",
       "schema": "public",
-      "values": [
-        "on",
-        "off"
-      ]
+      "values": ["on", "off"]
     },
     "public.user_role": {
       "name": "user_role",
       "schema": "public",
-      "values": [
-        "member",
-        "cashier",
-        "admin",
-        "owner"
-      ]
+      "values": ["member", "cashier", "admin", "owner"]
     }
   },
   "schemas": {},

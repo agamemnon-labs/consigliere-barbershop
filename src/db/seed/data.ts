@@ -8,19 +8,19 @@ export const branchSeed = [
     slug: "juanda",
     name: "Juanda",
     address: "Jl. Juanda, Samarinda Ulu",
-    openHours: everyDay("10:00", "22:00"),
+    openHours: everyDay("10:00", "21:00"),
   },
   {
     slug: "pramuka",
     name: "Pramuka",
     address: "Jl. Pramuka, Samarinda Ulu",
-    openHours: everyDay("10:00", "22:00"),
+    openHours: everyDay("10:00", "21:00"),
   },
   {
     slug: "tepian",
     name: "Tepian",
     address: "Jl. Slamet Riyadi, Samarinda Seberang",
-    openHours: everyDay("11:00", "23:00"),
+    openHours: everyDay("10:00", "21:00"),
   },
 ] as const;
 
@@ -43,18 +43,102 @@ export const barberSeed: {
   offDay: number;
   bio: string;
 }[] = [
-  { slug: "vito", name: "Vito", level: "executive", home: "juanda", offDay: 1, bio: "Gunting klasik, rapi sampai ke tengkuk." },
-  { slug: "sonny", name: "Sonny", level: "premium", home: "juanda", offDay: 2, bio: "Taper dan skin fade yang bersih." },
-  { slug: "paulie", name: "Paulie", level: "senior", home: "juanda", offDay: 3, bio: "Pompadour, slick back, dan obrolan panjang." },
-  { slug: "tommy", name: "Tommy", level: "regular", home: "juanda", offDay: 4, bio: "Cepat, teliti, tidak banyak tanya." },
-  { slug: "michael", name: "Michael", level: "premium", home: "pramuka", offDay: 1, bio: "Textured crop dan warna." },
-  { slug: "henry", name: "Henry", level: "senior", home: "pramuka", offDay: 2, bio: "Perm dan potongan panjang." },
-  { slug: "fredo", name: "Fredo", level: "regular", home: "pramuka", offDay: 3, bio: "Buzz cut sampai crew cut." },
-  { slug: "luca", name: "Luca", level: "regular", home: "pramuka", offDay: 5, bio: "Shaving klasik dengan handuk panas." },
-  { slug: "jimmy", name: "Jimmy", level: "senior", home: "tepian", offDay: 1, bio: "Side part yang tahan seharian." },
-  { slug: "tony", name: "Tony", level: "regular", home: "tepian", offDay: 2, bio: "Fade rendah, garis tegas." },
-  { slug: "sal", name: "Sal", level: "regular", home: "tepian", offDay: 4, bio: "Rapi untuk kantor, rapi untuk kondangan." },
-  { slug: "carlo", name: "Carlo", level: "executive", home: "tepian", offDay: 0, bio: "Konsultasi gaya, potongan, dan perawatan." },
+  {
+    slug: "vito",
+    name: "Vito",
+    level: "executive",
+    home: "juanda",
+    offDay: 1,
+    bio: "Gunting klasik, rapi sampai ke tengkuk.",
+  },
+  {
+    slug: "sonny",
+    name: "Sonny",
+    level: "premium",
+    home: "juanda",
+    offDay: 2,
+    bio: "Taper dan skin fade yang bersih.",
+  },
+  {
+    slug: "paulie",
+    name: "Paulie",
+    level: "senior",
+    home: "juanda",
+    offDay: 3,
+    bio: "Pompadour, slick back, dan obrolan panjang.",
+  },
+  {
+    slug: "tommy",
+    name: "Tommy",
+    level: "regular",
+    home: "juanda",
+    offDay: 4,
+    bio: "Cepat, teliti, tidak banyak tanya.",
+  },
+  {
+    slug: "michael",
+    name: "Michael",
+    level: "premium",
+    home: "pramuka",
+    offDay: 1,
+    bio: "Textured crop dan warna.",
+  },
+  {
+    slug: "henry",
+    name: "Henry",
+    level: "senior",
+    home: "pramuka",
+    offDay: 2,
+    bio: "Perm dan potongan panjang.",
+  },
+  {
+    slug: "fredo",
+    name: "Fredo",
+    level: "regular",
+    home: "pramuka",
+    offDay: 3,
+    bio: "Buzz cut sampai crew cut.",
+  },
+  {
+    slug: "luca",
+    name: "Luca",
+    level: "regular",
+    home: "pramuka",
+    offDay: 5,
+    bio: "Shaving klasik dengan handuk panas.",
+  },
+  {
+    slug: "jimmy",
+    name: "Jimmy",
+    level: "senior",
+    home: "tepian",
+    offDay: 1,
+    bio: "Side part yang tahan seharian.",
+  },
+  {
+    slug: "tony",
+    name: "Tony",
+    level: "regular",
+    home: "tepian",
+    offDay: 2,
+    bio: "Fade rendah, garis tegas.",
+  },
+  {
+    slug: "sal",
+    name: "Sal",
+    level: "regular",
+    home: "tepian",
+    offDay: 4,
+    bio: "Rapi untuk kantor, rapi untuk kondangan.",
+  },
+  {
+    slug: "carlo",
+    name: "Carlo",
+    level: "executive",
+    home: "tepian",
+    offDay: 0,
+    bio: "Konsultasi gaya, potongan, dan perawatan.",
+  },
 ];
 
 type ServiceSeed = {
@@ -225,7 +309,11 @@ export const topupSeed = [
 
 export const settingsSeed: Record<string, unknown> = {
   membership_fee: 30_000,
-  birthday_discount: { percent: 50, categories: ["haircut"], stacksWithPoints: false },
+  birthday_discount: {
+    percent: 50,
+    categories: ["haircut"],
+    stacksWithPoints: false,
+  },
   points: { earnPer: 50_000, redeemPoints: 10, redeemValue: 50_000 },
   queue_grace_minutes: 5,
   queue_alert_when_ahead: 2,
@@ -244,9 +332,24 @@ export const staffSeed: {
 }[] = [
   { email: "owner@consigliere.test", name: "Don", role: "owner" },
   { email: "admin@consigliere.test", name: "Tom", role: "admin" },
-  { email: "kasir.juanda@consigliere.test", name: "Connie", role: "cashier", branch: "juanda" },
-  { email: "kasir.pramuka@consigliere.test", name: "Kay", role: "cashier", branch: "pramuka" },
-  { email: "kasir.tepian@consigliere.test", name: "Lucy", role: "cashier", branch: "tepian" },
+  {
+    email: "kasir.juanda@consigliere.test",
+    name: "Connie",
+    role: "cashier",
+    branch: "juanda",
+  },
+  {
+    email: "kasir.pramuka@consigliere.test",
+    name: "Kay",
+    role: "cashier",
+    branch: "pramuka",
+  },
+  {
+    email: "kasir.tepian@consigliere.test",
+    name: "Lucy",
+    role: "cashier",
+    branch: "tepian",
+  },
 ];
 
 function everyDay(open: string, close: string) {

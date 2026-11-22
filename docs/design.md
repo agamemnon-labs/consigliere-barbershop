@@ -176,7 +176,7 @@ Each phase ends deployed and usable.
 3. **Queue core** ✅ — cashier screen (columns, call/done/late, add walk-in), tablet display, live queue on the phone. Realtime. *This is the heart; demo-able on its own.*
 4. **Online booking + QRIS (sandbox)** ✅ — booking flow, webhook, pay-then-queue, expiry.
 5. **Cashier payments** ✅ — EDC recording, transactions, receipts.
-6. **Membership** — sign-up, PIN login, QR card, points, birthday discount, balance + top-up, forgot-PIN OTP.
+6. **Membership** ✅ — sign-up at the counter (`/kasir/member`), phone + PIN login (`/masuk`), QR card on the phone (`/kartu`), points, birthday discount, balance + counter top-up, forgot-PIN code (`/masuk/lupa-pin`, via the WhatsApp outbox). The cashier's checkout takes a card number (scanner types it + Enter) or a WhatsApp number and offers the perks the member qualifies for; paying from balance needs the member's PIN, and 5 wrong PINs lock the card for 15 minutes. Today's takings count only new money (EDC + online QRIS); balance and credit spent are shown apart. Still open from the brief: top-up by QRIS from the phone (reuses the booking QRIS adapter).
 7. **Admin back office** — rotation, prices, members, rules, reports.
 8. **Polish & portfolio** — demo mode ribbon, guided demo accounts ("login as cashier / tablet / owner"), Playwright e2e, Lighthouse ≥ 90 on mobile, case-study page for Agamemnon.
 

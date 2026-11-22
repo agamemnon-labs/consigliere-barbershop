@@ -37,7 +37,7 @@ export async function seed(db: AnyDb, options: SeedOptions) {
       queue_entries, bookings, members, customers, display_devices,
       sessions, accounts, verifications, rate_limits, users,
       package_items, service_variants, services, barber_shifts, barber_level_history,
-      barbers, barber_levels, branches, topup_packages, settings
+      barbers, barber_levels, closures, branches, topup_packages, settings
       restart identity cascade`);
 
     const branchRows = await tx

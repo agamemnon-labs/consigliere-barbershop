@@ -134,6 +134,22 @@ export const barberShifts = pgTable(
   ],
 ).enableRLS();
 
+/**
+ * Days a branch is closed (Lebaran, Natal…). Null branch = every branch.
+ * Customer pages show the reason as a banner; online queue stays shut.
+ */
+export const closures = pgTable(
+  "closures",
+  {
+    id: id(),
+    branchId: uuid().references(() => branches.id, { onDelete: "cascade" }),
+    date: date().notNull(),
+    reason: text().notNull(),
+    createdAt: createdAt(),
+  },
+  (t) => [index().on(t.date)],
+).enableRLS();
+
 /* ── Services & prices ─────────────────────────────────────────────────── */
 
 export const services = pgTable("services", {

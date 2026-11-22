@@ -35,9 +35,7 @@ export function SignUpForm({ fee, phone }: { fee: number; phone: string }) {
   return (
     <section aria-label="Daftar member baru" className="border-t border-rule pt-6">
       <h2 className="font-display text-2xl">Daftar member baru</h2>
-      <p className="mt-1 text-muted">
-        Biaya {formatRupiah(fee)}, sekali saja. Dapat poin tiap kunjungan, diskon ulang tahun, dan saldo.
-      </p>
+      <p className="mt-1 text-muted">Biaya {formatRupiah(fee)}, sekali saja</p>
       <form action={action} className="mt-5 grid gap-5 sm:grid-cols-2">
         <Field label="Nama" name="name" required autoComplete="off" defaultValue={v.name} />
         <Field

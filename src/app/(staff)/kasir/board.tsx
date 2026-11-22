@@ -175,7 +175,7 @@ function Column({ queue, catalog }: { queue: BarberQueue; catalog: CatalogServic
       </div>
 
       <ol className="flex-1 px-4 py-1">
-        {line.length === 0 ? <li className="py-4 text-sm text-muted">Belum ada yang menunggu.</li> : null}
+        {line.length === 0 ? <li className="py-4 text-sm text-muted">Belum ada yang menunggu</li> : null}
         {line.map((e, i) => (
           <li key={e.id} className="border-b border-rule py-3 last:border-0">
             <div className="flex items-start justify-between gap-3">
@@ -187,7 +187,7 @@ function Column({ queue, catalog }: { queue: BarberQueue; catalog: CatalogServic
                 <p className="label mt-1">
                   {e.source === "online" ? "Online · lunas" : "Walk-in"}
                   {e.lateMoves > 0 ? " · sudah mundur 1" : ""}
-                  {e.status === "waiting" ? ` · ± ${e.waitMin} mnt` : ""}
+                  {e.status === "waiting" ? (e.waitMin > 0 ? ` · ± ${e.waitMin} mnt` : " · berikutnya") : ""}
                 </p>
                 {e.status === "called" && e.calledAt ? (
                   <p className="mt-1 text-sm text-accent-ink">

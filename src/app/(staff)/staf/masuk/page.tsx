@@ -13,7 +13,6 @@ export default function StaffSignIn() {
       <div className="mt-16">
         <p className="label">Ruang staf</p>
         <h1 className="mt-3 text-4xl">Selamat bekerja</h1>
-        <p className="mt-3 text-muted">Kasir, admin, dan pemilik masuk di sini.</p>
       </div>
       <SignInForm />
     </main>

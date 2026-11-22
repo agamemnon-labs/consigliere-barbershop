@@ -71,9 +71,7 @@ async function Week({ searchParams }: { searchParams: PageProps<"/admin/rotasi">
           rows={week.rows}
         />
       </AdminForm>
-      <p className="mt-4 text-sm text-muted">
-        Kosong berarti belum dijadwalkan. Pelanggan langsung melihat perubahan di halaman barber dan cabang.
-      </p>
+      <p className="mt-4 text-sm text-muted">Kosong berarti belum dijadwalkan</p>
     </>
   );
 }

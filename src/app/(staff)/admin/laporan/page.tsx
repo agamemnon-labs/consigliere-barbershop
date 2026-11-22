@@ -89,7 +89,7 @@ function Body({ report: r }: { report: Report }) {
         </div>
         <div>
           <dt className="label">Pelanggan selesai</dt>
-          <dd className="num mt-1 text-2xl">{r.visits}</dd>
+          <dd className="num mt-1 text-2xl">{r.visits.toLocaleString("id-ID")}</dd>
         </div>
       </dl>
 

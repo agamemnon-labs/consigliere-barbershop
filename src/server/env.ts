@@ -12,6 +12,10 @@ const schema = z.object({
   BETTER_AUTH_SECRET: z.string().min(32).optional(),
   /** Public origin, e.g. https://consigliere.vercel.app */
   BETTER_AUTH_URL: z.url().optional(),
+  /** Xendit secret key. Unset = demo payments that never touch a gateway. */
+  XENDIT_SECRET_KEY: z.string().min(1).optional(),
+  /** Xendit dashboard → Webhooks → verification token. Required with a secret key. */
+  XENDIT_WEBHOOK_TOKEN: z.string().min(1).optional(),
 });
 
 export type Env = z.infer<typeof schema>;

@@ -6,7 +6,7 @@
 export const brand = {
   name: "Consigliere",
   legalName: "Consigliere Barbershop",
-  tagline: "Rambut rapi, urusan beres.",
+  tagline: "Rambut rapi, urusan beres",
   city: "Samarinda",
   established: 2026,
   /** Shown on the complaints line and in the footer. E.164 without the plus. */

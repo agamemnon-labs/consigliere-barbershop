@@ -18,8 +18,8 @@ export default function MemberSignInPage({ searchParams }: PageProps<"/masuk">) 
       <BackLink href="/">Beranda</BackLink>
       <header className="pt-10 pb-8">
         <p className="label">Kartu member</p>
-        <h1 className="mt-3 text-5xl leading-[1.05]">Masuk.</h1>
-        <p className="mt-4 text-muted">Pakai nomor WhatsApp dan PIN yang kamu buat waktu daftar di kasir.</p>
+        <h1 className="mt-3 text-5xl leading-[1.05]">Masuk</h1>
+        <p className="mt-4 text-muted">Pakai nomor WhatsApp dan PIN-mu</p>
       </header>
       <Suspense fallback={null}>
         <AlreadyIn searchParams={searchParams} />
@@ -37,9 +37,7 @@ export default function MemberSignInPage({ searchParams }: PageProps<"/masuk">) 
           </Notice>
         </div>
       ) : null}
-      <p className="mt-12 text-center text-sm text-muted">
-        Belum member? Daftar di kasir cabang mana saja: poin tiap kunjungan, diskon ulang tahun, dan saldo.
-      </p>
+      <p className="mt-12 text-center text-sm text-muted">Belum member? Daftar di kasir cabang mana saja</p>
       <Credits />
     </div>
   );

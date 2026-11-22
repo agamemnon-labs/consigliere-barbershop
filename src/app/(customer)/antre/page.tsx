@@ -24,13 +24,10 @@ export default function BookPage({ searchParams }: PageProps<"/antre">) {
       <BackLink href="/">Beranda</BackLink>
       <header className="pt-10 pb-10">
         <p className="label">Antrean online</p>
-        <h1 className="mt-3 text-5xl leading-[1.05]">Ambil nomor.</h1>
-        <p className="mt-4 text-muted">
-          Bayar dulu dengan QRIS, lalu nomormu langsung masuk antrean. Tidak ada jam pasti: kamu antre bersama
-          yang datang langsung, dan kami kabari perkiraan giliranmu.
-        </p>
+        <h1 className="mt-3 text-5xl leading-[1.05]">Ambil nomor</h1>
+        <p className="mt-4 text-muted">Bayar QRIS, nomormu langsung masuk antrean</p>
       </header>
-      <Suspense fallback={<p className="py-10 text-muted italic">Melihat antrean…</p>}>
+      <Suspense fallback={<p className="py-10 text-muted">Melihat antrean…</p>}>
         <Step searchParams={searchParams} />
       </Suspense>
       <Credits />
@@ -78,16 +75,14 @@ async function Step({ searchParams }: { searchParams: PageProps<"/antre">["searc
       {options.closedReason ? (
         <Notice title="Belum bisa ambil nomor">{options.closedReason}</Notice>
       ) : options.barbers.length === 0 ? (
-        <p className="text-muted italic">Belum ada barber yang jaga hari ini.</p>
+        <p className="text-muted">Belum ada barber yang jaga hari ini.</p>
       ) : !options.online.ok && !isDemoDatabase() ? (
         <Notice title="Belum bisa ambil nomor">{options.online.reason}</Notice>
       ) : (
         <>
           {!options.online.ok ? (
             <div className="mb-8">
-              <Notice title="Mode demo">
-                {options.online.reason} Di demo ini jam buka diabaikan supaya bisa dicoba kapan saja.
-              </Notice>
+              <Notice title="Mode demo">Jam buka diabaikan supaya bisa dicoba kapan saja</Notice>
             </div>
           ) : null}
           <BookingForm options={options} demo={paymentProvider().testMode} />

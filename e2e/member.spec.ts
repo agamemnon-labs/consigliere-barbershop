@@ -3,7 +3,7 @@ import { expect, test } from "@playwright/test";
 test("the member card asks for a login first", async ({ page }) => {
   await page.goto("/kartu");
   await expect(page).toHaveURL(/\/masuk/);
-  await expect(page.getByRole("heading", { name: "Masuk." })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Masuk", exact: true })).toBeVisible();
 });
 
 test("a member signs in with WhatsApp and PIN and sees their card", async ({ page }) => {

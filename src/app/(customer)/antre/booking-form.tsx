@@ -118,7 +118,7 @@ export function BookingForm({ options, demo }: { options: Options; demo: boolean
             checked={barberId === "any"}
             onChange={() => setBarberId("any")}
             title="Siapa saja yang paling cepat"
-            detail={`Sekarang ${fastest.name}, ± ${fastest.waitMin} mnt`}
+            detail={`Sekarang ${fastest.name}, ${fastest.waitMin > 0 ? `± ${fastest.waitMin} mnt` : "langsung duduk"}`}
             aside={formatShort(fastest.haircutPrice)}
           />
         ) : null}
@@ -146,12 +146,12 @@ export function BookingForm({ options, demo }: { options: Options; demo: boolean
             <span>Tambah layanan lain</span>
             <span className="label">Kimia · perawatan · paket</span>
           </summary>
-          <div className="pb-4">{groups.slice(1).map(renderGroup)}</div>
+          <div className="pb-4">
+            {groups.slice(1).map(renderGroup)}
+            <p className="mt-4 text-sm text-muted">Coloring dibayar di kasir, harganya tergantung rambut</p>
+          </div>
         </details>
       ) : null}
-      <p className="mt-4 text-sm text-muted">
-        Coloring dibayar di kasir, karena harganya tergantung panjang rambut dan warna.
-      </p>
 
       <Rule label="3 · Atas nama" className="mt-10" />
       <div className="mt-6 grid gap-6">
@@ -162,7 +162,7 @@ export function BookingForm({ options, demo }: { options: Options; demo: boolean
           maxLength={60}
           required
           defaultValue={state.values?.name}
-          hint="Dipanggil dengan nama ini. Layar di toko hanya menampilkan nomor."
+          hint="Layar di toko hanya menampilkan nomor"
         />
         <Field
           label="Nomor WhatsApp"
@@ -172,7 +172,7 @@ export function BookingForm({ options, demo }: { options: Options; demo: boolean
           autoComplete="tel"
           required
           defaultValue={state.values?.phone}
-          hint="Untuk kabar saat giliranmu sudah dekat."
+          hint="Kami kabari saat giliranmu dekat"
         />
       </div>
 
@@ -203,8 +203,7 @@ export function BookingForm({ options, demo }: { options: Options; demo: boolean
           {pending ? "Menyiapkan QRIS…" : `Bayar ${formatRupiah(amount)} dengan QRIS`}
         </button>
         <p className="mt-3 text-center text-sm text-muted">
-          Nomormu masuk antrean begitu pembayaran berhasil. Batas bayar 15 menit.
-          {demo ? " Mode demo: tidak ada uang sungguhan." : ""}
+          Batas bayar 15 menit{demo ? " · uang demo" : ""}
         </p>
       </div>
     </form>

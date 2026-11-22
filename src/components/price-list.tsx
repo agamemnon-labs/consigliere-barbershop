@@ -9,41 +9,68 @@ const categories = [
   { key: "package", title: "Paket" },
 ] as const;
 
-type Props = { only?: (typeof categories)[number]["key"][] };
+type Props = {
+  only?: (typeof categories)[number]["key"][];
+  /** Show the first category open and fold the rest behind one tap. */
+  folded?: boolean;
+};
 
 /** The full pricelist, grouped by category. Rows expand downward for details. */
-export async function PriceList({ only }: Props) {
+export async function PriceList({ only, folded = false }: Props) {
   const [services, levels] = await Promise.all([getServices(), getLevels()]);
   const haircutPrices = levels.map((l) => l.haircutPrice);
   const shown = only ? categories.filter((c) => only.includes(c.key)) : categories;
+  const sections = shown.map((cat) => {
+    const items = services.filter((s) => s.category === cat.key);
+    if (items.length === 0) return null;
+    const n = categories.findIndex((c) => c.key === cat.key) + 1;
+    return (
+      <section key={cat.key} aria-labelledby={`cat-${cat.key}`}>
+        <header className="mb-2 flex items-baseline gap-3">
+          <span className="num text-xs text-faint">{String(n).padStart(2, "0")}</span>
+          <h3 id={`cat-${cat.key}`} className="text-2xl">
+            {cat.title}
+          </h3>
+        </header>
+        <ul className="border-t border-rule">
+          {items.map((s) => (
+            <li key={s.id} className="border-b border-rule">
+              <PriceRow service={s} label={priceLabel(s, haircutPrices)} levels={levels} />
+            </li>
+          ))}
+        </ul>
+      </section>
+    );
+  });
+  const note = (
+    <p className="text-sm text-muted">
+      K = ribu rupiah, <span className="num">+</span> = mulai dari. Non-tunai
+    </p>
+  );
+  if (!folded) {
+    return (
+      <div className="flex flex-col gap-12">
+        {sections}
+        {note}
+      </div>
+    );
+  }
+  const [first, ...rest] = sections;
   return (
-    <div className="flex flex-col gap-12">
-      {shown.map((cat) => {
-        const items = services.filter((s) => s.category === cat.key);
-        if (items.length === 0) return null;
-        const n = categories.findIndex((c) => c.key === cat.key) + 1;
-        return (
-          <section key={cat.key} aria-labelledby={`cat-${cat.key}`}>
-            <header className="mb-2 flex items-baseline gap-3">
-              <span className="num text-xs text-faint">{String(n).padStart(2, "0")}</span>
-              <h3 id={`cat-${cat.key}`} className="text-2xl">
-                {cat.title}
-              </h3>
-            </header>
-            <ul className="border-t border-rule">
-              {items.map((s) => (
-                <li key={s.id} className="border-b border-rule">
-                  <PriceRow service={s} label={priceLabel(s, haircutPrices)} levels={levels} />
-                </li>
-              ))}
-            </ul>
-          </section>
-        );
-      })}
-      <p className="text-sm text-muted">
-        K berarti ribu rupiah. Tanda <span className="num">+</span> berarti harga mulai dari. Pembayaran
-        non-tunai.
-      </p>
+    <div className="flex flex-col gap-8">
+      {first}
+      <details className="row">
+        <summary className="flex min-h-12 items-center justify-between">
+          <span>Harga lainnya</span>
+          <span aria-hidden className="row-mark inline-block w-3 text-center text-muted">
+            +
+          </span>
+        </summary>
+        <div className="flex flex-col gap-12 pt-8">
+          {rest}
+          {note}
+        </div>
+      </details>
     </div>
   );
 }

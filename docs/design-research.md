@@ -41,3 +41,11 @@ What current designers and design communities count as good and as "AI slop" UI 
 10. **Motion.** Motion only explains something: colour or surface changes on hover, a tiny press. Nothing loops unless it is live.
 
 These are applied in the UX polish pass after phase 7, customer phone screens first.
+
+## UX polish pass, customer screens (2026-11-22)
+
+- Every intro paragraph became one line. If a sentence explains a rule the screen already enforces (QRIS timeout, ticket estimate), cut it.
+- Home shows the haircut price only; the rest folds behind "Harga lainnya". A nested `<details>` must rotate only its own mark: use `.row[open] > summary .row-mark`, never a descendant selector.
+- No periods on headlines, labels, hints or button notes. Body sentences keep them.
+- Italic is reserved for one signature spot (the ticket stub's "dengan {barber}").
+- Do not print "± 0 mnt"; say what it means ("langsung duduk").

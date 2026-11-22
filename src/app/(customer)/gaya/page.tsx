@@ -60,7 +60,7 @@ export default function StyleSheet() {
     <main>
       <header className="mx-auto flex max-w-3xl flex-col items-center px-6 pt-20 pb-16 text-center">
         <p className="label">Lembar gaya · Fase 1</p>
-        <h1 className="mt-6 text-5xl italic sm:text-6xl">Tukang jahit, bukan neon.</h1>
+        <h1 className="mt-6 text-5xl sm:text-6xl">Tukang jahit, bukan neon</h1>
         <p className="mt-6 max-w-[46ch] text-muted">
           Hitam hangat, warna tulang, dan satu merah darah yang dipakai hemat. Serif untuk judul, sans polos
           untuk dibaca, angka tabular untuk antrean. Garis tipis, ruang lega.
@@ -100,7 +100,7 @@ export default function StyleSheet() {
         <div className="grid gap-10">
           <Specimen name="Bodoni Moda" use="Judul. Bodoni lahir di Parma.">
             <p className="font-display text-6xl leading-none sm:text-7xl">Consigliere</p>
-            <p className="mt-3 font-display text-3xl italic">Giliran Anda, Boss.</p>
+            <p className="mt-3 font-display text-3xl">Giliran Anda, Boss.</p>
           </Specimen>
           <Specimen name="Libre Franklin" use="Teks yang benar-benar dibaca.">
             <p className="max-w-[52ch] text-lg">
@@ -243,7 +243,7 @@ function CashierPreview() {
     <div data-theme="paper" className="rounded-sm border border-rule bg-bg p-4 text-fg sm:p-6">
       <div className="mb-5 flex items-baseline justify-between border-b border-rule pb-4">
         <p className="font-display text-xl">
-          Juanda <span className="text-muted italic">· Minggu, 22 Nov</span>
+          Juanda <span className="text-muted">· Minggu, 22 Nov</span>
         </p>
         <p className="num text-sm text-muted">14.22</p>
       </div>
@@ -265,7 +265,7 @@ function CashierPreview() {
                   <p className="num text-sm text-muted">sejak {c.now.since}</p>
                 </div>
               ) : (
-                <p className="mt-2 text-muted italic">Kursi kosong</p>
+                <p className="mt-2 text-muted">Kursi kosong</p>
               )}
               {c.now ? (
                 <Button variant="primary" block className="mt-3 min-h-11">
@@ -338,7 +338,7 @@ function TabletPreview() {
                   <p className="num mt-1 text-sm text-muted">± {r.wait} mnt</p>
                 </>
               ) : (
-                <p className="text-xl text-muted italic">Langsung duduk</p>
+                <p className="text-xl text-muted">Langsung duduk</p>
               )}
             </div>
           </div>

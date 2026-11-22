@@ -11,7 +11,7 @@ export default function ForgotPinPage() {
       <BackLink href="/masuk">Masuk</BackLink>
       <header className="pt-10 pb-8">
         <p className="label">Kartu member</p>
-        <h1 className="mt-3 text-5xl leading-[1.05]">Lupa PIN.</h1>
+        <h1 className="mt-3 text-5xl leading-[1.05]">Lupa PIN</h1>
         <p className="mt-4 text-muted">
           Kami kirim kode 6 angka ke WhatsApp-mu. Kode itu hanya untukmu: kasir tidak akan pernah memintanya.
         </p>

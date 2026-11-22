@@ -206,7 +206,7 @@
   .row .row-mark {
     transition: rotate 200ms var(--ease-out-quiet);
   }
-  .row[open] .row-mark {
+  .row[open] > summary .row-mark {
     rotate: 45deg;
   }
   .row::details-content {

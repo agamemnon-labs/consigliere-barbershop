@@ -177,7 +177,18 @@ Each phase ends deployed and usable.
 4. **Online booking + QRIS (sandbox)** ✅ — booking flow, webhook, pay-then-queue, expiry.
 5. **Cashier payments** ✅ — EDC recording, transactions, receipts.
 6. **Membership** ✅ — sign-up at the counter (`/kasir/member`), phone + PIN login (`/masuk`), QR card on the phone (`/kartu`), points, birthday discount, balance + counter top-up, forgot-PIN code (`/masuk/lupa-pin`, via the WhatsApp outbox). The cashier's checkout takes a card number (scanner types it + Enter) or a WhatsApp number and offers the perks the member qualifies for; paying from balance needs the member's PIN, and 5 wrong PINs lock the card for 15 minutes. Today's takings count only new money (EDC + online QRIS); balance and credit spent are shown apart. Still open from the brief: top-up by QRIS from the phone (reuses the booking QRIS adapter).
-7. **Admin back office** — rotation, prices, members, rules, reports.
+7. **Admin back office** ✅ — `/admin` sections:
+   - Hari ini: per branch, money in, served, in line now and barbers on duty; phone-sized for the owner.
+   - Laporan: a date range with money in, service sales, visits, barber commission, per branch, top services, payment methods, and member money (fees, top-ups, bonus given, balance held, open credit). CSV export of every sale or of the commission.
+   - Rotasi: a week grid with "salin dari minggu lalu".
+   - Harga: haircut price and commission per level, plus every service's price, variants, duration and on/off.
+   - Barber: level change from a date (history kept, so commission on past sales never changes) and active toggle.
+   - Member: search, edit name, number and status, and points/balance correction with a reason.
+   - Aturan: fee, points, birthday, queue and credit timings, other-service commission, and top-up packages.
+   - Pesan: the WhatsApp outbox, with one-time codes masked even for admins.
+   - Every change writes the audit log; price and rotation edits refresh the public site at once (`updateTag`).
+   - Commission is paid on what the shop earned per service (price minus discount): haircuts at the barber's level share on the day of the sale, everything else at the flat share from Aturan.
+   - Deferred: staff accounts and tablet tokens (the tablet is public and needs none), credits & refunds screen.
 8. **Polish & portfolio** — demo mode ribbon, guided demo accounts ("login as cashier / tablet / owner"), Playwright e2e, Lighthouse ≥ 90 on mobile, case-study page for Agamemnon.
 
 Phases 1–3 are the MVP that proves the idea.

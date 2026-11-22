@@ -22,9 +22,9 @@ export default defineConfig({
       name: "phone",
       use: { ...devices["iPhone 13"], browserName: "chromium" },
       // The cashier board and the counter tablet are not phone screens.
-      testIgnore: /(cashier|display)\./,
+      testIgnore: /(cashier|display|admin)\./,
     },
-    { name: "desktop", use: { ...devices["Desktop Chrome"] }, testMatch: /(staff|cashier|display)\./ },
+    { name: "desktop", use: { ...devices["Desktop Chrome"] }, testMatch: /(staff|cashier|display|admin)\./ },
   ],
   webServer: {
     command: `pnpm start -p ${port}`,

@@ -164,7 +164,8 @@ export const serviceSeed: ServiceSeed[] = [
     category: "haircut",
     priceType: "by_level",
     name: "Haircut",
-    description: "Konsultasi, potong, cuci, dan styling. Harga mengikuti level barber.",
+    description:
+      "Potong, cuci (sampo dan kondisioner kalau mau, gratis), pijat, dan styling. Harga mengikuti level barber.",
     durationMin: 30,
   },
   {
@@ -318,6 +319,8 @@ export const settingsSeed: Record<string, unknown> = {
   queue_grace_minutes: 5,
   queue_alert_when_ahead: 2,
   pending_booking_minutes: 15,
+  /** Online queue stops taking numbers this many minutes before closing. */
+  online_queue_closes_before_min: 45,
   credit_valid_days: 30,
   tv_strip_enabled: false,
   default_commission_bps: 4_000,

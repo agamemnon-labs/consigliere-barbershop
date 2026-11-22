@@ -6,7 +6,9 @@ const nextConfig: NextConfig = {
   reactCompiler: true,
   typedRoutes: true,
   poweredByHeader: false,
-  serverExternalPackages: ["@node-rs/argon2"],
+  serverExternalPackages: ["@electric-sql/pglite"],
+  // The demo database applies the SQL migrations at runtime.
+  outputFileTracingIncludes: { "/**": ["./drizzle/**/*"] },
   turbopack: {
     rules: {
       "*.css": {

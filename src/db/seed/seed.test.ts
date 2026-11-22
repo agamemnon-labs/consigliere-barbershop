@@ -1,28 +1,13 @@
-import { readdirSync, readFileSync } from "node:fs";
-import { join } from "node:path";
-import { PGlite } from "@electric-sql/pglite";
 import { verifyPassword } from "better-auth/crypto";
 import { and, eq, sql } from "drizzle-orm";
-import { drizzle } from "drizzle-orm/pglite";
 import { beforeAll, describe, expect, it } from "vitest";
 import * as s from "../schema";
-import { seed } from "./seed";
+import { createDemoDb } from "../demo";
 
-const client = new PGlite();
-const db = drizzle(client, { schema: s, casing: "snake_case" });
+let db: Awaited<ReturnType<typeof createDemoDb>>;
 
 beforeAll(async () => {
-  const dir = join(process.cwd(), "drizzle");
-  for (const file of readdirSync(dir)
-    .filter((f) => f.endsWith(".sql"))
-    .sort()) {
-    await client.exec(readFileSync(join(dir, file), "utf8").replaceAll("--> statement-breakpoint", ""));
-  }
-  await seed(db, {
-    staffPassword: "test-password",
-    from: "2026-11-22",
-    days: 7,
-  });
+  db = await createDemoDb({ staffPassword: "test-password", from: "2026-11-22", days: 7 });
 }, 60_000);
 
 describe("migrations + seed", () => {

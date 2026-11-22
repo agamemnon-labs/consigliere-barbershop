@@ -1,15 +1,19 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { connection } from "next/server";
+import { Suspense } from "react";
 import { BackLink } from "@/components/back-link";
 import { Credits } from "@/components/credits";
+import { LiveRefresh } from "@/components/live-refresh";
 import { Notice } from "@/components/notice";
 import { Rule } from "@/components/rule";
 import { brand } from "@/config/brand";
 import { formatShort } from "@/domain/money";
 import { closureFor, onDuty, shortDate } from "@/domain/schedule";
-import { clockLabel } from "@/domain/time";
-import { getBarbers, getBranches, getRotation, getToday } from "@/server/catalog";
+import { clockLabel, shopDate } from "@/domain/time";
+import { type Barber, getBarbers, getBranches, getRotation, getToday } from "@/server/catalog";
+import { getBranchQueue } from "@/server/queue";
 
 export async function generateStaticParams() {
   const branches = await getBranches();
@@ -76,18 +80,9 @@ export default async function BranchPage({ params }: PageProps<"/cabang/[slug]">
 
       <Rule label={`Barber hari ini · ${shortDate(today)}`} />
       {onDutyToday.length > 0 ? (
-        <ul className="mt-4">
-          {onDutyToday.map((b) => (
-            <li key={b.id} className="border-b border-rule">
-              <Link href={`/barber#${b.slug}`} className="group flex min-h-16 items-baseline py-4">
-                <span className="font-display text-xl group-hover:text-accent-ink">{b.name}</span>
-                <span className="label ml-3">{b.level.name}</span>
-                <span className="leader" aria-hidden />
-                <span className="num">{formatShort(b.level.haircutPrice)}</span>
-              </Link>
-            </li>
-          ))}
-        </ul>
+        <Suspense fallback={<BarberRows barbers={onDutyToday} />}>
+          <LiveBarberRows slug={branch.slug} branchId={branch.id} barbers={onDutyToday} />
+        </Suspense>
       ) : (
         <p className="mt-6 text-muted italic">
           {closed ? "Sampai jumpa besok." : "Jadwal hari ini belum diisi."}
@@ -106,5 +101,80 @@ export default async function BranchPage({ params }: PageProps<"/cabang/[slug]">
 
       <Credits />
     </div>
+  );
+}
+
+/** Keyed by barber slug: ids can differ between the prerendered shell and the demo database. */
+type Live = { chair: string | null; waiting: number; waitMin: number };
+
+/** Streams in after the static shell: who is in each chair, how many wait, how long. */
+async function LiveBarberRows({
+  slug,
+  branchId,
+  barbers,
+}: {
+  slug: string;
+  branchId: string;
+  barbers: Barber[];
+}) {
+  await connection();
+  const now = new Date();
+  const queue = await getBranchQueue(slug, shopDate(now), now);
+  const live = new Map<string, Live>(
+    (queue?.barbers ?? []).map((b) => [
+      b.barber.slug,
+      {
+        chair: b.entries.find((e) => e.status === "in_service")?.ticket ?? null,
+        waiting: b.entries.filter((e) => e.status !== "in_service").length,
+        waitMin: b.waitMin,
+      },
+    ]),
+  );
+  return (
+    <>
+      <BarberRows barbers={barbers} live={live} />
+      <div className="mt-3 flex justify-end">
+        <LiveRefresh branchId={queue?.branch.id ?? branchId} />
+      </div>
+    </>
+  );
+}
+
+function BarberRows({ barbers, live }: { barbers: Barber[]; live?: Map<string, Live> }) {
+  return (
+    <ul className="mt-4">
+      {barbers.map((b) => {
+        const q = live?.get(b.slug);
+        return (
+          <li key={b.id} className="border-b border-rule">
+            <Link href={`/barber#${b.slug}`} className="group block py-4">
+              <span className="flex items-baseline">
+                <span className="font-display text-xl group-hover:text-accent-ink">{b.name}</span>
+                <span className="label ml-3">{b.level.name}</span>
+                <span className="leader" aria-hidden />
+                <span className="num">{formatShort(b.level.haircutPrice)}</span>
+              </span>
+              <span className="mt-1 block min-h-5 text-sm text-muted">
+                {q ? <LiveLine q={q} /> : "\u00a0"}
+              </span>
+            </Link>
+          </li>
+        );
+      })}
+    </ul>
+  );
+}
+
+function LiveLine({ q }: { q: Live }) {
+  if (!q.chair && q.waiting === 0) return <span className="text-fg">Kursi kosong, bisa langsung duduk</span>;
+  return (
+    <>
+      {q.chair ? (
+        <>
+          Di kursi <span className="num text-fg">{q.chair}</span> ·{" "}
+        </>
+      ) : null}
+      {q.waiting} menunggu · giliran baru <span className="num text-fg">± {q.waitMin} mnt</span>
+    </>
   );
 }

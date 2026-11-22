@@ -308,6 +308,22 @@ export const topupSeed = [
   { pay: 500_000, get: 575_000 },
 ] as const;
 
+/**
+ * Demo members, seeded only when a member PIN is passed (demo DB, local).
+ * `birthdayNow` puts the birthday in the seed month so the discount is demoable.
+ */
+export const memberSeed = [
+  {
+    name: "Bram Wicaksono",
+    phone: "6281200000001",
+    dob: "1994-01-17",
+    birthdayNow: true,
+    points: 25,
+    topup: 0,
+  },
+  { name: "Rizal Hakim", phone: "6281200000002", dob: "1990-03-14", birthdayNow: false, points: 8, topup: 1 },
+] as const;
+
 export const settingsSeed: Record<string, unknown> = {
   membership_fee: 30_000,
   birthday_discount: {

@@ -2,6 +2,7 @@ import "server-only";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { nextCookies } from "better-auth/next-js";
+import { phoneNumber } from "better-auth/plugins/phone-number";
 import { type Database, getDb, schema } from "@/db";
 import { authSecret, env } from "@/server/env";
 
@@ -66,6 +67,8 @@ export function createAuth(
       max: 60,
       customRules: {
         "/sign-in/email": { window: 15 * 60, max: 5 },
+        // A 6-digit PIN is guessable without a tight limit: 5 tries per 15 minutes per client.
+        "/sign-in/phone-number": { window: 15 * 60, max: 5 },
       },
     },
     advanced: {
@@ -73,7 +76,16 @@ export function createAuth(
       database: { generateId: "uuid" },
     },
     telemetry: { enabled: false },
-    plugins: [nextCookies()],
+    plugins: [
+      phoneNumber({
+        // Members are created at the counter, never by OTP sign-up; PIN resets run our own flow.
+        sendOTP: () => {
+          throw new Error("Phone OTP sign-in is not used.");
+        },
+        phoneNumberValidator: (n) => /^62\d{9,12}$/.test(n),
+      }),
+      nextCookies(),
+    ],
   });
 }
 

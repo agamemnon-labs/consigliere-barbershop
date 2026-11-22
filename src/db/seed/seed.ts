@@ -11,6 +11,7 @@ import {
   barberSeed,
   branchSeed,
   levelSeed,
+  memberSeed,
   serviceSeed,
   settingsSeed,
   staffSeed,
@@ -27,6 +28,8 @@ export type SeedOptions = {
   days?: number;
   /** Put a believable queue on today's first day so the screens aren't empty. Pass the current time. */
   demoQueueAt?: Date;
+  /** PIN for the demo members. Without it no members are seeded. */
+  memberPin?: string;
 };
 
 export async function seed(db: AnyDb, options: SeedOptions) {
@@ -148,6 +151,47 @@ export async function seed(db: AnyDb, options: SeedOptions) {
         providerId: "credential",
         password: passwordHash,
       });
+    }
+
+    if (options.memberPin) {
+      const pinHash = await hashPassword(options.memberPin);
+      const packages = (await tx.select().from(s.topupPackages)).sort((a, b) => a.pay - b.pay);
+      for (const [i, m] of memberSeed.entries()) {
+        const dob = m.birthdayNow ? `${m.dob.slice(0, 4)}${from.slice(4, 7)}-${m.dob.slice(8)}` : m.dob;
+        const [customer] = await tx.insert(s.customers).values({ name: m.name, phone: m.phone }).returning();
+        const [user] = await tx
+          .insert(s.users)
+          .values({
+            name: m.name,
+            email: `${m.phone}@member.consigliere.invalid`,
+            phoneNumber: m.phone,
+            phoneNumberVerified: true,
+            role: "member",
+          })
+          .returning();
+        if (!customer || !user) throw new Error(`Member ${m.name} was not inserted`);
+        await tx
+          .insert(s.accounts)
+          .values({ userId: user.id, accountId: user.id, providerId: "credential", password: pinHash });
+        const [member] = await tx
+          .insert(s.members)
+          .values({
+            customerId: customer.id,
+            userId: user.id,
+            dob,
+            memberNo: `C${String(i + 1).padStart(5, "0")}`,
+          })
+          .returning();
+        if (!member) throw new Error(`Member ${m.name} was not inserted`);
+        await tx.insert(s.pointLedger).values({ memberId: member.id, delta: m.points, reason: "earn" });
+        const pkg = m.topup ? packages[m.topup - 1] : undefined;
+        if (pkg) {
+          await tx.insert(s.balanceLedger).values([
+            { memberId: member.id, delta: pkg.pay, reason: "topup" },
+            { memberId: member.id, delta: pkg.get - pkg.pay, reason: "bonus" },
+          ]);
+        }
+      }
     }
 
     if (options.demoQueueAt) {

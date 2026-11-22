@@ -29,6 +29,13 @@
       "when": 1795365322436,
       "tag": "0003_credit_spend_transaction",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1795365801670,
+      "tag": "0004_member_phone_login",
+      "breakpoints": true
     }
   ]
 }

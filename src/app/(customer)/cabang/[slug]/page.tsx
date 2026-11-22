@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { connection } from "next/server";
 import { Suspense } from "react";
 import { BackLink } from "@/components/back-link";
+import { ButtonLink } from "@/components/button";
 import { Credits } from "@/components/credits";
 import { LiveRefresh } from "@/components/live-refresh";
 import { Notice } from "@/components/notice";
@@ -88,6 +89,11 @@ export default async function BranchPage({ params }: PageProps<"/cabang/[slug]">
           {closed ? "Sampai jumpa besok." : "Jadwal hari ini belum diisi."}
         </p>
       )}
+      {onDutyToday.length > 0 && !closed ? (
+        <ButtonLink href={`/antre?cabang=${branch.slug}`} className="mt-8" block>
+          Ambil nomor di {branch.name}
+        </ButtonLink>
+      ) : null}
       <p className="mt-6 text-sm text-muted">
         Harga potong mengikuti level barber. Barber bergiliran antar cabang; cek jadwal seminggu di{" "}
         <Link

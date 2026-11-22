@@ -26,6 +26,9 @@ export default async function Home() {
           Tiga cabang di {brand.city}. Lihat harga dan barber tanpa perlu bertanya, lalu datang saat giliran
           Anda.
         </p>
+        <ButtonLink href="/antre" className="mt-10" block>
+          Ambil nomor antrean
+        </ButtonLink>
       </header>
 
       {closedToday.length > 0 ? (
@@ -84,7 +87,7 @@ export default async function Home() {
       <p className="label mt-16 text-center leading-relaxed">
         Segera hadir
         <br />
-        <span className="text-fg">Antrean langsung · Ambil nomor · Kartu member</span>
+        <span className="text-fg">Kartu member · Poin · Saldo</span>
       </p>
 
       <Credits />

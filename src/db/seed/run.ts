@@ -16,7 +16,9 @@ const staffPassword = process.env.SEED_STAFF_PASSWORD ?? "consigliere-demo";
 
 const client = postgres(url, { max: 1 });
 try {
-  await seed(drizzle(client, { schema, casing: "snake_case" }), { staffPassword });
+  await seed(drizzle(client, { schema, casing: "snake_case" }), {
+    staffPassword,
+  });
   console.log("Seeded: 3 branches, 12 barbers, full pricelist, 14 days of rotation, 5 staff accounts.");
 } finally {
   await client.end();

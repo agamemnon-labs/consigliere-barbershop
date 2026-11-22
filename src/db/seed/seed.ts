@@ -40,20 +40,37 @@ export async function seed(db: AnyDb, options: SeedOptions) {
       barbers, barber_levels, branches, topup_packages, settings
       restart identity cascade`);
 
-    const branchRows = await tx.insert(s.branches).values([...branchSeed]).returning();
+    const branchRows = await tx
+      .insert(s.branches)
+      .values([...branchSeed])
+      .returning();
     const branchId = bySlug(branchRows);
 
-    const levelRows = await tx.insert(s.barberLevels).values([...levelSeed]).returning();
+    const levelRows = await tx
+      .insert(s.barberLevels)
+      .values([...levelSeed])
+      .returning();
     const levelId = bySlug(levelRows);
 
     const barberRows = await tx
       .insert(s.barbers)
-      .values(barberSeed.map((b) => ({ slug: b.slug, name: b.name, bio: b.bio, levelId: levelId(b.level) })))
+      .values(
+        barberSeed.map((b) => ({
+          slug: b.slug,
+          name: b.name,
+          bio: b.bio,
+          levelId: levelId(b.level),
+        })),
+      )
       .returning();
     const barberId = bySlug(barberRows);
 
     await tx.insert(s.barberLevelHistory).values(
-      barberSeed.map((b) => ({ barberId: barberId(b.slug), levelId: levelId(b.level), effectiveFrom: "2026-01-01" })),
+      barberSeed.map((b) => ({
+        barberId: barberId(b.slug),
+        levelId: levelId(b.level),
+        effectiveFrom: "2026-01-01",
+      })),
     );
 
     const shifts = barberSeed.flatMap((b) =>
@@ -66,7 +83,7 @@ export async function seed(db: AnyDb, options: SeedOptions) {
           status: off ? ("off" as const) : ("on" as const),
           branchId: off ? null : branchId(rotate(b.home, date, b.slug)),
           start: off ? null : "10:00",
-          end: off ? null : "22:00",
+          end: off ? null : "21:00",
         };
       }),
     );
@@ -98,9 +115,12 @@ export async function seed(db: AnyDb, options: SeedOptions) {
     const serviceId = bySlug(serviceRows);
     for (const svc of serviceSeed) {
       if ("items" in svc) {
-        await tx
-          .insert(s.packageItems)
-          .values(svc.items.map((item) => ({ packageId: serviceId(svc.slug), serviceId: serviceId(item) })));
+        await tx.insert(s.packageItems).values(
+          svc.items.map((item) => ({
+            packageId: serviceId(svc.slug),
+            serviceId: serviceId(item),
+          })),
+        );
       }
     }
 

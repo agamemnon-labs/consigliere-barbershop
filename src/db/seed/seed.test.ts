@@ -13,10 +13,16 @@ const db = drizzle(client, { schema: s, casing: "snake_case" });
 
 beforeAll(async () => {
   const dir = join(process.cwd(), "drizzle");
-  for (const file of readdirSync(dir).filter((f) => f.endsWith(".sql")).sort()) {
+  for (const file of readdirSync(dir)
+    .filter((f) => f.endsWith(".sql"))
+    .sort()) {
     await client.exec(readFileSync(join(dir, file), "utf8").replaceAll("--> statement-breakpoint", ""));
   }
-  await seed(db, { staffPassword: "test-password", from: "2026-11-22", days: 7 });
+  await seed(db, {
+    staffPassword: "test-password",
+    from: "2026-11-22",
+    days: 7,
+  });
 }, 60_000);
 
 describe("migrations + seed", () => {
@@ -40,7 +46,10 @@ describe("migrations + seed", () => {
 
   it("gives every barber exactly one day off per week", async () => {
     const off = await db
-      .select({ barberId: s.barberShifts.barberId, n: sql<number>`count(*)::int` })
+      .select({
+        barberId: s.barberShifts.barberId,
+        n: sql<number>`count(*)::int`,
+      })
       .from(s.barberShifts)
       .where(eq(s.barberShifts.status, "off"))
       .groupBy(s.barberShifts.barberId);
@@ -64,7 +73,12 @@ describe("migrations + seed", () => {
       .select()
       .from(s.accounts)
       .where(and(eq(s.accounts.userId, owner!.id), eq(s.accounts.providerId, "credential")));
-    expect(await verifyPassword({ hash: account!.password!, password: "test-password" })).toBe(true);
+    expect(
+      await verifyPassword({
+        hash: account!.password!,
+        password: "test-password",
+      }),
+    ).toBe(true);
   });
 
   it("keeps the birthday discount to haircuts", async () => {

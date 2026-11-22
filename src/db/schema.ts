@@ -38,12 +38,7 @@ const createdAt = () => timestamp({ withTimezone: true }).notNull().defaultNow()
 
 export const userRole = pgEnum("user_role", ["member", "cashier", "admin", "owner"]);
 export const shiftStatus = pgEnum("shift_status", ["on", "off"]);
-export const serviceCategory = pgEnum("service_category", [
-  "haircut",
-  "chemical",
-  "refreshment",
-  "package",
-]);
+export const serviceCategory = pgEnum("service_category", ["haircut", "chemical", "refreshment", "package"]);
 /** fixed: one price · from: "mulai dari" · by_level: haircut, priced by barber level · variant: short/long etc. */
 export const priceType = pgEnum("price_type", ["fixed", "from", "by_level", "variant"]);
 export const queueSource = pgEnum("queue_source", ["online", "walkin"]);
@@ -55,13 +50,7 @@ export const queueStatus = pgEnum("queue_status", [
   "no_show",
   "cancelled",
 ]);
-export const bookingStatus = pgEnum("booking_status", [
-  "pending",
-  "paid",
-  "expired",
-  "credited",
-  "refunded",
-]);
+export const bookingStatus = pgEnum("booking_status", ["pending", "paid", "expired", "credited", "refunded"]);
 export const paymentMethod = pgEnum("payment_method", [
   "edc_card",
   "edc_qris",
@@ -328,7 +317,15 @@ export const bookings = pgTable(
     barberId: uuid().references(() => barbers.id),
     /** Snapshot of chosen services at booking time. */
     services: jsonb()
-      .$type<{ serviceId: string; variantId?: string; name: string; price: number; durationMin: number }[]>()
+      .$type<
+        {
+          serviceId: string;
+          variantId?: string;
+          name: string;
+          price: number;
+          durationMin: number;
+        }[]
+      >()
       .notNull(),
     amount: integer().notNull(),
     status: bookingStatus().notNull().default("pending"),
@@ -366,10 +363,7 @@ export const queueEntries = pgTable(
     estimatedMin: smallint().notNull(),
     createdAt: createdAt(),
   },
-  (t) => [
-    index().on(t.barberId, t.date, t.position),
-    uniqueIndex().on(t.branchId, t.date, t.ticketNo),
-  ],
+  (t) => [index().on(t.barberId, t.date, t.position), uniqueIndex().on(t.branchId, t.date, t.ticketNo)],
 ).enableRLS();
 
 /* ── Money ─────────────────────────────────────────────────────────────── */
@@ -385,9 +379,7 @@ export const transactions = pgTable(
     customerId: uuid().references(() => customers.id),
     memberId: uuid().references(() => members.id),
     queueEntryId: uuid().references(() => queueEntries.id),
-    items: jsonb()
-      .$type<{ serviceId: string; name: string; price: number; discount: number }[]>()
-      .notNull(),
+    items: jsonb().$type<{ serviceId: string; name: string; price: number; discount: number }[]>().notNull(),
     subtotal: integer().notNull(),
     discounts: integer().notNull().default(0),
     total: integer().notNull(),

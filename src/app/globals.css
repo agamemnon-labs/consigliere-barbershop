@@ -1,26 +1,227 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/*
+ * Consigliere design tokens.
+ *
+ * Direction: a quiet, editorial old tailor shop / 70s film credits feel.
+ * Warm off-black, bone, and a single oxblood accent used sparingly.
+ * No gradients, glow, glass, emoji or stock illustration. Thin rules,
+ * generous spacing, serif display over a plain sans, tabular numbers.
+ *
+ * Three themes, chosen per surface with `data-theme`:
+ *   night   customer web (phone), dark
+ *   paper   cashier and admin, light cream for long hours
+ *   display counter tablet and TV, darkest, highest contrast
+ */
+
+:root,
+[data-theme="night"] {
+  --bg: #15110e;
+  --surface: #1d1814;
+  --fg: #ebe3d4;
+  --muted: #a69b8b;
+  --faint: #6e6458;
+  --rule: rgb(235 227 212 / 0.14);
+  --rule-strong: rgb(235 227 212 / 0.34);
+  --accent: #6e1d1b;
+  --accent-fg: #f3eadb;
+  /* Oxblood lifted just enough to read as text on the dark ground. */
+  --accent-ink: #c4665a;
+  --stub: #ebe3d4;
+  --stub-ink: #15110e;
+  color-scheme: dark;
+}
+
+[data-theme="paper"] {
+  --bg: #f3ecdf;
+  --surface: #faf6ee;
+  --fg: #1b1613;
+  --muted: #675c50;
+  --faint: #9b8f80;
+  --rule: rgb(27 22 19 / 0.13);
+  --rule-strong: rgb(27 22 19 / 0.32);
+  --accent: #6e1d1b;
+  --accent-fg: #f6efe2;
+  --accent-ink: #7a2420;
+  --stub: #faf6ee;
+  --stub-ink: #1b1613;
+  color-scheme: light;
+}
+
+[data-theme="display"] {
+  --bg: #0d0b09;
+  --surface: #171310;
+  --fg: #f6f0e5;
+  --muted: #c2b7a6;
+  --faint: #857a6c;
+  --rule: rgb(246 240 229 / 0.18);
+  --rule-strong: rgb(246 240 229 / 0.42);
+  --accent: #7a2420;
+  --accent-fg: #f6efe2;
+  --accent-ink: #d77568;
+  --stub: #f6f0e5;
+  --stub-ink: #0d0b09;
+  color-scheme: dark;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-fg: var(--fg);
+  --color-muted: var(--muted);
+  --color-faint: var(--faint);
+  --color-rule: var(--rule);
+  --color-rule-strong: var(--rule-strong);
+  --color-accent: var(--accent);
+  --color-accent-fg: var(--accent-fg);
+  --color-accent-ink: var(--accent-ink);
+  --color-stub: var(--stub);
+  --color-stub-ink: var(--stub-ink);
+
+  --font-display: var(--font-bodoni), "Bodoni 72", "Didot", Georgia, serif;
+  --font-sans: var(--font-franklin), "Franklin Gothic", "Helvetica Neue", Arial, sans-serif;
+  --font-mono: var(--font-plex-mono), ui-monospace, "SFMono-Regular", Menlo, monospace;
+
+  --radius-xs: 1px;
+  --radius-sm: 2px;
+  --tracking-credits: 0.22em;
+  --tracking-label: 0.16em;
+
+  --ease-out-quiet: cubic-bezier(0.2, 0.7, 0.2, 1);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--fg);
+    font-family: var(--font-sans);
+    font-size: 1rem;
+    line-height: 1.55;
+    font-feature-settings: "kern", "liga";
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-optical-sizing: auto;
+    text-wrap: balance;
+    line-height: 1.08;
+    letter-spacing: -0.01em;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  ::selection {
+    background: var(--accent);
+    color: var(--accent-fg);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--accent-ink);
+    outline-offset: 3px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      /* biome-ignore lint/complexity/noImportantStyles: reduced motion must win over component transitions */
+      animation-duration: 0.01ms !important;
+      /* biome-ignore lint/complexity/noImportantStyles: same as above */
+      transition-duration: 0.01ms !important;
+    }
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@layer components {
+  /* Small caps label, the voice of film credits. */
+  .label {
+    font-family: var(--font-sans);
+    font-size: 0.6875rem;
+    font-weight: 500;
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--muted);
+    line-height: 1.3;
+  }
+
+  .num {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums slashed-zero;
+    font-feature-settings: "tnum", "zero";
+  }
+
+  /* Dotted leader between a name and its price, as on a printed pricelist. */
+  .leader {
+    flex: 1 1 auto;
+    min-width: 1.5rem;
+    margin-inline: 0.5rem;
+    translate: 0 -0.3em;
+    border-bottom: 1px dotted var(--rule-strong);
+  }
+
+  /*
+   * Ticket stub: bone card with a perforated tear line and punched notches.
+   * The notches are cut with a mask, so the page colour shows through.
+   */
+  .stub {
+    --notch: 0.6rem;
+    --tear: 68%;
+    background: var(--stub);
+    color: var(--stub-ink);
+    mask:
+      radial-gradient(circle at var(--tear) 0, transparent var(--notch), #000 calc(var(--notch) + 0.5px)) top
+      / 100% 51% no-repeat,
+      radial-gradient(circle at var(--tear) 100%, transparent var(--notch), #000 calc(var(--notch) + 0.5px))
+      bottom / 100% 51% no-repeat;
+  }
+  .stub-tear {
+    background-image: linear-gradient(var(--stub-ink) 50%, transparent 0);
+    background-size: 1px 6px;
+    background-repeat: repeat-y;
+    opacity: 0.35;
+    width: 1px;
+  }
+
+  /* Native <details> rows that open downward, no JavaScript. */
+  .row > summary {
+    list-style: none;
+    cursor: pointer;
+  }
+  .row > summary::-webkit-details-marker {
+    display: none;
+  }
+  .row .row-mark {
+    transition: rotate 200ms var(--ease-out-quiet);
+  }
+  .row[open] .row-mark {
+    rotate: 45deg;
+  }
+  .row::details-content {
+    block-size: 0;
+    overflow: clip;
+    transition:
+      block-size 240ms var(--ease-out-quiet),
+      content-visibility 240ms allow-discrete;
+  }
+  .row[open]::details-content {
+    block-size: auto;
+  }
+}
+
+@supports (interpolate-size: allow-keywords) {
+  :root {
+    interpolate-size: allow-keywords;
+  }
 }

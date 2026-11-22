@@ -418,6 +418,8 @@ export const creditLedger = pgTable(
     delta: integer().notNull(),
     reason: creditReason().notNull(),
     bookingId: uuid().references(() => bookings.id),
+    /** The counter payment this credit was spent on. */
+    transactionId: uuid().references(() => transactions.id),
     expiresAt: timestamp({ withTimezone: true }),
     createdAt: createdAt(),
   },

@@ -11,10 +11,22 @@ async function signInAsJuandaCashier(page: Page) {
   await expect(page).toHaveURL(/\/kasir$/);
 }
 
-/** Seat, finish or cancel whoever is there so the column starts empty. */
+/** Takes payment for whoever is in the chair: haircut only, EDC QRIS. */
+async function payForChair(column: Locator) {
+  await column.getByText("Selesai & bayar").click();
+  await column.getByText("QRIS", { exact: true }).click();
+  await column.getByRole("button", { name: "Lunas", exact: true }).click();
+}
+
+/** Seat, finish (and pay) or cancel whoever is there so the column starts empty. */
 async function clearColumn(column: Locator) {
   for (let i = 0; i < 15; i++) {
     let clicked = false;
+    if (await column.getByText("Selesai & bayar").isVisible()) {
+      await payForChair(column);
+      await expect(column.getByText("Kursi kosong")).toBeVisible();
+      continue;
+    }
     for (const name of ["Selesai", "Duduk", "Panggil", "Batal"]) {
       const button = column.getByRole("button", { name, exact: true }).first();
       if (await button.isVisible()) {
@@ -31,7 +43,7 @@ async function clearColumn(column: Locator) {
   }
 }
 
-test("the cashier adds a walk-in, calls, seats and finishes them", async ({ page }) => {
+test("the cashier adds a walk-in, calls, seats, takes payment and prints a receipt", async ({ page }) => {
   await signInAsJuandaCashier(page);
   const column = page.getByRole("region", { name: /^Antrean / }).last();
   await expect(column).toBeVisible();
@@ -53,9 +65,25 @@ test("the cashier adds a walk-in, calls, seats and finishes them", async ({ page
   await row.getByRole("button", { name: "Duduk" }).click();
   await expect(column.getByText("Di kursi").locator("..")).toContainText(name);
 
-  await column.getByRole("button", { name: "Selesai" }).click();
+  // Haircut is already on the bill; add a coloring and type its price.
+  await column.getByText("Selesai & bayar").click();
+  await column.getByLabel("Tambah layanan").selectOption({ label: "Coloring Fashion" });
+  await column.getByRole("textbox", { name: "Harga" }).fill("350000");
+  await column.getByText("Kartu", { exact: true }).click();
+  await column.getByRole("button", { name: "Lunas", exact: true }).click();
+
   await expect(column.getByText("Kursi kosong")).toBeVisible();
   await expect(column.getByText(name)).toBeHidden();
+
+  const takings = page.getByRole("region", { name: "Pemasukan hari ini" });
+  await expect(takings).toContainText("EDC · kartu");
+  await takings.getByRole("link").first().click();
+  await expect(page).toHaveURL(/\/kasir\/struk\//);
+  const receipt = page.locator("article.receipt");
+  await expect(receipt).toContainText("Coloring Fashion");
+  await expect(receipt).toContainText("Rp350.000");
+  await expect(receipt).toContainText("EDC · kartu");
+  await expect(page.getByRole("button", { name: "Cetak" })).toBeVisible();
 });
 
 test("a cashier only sees their own branch", async ({ page }) => {

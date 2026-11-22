@@ -2,7 +2,6 @@ import "server-only";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { auth, STAFF_ROLES, type StaffRole } from "@/server/auth";
-import { hasDatabase } from "@/server/env";
 
 export type Staff = {
   id: string;
@@ -14,8 +13,7 @@ export type Staff = {
 
 /** The signed-in staff member, or null. Reads the request, so call it inside a Suspense boundary. */
 export async function getStaff(): Promise<Staff | null> {
-  if (!hasDatabase()) return null;
-  const session = await auth().api.getSession({ headers: await headers() });
+  const session = await (await auth()).api.getSession({ headers: await headers() });
   const user = session?.user;
   if (!user?.isActive) return null;
   const role = user.role as string;

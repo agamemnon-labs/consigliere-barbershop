@@ -3,13 +3,13 @@ import { z } from "zod";
 
 /**
  * Server environment, validated once on first use.
- * Values are read lazily so `next build` works without a database.
+ * Values are read lazily so `next build` works without secrets.
  */
 const schema = z.object({
-  /** Supabase pooler URL (transaction mode, port 6543) for the app. */
-  DATABASE_URL: z.url(),
-  /** At least 32 random bytes. `openssl rand -base64 32` */
-  BETTER_AUTH_SECRET: z.string().min(32),
+  /** Supabase pooler URL (transaction mode, port 6543). Unset = in-memory demo database. */
+  DATABASE_URL: z.url().optional(),
+  /** At least 32 random bytes. `openssl rand -base64 32`. Required with a real database. */
+  BETTER_AUTH_SECRET: z.string().min(32).optional(),
   /** Public origin, e.g. https://consigliere.vercel.app */
   BETTER_AUTH_URL: z.url().optional(),
 });
@@ -23,7 +23,10 @@ export function env(): Env {
   return cached;
 }
 
-/** True when the app has a database to talk to. Pages use it to show a calm notice instead of crashing. */
-export function hasDatabase(): boolean {
-  return Boolean(process.env.DATABASE_URL);
+/** The auth secret. The demo database gets a fixed one; a real database must have its own. */
+export function authSecret(): string {
+  const { BETTER_AUTH_SECRET, DATABASE_URL } = env();
+  if (BETTER_AUTH_SECRET) return BETTER_AUTH_SECRET;
+  if (!DATABASE_URL) return "consigliere-demo-only-secret-do-not-use-in-production";
+  throw new Error("BETTER_AUTH_SECRET is required when DATABASE_URL is set.");
 }

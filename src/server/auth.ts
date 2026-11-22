@@ -2,8 +2,8 @@ import "server-only";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { nextCookies } from "better-auth/next-js";
-import { type Database, db, schema } from "@/db";
-import { env } from "@/server/env";
+import { type Database, getDb, schema } from "@/db";
+import { authSecret, env } from "@/server/env";
 
 export const STAFF_ROLES = ["cashier", "admin", "owner"] as const;
 export type StaffRole = (typeof STAFF_ROLES)[number];
@@ -79,11 +79,10 @@ export function createAuth(
 
 export type Auth = ReturnType<typeof createAuth>;
 
-let instance: Auth | undefined;
+let instance: Promise<Auth> | undefined;
 
-/** Created on first use so builds and static pages never need database credentials. */
-export function auth(): Auth {
-  const { BETTER_AUTH_SECRET, BETTER_AUTH_URL } = env();
-  instance ??= createAuth(db(), { secret: BETTER_AUTH_SECRET, baseURL: BETTER_AUTH_URL });
+/** Created on first use so builds and static pages never need a database or secrets. */
+export function auth(): Promise<Auth> {
+  instance ??= getDb().then((db) => createAuth(db, { secret: authSecret(), baseURL: env().BETTER_AUTH_URL }));
   return instance;
 }

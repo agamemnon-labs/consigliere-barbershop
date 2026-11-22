@@ -1,24 +1,12 @@
-import { readdirSync, readFileSync } from "node:fs";
-import { join } from "node:path";
-import { PGlite } from "@electric-sql/pglite";
-import { drizzle } from "drizzle-orm/pglite";
 import { beforeAll, describe, expect, it } from "vitest";
-import * as schema from "@/db/schema";
-import { seed } from "@/db/seed/seed";
+import { createDemoDb } from "@/db/demo";
 import { createAuth } from "./auth";
 
-const client = new PGlite();
-const db = drizzle(client, { schema, casing: "snake_case" });
-const auth = createAuth(db, { secret: "x".repeat(32), baseURL: "http://localhost:3000" });
+let auth: ReturnType<typeof createAuth>;
 
 beforeAll(async () => {
-  const dir = join(process.cwd(), "drizzle");
-  for (const file of readdirSync(dir)
-    .filter((f) => f.endsWith(".sql"))
-    .sort()) {
-    await client.exec(readFileSync(join(dir, file), "utf8").replaceAll("--> statement-breakpoint", ""));
-  }
-  await seed(db, { staffPassword: "correct horse battery", from: "2026-11-22", days: 1 });
+  const db = await createDemoDb({ staffPassword: "correct horse battery", from: "2026-11-22", days: 1 });
+  auth = createAuth(db, { secret: "x".repeat(32), baseURL: "http://localhost:3000" });
 }, 60_000);
 
 describe("staff auth against the real schema", () => {

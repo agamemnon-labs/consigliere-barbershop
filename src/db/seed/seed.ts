@@ -25,6 +25,8 @@ export type SeedOptions = {
   /** First day of the generated rotation, YYYY-MM-DD (WITA). Defaults to today. */
   from?: string;
   days?: number;
+  /** Put a believable queue on today's first day so the screens aren't empty. Pass the current time. */
+  demoQueueAt?: Date;
 };
 
 export async function seed(db: AnyDb, options: SeedOptions) {
@@ -147,6 +149,10 @@ export async function seed(db: AnyDb, options: SeedOptions) {
         password: passwordHash,
       });
     }
+
+    if (options.demoQueueAt) {
+      await seedDemoQueue(tx, from, options.demoQueueAt, shifts, branchRows);
+    }
   });
 }
 
@@ -167,4 +173,95 @@ function rotate(home: string, date: string, slug: string): string {
   if (!covers) return home;
   const next = order[(order.indexOf(home as (typeof order)[number]) + 1) % order.length];
   return next ?? home;
+}
+
+type Tx = Parameters<Parameters<AnyDb["transaction"]>[0]>[0];
+
+/** A few customers per branch: someone in the chair, someone called, a short line. */
+async function seedDemoQueue(
+  tx: Tx,
+  date: string,
+  now: Date,
+  shifts: { barberId: string; date: string; status: "on" | "off"; branchId: string | null }[],
+  branches: { id: string }[],
+) {
+  const ago = (m: number) => new Date(now.getTime() - m * 60_000);
+  const names = ["Bram", "Rizal", "Andi", "Yoga", "Fajar", "Dimas", "Reza", "Hendra", "Bayu", "Gilang"];
+  let n = 0;
+  for (const branch of branches) {
+    const duty = shifts.filter((x) => x.date === date && x.status === "on" && x.branchId === branch.id);
+    let ticket = 10;
+    const rows: (typeof s.queueEntries.$inferInsert)[] = [];
+    duty.slice(0, 3).forEach((shift, i) => {
+      const base = { branchId: branch.id, barberId: shift.barberId, date, estimatedMin: 30 };
+      const name = () => names[n++ % names.length] ?? null;
+      rows.push({
+        ...base,
+        position: 1,
+        ticketNo: ticket++,
+        displayName: name(),
+        source: "walkin",
+        status: "done",
+        startedAt: ago(70),
+        finishedAt: ago(40),
+      });
+      if (i === 0) {
+        rows.push({
+          ...base,
+          position: 2,
+          ticketNo: ticket++,
+          displayName: name(),
+          source: "walkin",
+          status: "in_service",
+          calledAt: ago(14),
+          startedAt: ago(12),
+        });
+        rows.push({
+          ...base,
+          position: 3,
+          ticketNo: ticket++,
+          displayName: name(),
+          source: "online",
+          status: "waiting",
+        });
+        rows.push({
+          ...base,
+          position: 4,
+          ticketNo: ticket++,
+          displayName: null,
+          source: "walkin",
+          status: "waiting",
+        });
+      } else if (i === 1) {
+        rows.push({
+          ...base,
+          position: 2,
+          ticketNo: ticket++,
+          displayName: name(),
+          source: "online",
+          status: "called",
+          calledAt: ago(2),
+          graceUntil: new Date(now.getTime() + 3 * 60_000),
+        });
+        rows.push({
+          ...base,
+          position: 3,
+          ticketNo: ticket++,
+          displayName: name(),
+          source: "walkin",
+          status: "waiting",
+        });
+      } else {
+        rows.push({
+          ...base,
+          position: 2,
+          ticketNo: ticket++,
+          displayName: name(),
+          source: "walkin",
+          status: "waiting",
+        });
+      }
+    });
+    if (rows.length) await tx.insert(s.queueEntries).values(rows);
+  }
 }

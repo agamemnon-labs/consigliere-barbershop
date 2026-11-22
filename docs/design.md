@@ -8,24 +8,24 @@ Status: v2.0, 2026-11-22. Stack re-audited from scratch (see §1). Earlier: v1.2
 
 Nopal asked for a no-sunk-cost review of v1.2 against the best current tooling. Versions were checked on npm on 2026-11-22; ecosystem state was checked on the web the same day. Result: the shape (one TypeScript app on Vercel + managed Postgres) survives; the auth layer, UI kit and payment gateway changed.
 
-| Area            | v1.2 said                           | v2.0 decision                                                                                                                                                                        | Why                                                                                                                                                                                                                                                                |
-| --------------- | ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Framework       | Next.js App Router                  | **Next.js 16.4** (App Router, Turbopack, Cache Components, React Compiler, typed routes, `proxy.ts`)                                                                                 | Still the strongest full-stack React framework; Cache Components gives a static shell + streamed dynamic parts, ideal for a fast phone site.                                                                                                                       |
-| React           | React                               | **React 19.3** with the React Compiler                                                                                                                                               | No manual memoisation; `useActionState` / `useOptimistic` for one-tap cashier actions.                                                                                                                                                                             |
-| Language        | TypeScript strict                   | **TypeScript 7.0** (native Go compiler), strict + `noUncheckedIndexedAccess`                                                                                                         | ~10x faster type checks; Next 16.4 runs the `tsc` CLI so TS 7 is supported.                                                                                                                                                                                        |
-| Runtime         | (unspecified)                       | **Node 26 LTS** (`engines`, `.node-version`)                                                                                                                                         | Current LTS, supported on Vercel; runs `.ts` scripts natively (seed needs no tsx).                                                                                                                                                                                 |
-| Package manager | pnpm                                | **pnpm 12**                                                                                                                                                                          | Kept. Exact versions saved (`saveExact`).                                                                                                                                                                                                                          |
-| Lint/format     | (unspecified)                       | **Biome 2.6**                                                                                                                                                                        | One fast tool for lint + format; replaces ESLint + Prettier.                                                                                                                                                                                                       |
-| Styling         | Tailwind + shadcn/ui                | **Tailwind CSS 4.3** with our own token system and **own components**; **Base UI** headless primitives only when a widget needs real a11y behaviour (dialog, combobox)               | shadcn's default look is the most recognisable "generated" aesthetic. Our components are few and brand-specific.                                                                                                                                                   |
-| Database        | Supabase Postgres                   | **Supabase Postgres** (Singapore)                                                                                                                                                    | Kept. Reporting, ledgers and money need SQL and transactions. Convex was considered (reactive by default, great DX) but loses on SQL reporting, RLS and portability (pg_dump vs rewriting functions).                                                              |
-| ORM             | Drizzle                             | **Drizzle ORM 0.45** (stable), move to 1.0 once it leaves RC                                                                                                                         | 1.0 is at rc.6; we don't ship RCs. Schema uses `casing: "snake_case"`.                                                                                                                                                                                             |
-| Realtime        | Supabase Realtime, Postgres Changes | **Supabase Realtime Broadcast from Database** (trigger → `realtime.broadcast_changes` → private channel per branch, gated by RLS on `realtime.messages`)                             | Supabase now recommends Broadcast over Postgres Changes; it scales and keeps tables private. Poll fallback every 15 s stays.                                                                                                                                       |
-| Auth            | Own small auth layer, argon2        | **Better Auth 1.7** (Drizzle adapter, DB-backed rate limits). Staff: email + password. Members (phase 6): phone-number plugin, phone + 6-digit PIN, WhatsApp OTP for a forgotten PIN | Maintained, audited sessions/cookies/CSRF/rate limiting instead of hand-rolled crypto. Plugin covers phone login and OTP. Password hashing: Better Auth's scrypt.                                                                                                  |
-| Validation      | (unspecified)                       | **Zod 4**                                                                                                                                                                            | Forms, env, webhooks.                                                                                                                                                                                                                                              |
-| Payments        | Midtrans QRIS sandbox               | **Xendit** (QRIS, test mode) behind a `PaymentProvider` interface                                                                                                                    | API-first, clean REST + webhooks with callback token, test-mode QR payment simulation, refunds by API, and payouts later (barber commission). QRIS MDR is regulated (0.7%) so cost is equal. Midtrans stays a drop-in alternative. Final sandbox spike in phase 4. |
-| Testing         | Vitest + Playwright                 | **Vitest 5** (domain + DB tests on **PGlite**, real migrations, no Docker) + **Playwright 1.65** (phone + desktop projects)                                                          | Every migration and the seed are tested on a real Postgres engine in-process.                                                                                                                                                                                      |
-| CI              | (unspecified)                       | GitHub Actions: check, typecheck, unit, build, e2e on every PR                                                                                                                       |                                                                                                                                                                                                                                                                    |
-| Hosting         | Vercel + Supabase                   | **Vercel (Node 26) + Supabase**, region Singapore                                                                                                                                    | Kept. Free tiers cover the demo.                                                                                                                                                                                                                                   |
+| Area | v1.2 said | v2.0 decision | Why |
+|---|---|---|---|
+| Framework | Next.js App Router | **Next.js 16.4** (App Router, Turbopack, Cache Components, React Compiler, typed routes, `proxy.ts`) | Still the strongest full-stack React framework; Cache Components gives a static shell + streamed dynamic parts, ideal for a fast phone site. |
+| React | React | **React 19.3** with the React Compiler | No manual memoisation; `useActionState` / `useOptimistic` for one-tap cashier actions. |
+| Language | TypeScript strict | **TypeScript 7.0** (native Go compiler), strict + `noUncheckedIndexedAccess` | ~10x faster type checks; Next 16.4 runs the `tsc` CLI so TS 7 is supported. |
+| Runtime | (unspecified) | **Node 26 LTS** (`engines`, `.node-version`) | Current LTS, supported on Vercel; runs `.ts` scripts natively (seed needs no tsx). |
+| Package manager | pnpm | **pnpm 12** | Kept. Exact versions saved (`saveExact`). |
+| Lint/format | (unspecified) | **Biome 2.6** | One fast tool for lint + format; replaces ESLint + Prettier. |
+| Styling | Tailwind + shadcn/ui | **Tailwind CSS 4.3** with our own token system and **own components**; **Base UI** headless primitives only when a widget needs real a11y behaviour (dialog, combobox) | shadcn's default look is the most recognisable "generated" aesthetic. Our components are few and brand-specific. |
+| Database | Supabase Postgres | **Supabase Postgres** (Singapore) | Kept. Reporting, ledgers and money need SQL and transactions. Convex was considered (reactive by default, great DX) but loses on SQL reporting, RLS and portability (pg_dump vs rewriting functions). |
+| ORM | Drizzle | **Drizzle ORM 0.45** (stable), move to 1.0 once it leaves RC | 1.0 is at rc.6; we don't ship RCs. Schema uses `casing: "snake_case"`. |
+| Realtime | Supabase Realtime, Postgres Changes | **Supabase Realtime Broadcast from Database** (trigger → `realtime.broadcast_changes` → private channel per branch, gated by RLS on `realtime.messages`) | Supabase now recommends Broadcast over Postgres Changes; it scales and keeps tables private. Poll fallback every 15 s stays. |
+| Auth | Own small auth layer, argon2 | **Better Auth 1.7** (Drizzle adapter, DB-backed rate limits). Staff: email + password. Members (phase 6): phone-number plugin, phone + 6-digit PIN, WhatsApp OTP for a forgotten PIN | Maintained, audited sessions/cookies/CSRF/rate limiting instead of hand-rolled crypto. Plugin covers phone login and OTP. Password hashing: Better Auth's scrypt. |
+| Validation | (unspecified) | **Zod 4** | Forms, env, webhooks. |
+| Payments | Midtrans QRIS sandbox | **Xendit** (QRIS, test mode) behind a `PaymentProvider` interface | API-first, clean REST + webhooks with callback token, test-mode QR payment simulation, refunds by API, and payouts later (barber commission). QRIS MDR is regulated (0.7%) so cost is equal. Midtrans stays a drop-in alternative. Final sandbox spike in phase 4. |
+| Testing | Vitest + Playwright | **Vitest 5** (domain + DB tests on **PGlite**, real migrations, no Docker) + **Playwright 1.65** (phone + desktop projects) | Every migration and the seed are tested on a real Postgres engine in-process. |
+| CI | (unspecified) | GitHub Actions: check, typecheck, unit, build, e2e on every PR | |
+| Hosting | Vercel + Supabase | **Vercel (Node 26) + Supabase**, region Singapore | Kept. Free tiers cover the demo. |
 
 Laravel and split SPA + API stay rejected for the reasons in v1.2 (more ops, two codebases, no gain for one brand with 3 branches).
 
@@ -41,6 +41,8 @@ Laravel and split SPA + API stay rejected for the reasons in v1.2 (more ops, two
 - **Realtime:** Broadcast from Database on `queue_entries` and `barber_shifts`, one private topic per branch per day. Fallback: poll every 15 s if the socket drops.
 - **WhatsApp messages** (OTP, "2 orang lagi"): `Notifier` interface; demo writes to `outbox`, viewable in admin.
 - **QR member card:** signed, rotating token (not the raw member number).
+- **Demo database:** with no `DATABASE_URL`, the app boots an in-memory Postgres (PGlite) with the real migrations and the demo seed (`src/db/demo.ts`). Local dev, CI e2e and a zero-config preview work without Supabase; data resets on restart, so production always sets `DATABASE_URL`.
+- **Caching:** public reads in `src/server/catalog.ts` use `use cache` with tags `catalog` and `rotation`; "today" is a cached WITA date that refreshes every minute.
 - **Time:** all "today" logic in `Asia/Makassar` (WITA) via `src/domain/time.ts`.
 - **Brand config:** `src/config/brand.ts` (name, city, WhatsApp, credits). Colours are CSS tokens in `globals.css`.
 
@@ -48,13 +50,13 @@ Laravel and split SPA + API stay rejected for the reasons in v1.2 (more ops, two
 
 ## 3. One app, four views
 
-| Route group        | Who              | Device                    | Notes                                                                                       |
-| ------------------ | ---------------- | ------------------------- | ------------------------------------------------------------------------------------------- |
-| `/` (customer)     | Public + members | Phone                     | Home → branches & live queue → services → barbers → book & pay → member area                |
-| `/kasir`           | Cashier          | Desktop, wide             | One column per barber on duty; call / done / skip; add walk-in; scan member; record payment |
-| `/tablet/[branch]` | Nobody (display) | Tablet at counter         | Read-only queue per barber + estimated wait; auto-reconnect; no input                       |
-| `/admin`           | Admin, owner     | Desktop-first, responsive | Full back office (see §6)                                                                   |
-| `/tv/[branch]`     | Display          | TV                        | Optional thin queue strip, off by default (admin setting)                                   |
+| Route group | Who | Device | Notes |
+|---|---|---|---|
+| `/` (customer) | Public + members | Phone | Home → branches & live queue → services → barbers → book & pay → member area |
+| `/kasir` | Cashier | Desktop, wide | One column per barber on duty; call / done / skip; add walk-in; scan member; record payment |
+| `/tablet/[branch]` | Nobody (display) | Tablet at counter | Read-only queue per barber + estimated wait; auto-reconnect; no input |
+| `/admin` | Admin, owner | Desktop-first, responsive | Full back office (see §6) |
+| `/tv/[branch]` | Display | TV | Optional thin queue strip, off by default (admin setting) |
 
 Roles: `customer`, `member`, `cashier`, `admin`, `owner`, `display`. Owner = admin + finance reports + settings. Cashier is scoped to one branch per shift.
 
@@ -63,6 +65,7 @@ Roles: `customer`, `member`, `cashier`, `admin`, `owner`, `display`. Owner = adm
 ## 4. Data model (core tables)
 
 > v2.0: the real schema lives in `src/db/schema.ts` (Drizzle) and is the source of truth; the sketch below is the original plan. Changes since: auth tables are Better Auth's (`users` with `role` member/cashier/admin/owner and `branch_id`, `sessions`, `accounts` holding the password/PIN hash, `verifications`, `rate_limits`); `members` links to `users` instead of storing a PIN hash; added `display_devices`, `closures` (holiday closures, per branch or all), `outbox`, `queue_entries.ticket_no` (per branch per day) and `estimated_min`, `barber_levels.commission_bps`, `service_variants.duration_min`. Money is integer rupiah everywhere.
+
 
 ```
 branches(id, name, address, maps_url, open_hours, is_active)
@@ -99,7 +102,6 @@ Balances and points are **ledgers** (sum of rows), never a single mutable number
 ## 5. Key rules (shared `domain/` module, unit tested)
 
 **Queue**
-
 - One queue per barber per day; online and walk-in share it, ordered by `position`.
 - Online booking is **"queue now" only**: no clock-time slots, because walk-ins share the same queue. After paying, the customer sees their position, the estimated turn time and a "leave now" hint based on that estimate. A WhatsApp/web alert goes out when **2 people are ahead**.
 - Online: customer picks branch → barber (or "any barber, shortest wait") → services → name + WhatsApp → QRIS. A `pending` booking holds no queue spot. Spot is created **only on paid webhook**. Pending expires after 15 min.
@@ -112,12 +114,10 @@ Balances and points are **ledgers** (sum of rows), never a single mutable number
 - Default durations (admin-editable): haircut 30 (real range 25–45), toning 60, coloring fashion 120, curly perm short 90 / long 120, cold wave short 120 / long 150, rootlift 45, down perm 60, Rootlift + Down Perm package 90, classic shaving 20, wash & styling 15, other refreshments 15 (ear candle 15, nose mask 10). Later: learn each barber's real average from `called_at`/done times.
 
 **Opening hours and closures**
-
 - All branches open 10:00–21:00 every day. Holiday closures (Lebaran, Natal…) are set by admin in `closures` (one branch or all) and show as a banner on customer pages and the tablet.
 - The online queue stops taking numbers 45 min before closing (admin setting `online_queue_closes_before_min`) and when the barber's remaining queue would run past closing.
 
 **Refunds and credit**
-
 - Customer cancels before being called, or is a no-show (absent at the second call):
   - **Member** (WhatsApp number matches a member) → amount goes to their **prepaid balance** (`balance_ledger`, reason `refund`), **no expiry**.
   - **Non-member** → **credit tied to the WhatsApp number**, valid 30 days, usable at any branch (online booking or at the cashier).
@@ -126,11 +126,9 @@ Balances and points are **ledgers** (sum of rows), never a single mutable number
 - Credit (non-members) works without an account and expires; balance (members) never expires. If a non-member signs up while holding credit, the remaining credit moves into their balance.
 
 **Pricing**
-
 - Haircut price comes from the barber's **level at service date**. Other services use fixed / from / variant price. "From" services get their final price entered by the cashier.
 
 **Membership**
-
 - Sign-up 30K (paid at cashier or QRIS). Card shows QR, member no, points, balance.
 - Points: `floor(total_paid / 50_000)` per transaction. Redeem 10 points = 50K off.
 - Birthday month: 50% off **haircut only** (default, matches the real shop); scope is still an admin setting. Does not stack with point redemption in the same transaction (simplest rule; admin can change).
@@ -138,7 +136,6 @@ Balances and points are **ledgers** (sum of rows), never a single mutable number
 - Top-up: package from `topup_packages`; bonus written as a separate `bonus` ledger row so reports can split real cash from bonus.
 
 **Payment recording**
-
 - EDC (card or QRIS): cashier selects method, enters amount, taps **Mark paid**. No integration with the EDC machine.
 - Online QRIS: gateway webhook only. Cashier cannot mark an online booking paid.
 - Balance: deducted from ledger after PIN confirmation on the cashier screen (member types PIN on a small keypad or scans QR + PIN).
@@ -165,8 +162,8 @@ Balances and points are **ledgers** (sum of rows), never a single mutable number
 Each phase ends deployed and usable.
 
 1. **Foundation** ✅ — repo, CLAUDE.md, brand config, design tokens + three themes + `/gaya` style sheet, staff auth (Better Auth), DB schema + migrations + seed (3 fictional Samarinda branches, 12 barbers, full real pricelist, 14 days of rotation, demo staff), CI. Public home renders the pricelist from seed data until phase 2.
-2. **Public read-only site** — services & prices, branches, barbers with level/today's branch/days off. (Covers the "shy" and "loyal" personas already.)
-3. **Queue core** — cashier screen (columns, call/done/late, add walk-in), tablet display, live queue on the phone. Realtime. _This is the heart; demo-able on its own._
+2. **Public read-only site** ✅ — services & prices, branches, barbers with level/today's branch/days off. (Covers the "shy" and "loyal" personas already.)
+3. **Queue core** — cashier screen (columns, call/done/late, add walk-in), tablet display, live queue on the phone. Realtime. *This is the heart; demo-able on its own.*
 4. **Online booking + QRIS (sandbox)** — booking flow, webhook, pay-then-queue, expiry.
 5. **Cashier payments** — EDC recording, transactions, receipts.
 6. **Membership** — sign-up, PIN login, QR card, points, birthday discount, balance + top-up, forgot-PIN OTP.

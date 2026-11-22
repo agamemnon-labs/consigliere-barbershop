@@ -22,6 +22,7 @@
     "db:seed": "node --env-file-if-exists=.env.local src/db/seed/run.ts"
   },
   "dependencies": {
+    "@supabase/supabase-js": "2.119.2",
     "better-auth": "1.7.27",
     "drizzle-orm": "0.45.4",
     "next": "16.4.6",

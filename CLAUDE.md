@@ -54,6 +54,7 @@ All four of check, typecheck, test and build must pass before a push. CI runs th
 - Fonts: Bodoni Moda (display), Libre Franklin (text), IBM Plex Mono (numbers, tabular).
 - **User friendly is a hard requirement.** One job per screen, little text, nothing overwhelming. Say it in fewer words; hide detail behind a tap (`<details>`) instead of printing it. If a screen feels full, cut before adding.
 - Research notes and sources: `docs/design-research.md`.
+- **Be proactive.** Research good current frontend, visual and UX practice yourself when it helps, without waiting to be asked. Fix anything that looks bad or sloppy as soon as you see it, in code or design. Record the lessons in `docs/design-research.md` or here.
 - UI work follows **unslop** (github.com/heydamir/unslop by Damir Sokolovsky, CC BY 4.0) as the design checklist, on top of the design skills (frontend-design, design-skills:design-elevation / design-critique / ux-writing, accessibility-audit). Review screenshots before shipping. Its rules that matter most here:
   - Sentence-case labels, not UPPERCASE with wide tracking.
   - No italic for emphasis.

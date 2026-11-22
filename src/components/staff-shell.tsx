@@ -13,9 +13,9 @@ type Props = { title: string; allow: readonly StaffRole[]; children: ReactNode }
 export function StaffShell({ title, allow, children }: Props) {
   return (
     <div className="flex min-h-dvh flex-col">
-      <header className="flex items-center justify-between border-b border-rule px-6 py-4">
+      <header className="flex items-center justify-between gap-4 border-b border-rule px-4 py-4 sm:px-6">
         <p className="font-display text-lg uppercase tracking-[0.18em]">{brand.name}</p>
-        <p className="label">{title}</p>
+        <p className="label hidden sm:block">{title}</p>
         <Suspense fallback={<span className="label">…</span>}>
           <Who allow={allow} />
         </Suspense>
@@ -32,7 +32,7 @@ async function Who({ allow }: { allow: readonly StaffRole[] }) {
   return (
     <form action={signOut} className="flex items-center gap-4">
       <span className="text-sm">
-        {staff.name} <span className="text-muted">· {roleName[staff.role]}</span>
+        {staff.name} <span className="hidden text-muted sm:inline">· {roleName[staff.role]}</span>
       </span>
       <button type="submit" className="label underline-offset-4 hover:text-fg hover:underline">
         Keluar

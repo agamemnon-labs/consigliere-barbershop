@@ -21,6 +21,10 @@ export async function createDemoDb(options: { from?: string; days?: number; staf
     await client.exec(readFileSync(join(dir, file), "utf8").replaceAll("--> statement-breakpoint", ""));
   }
   const db = drizzle(client, { schema, casing: "snake_case" });
-  await seed(db, { staffPassword: options.staffPassword ?? DEMO_STAFF_PASSWORD, ...options });
+  await seed(db, {
+    staffPassword: options.staffPassword ?? DEMO_STAFF_PASSWORD,
+    demoQueueAt: new Date(),
+    ...options,
+  });
   return db;
 }

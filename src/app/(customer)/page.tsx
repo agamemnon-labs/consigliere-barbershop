@@ -7,6 +7,7 @@ import { Rule } from "@/components/rule";
 import { Wordmark } from "@/components/wordmark";
 import { brand } from "@/config/brand";
 import { closureFor, onDuty, shortDate } from "@/domain/schedule";
+import { clockLabel } from "@/domain/time";
 import { getBranches, getRotation, getToday } from "@/server/catalog";
 
 export default async function Home() {
@@ -58,7 +59,9 @@ export default async function Home() {
                     <p className="label text-accent-ink">Tutup</p>
                   ) : (
                     <>
-                      <p className="num text-sm">{hours ? `${hours[0]}–${hours[1]}` : "—"}</p>
+                      <p className="num text-sm">
+                        {hours ? `${clockLabel(hours[0])}–${clockLabel(hours[1])}` : "—"}
+                      </p>
                       <p className="label mt-1">{count} barber jaga</p>
                     </>
                   )}

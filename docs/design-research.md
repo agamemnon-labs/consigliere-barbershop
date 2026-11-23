@@ -55,3 +55,17 @@ These are applied in the UX polish pass after phase 7, customer phone screens fi
 - Lighthouse caught `text-faint` at 3.2:1 on the night theme and 2.7:1 on paper. Faint text is still text: keep it at 4.5:1 or use it only for decoration.
 - A missing favicon is a console 404 and costs Best Practices points. `src/app/icon.svg` fixes it.
 - A demo ribbon must stay one line on a 390px phone: short copy, `truncate` on the text, `shrink-0` on the link.
+
+## Daylight redesign (2026-11-23)
+
+Nopal called the dark serif look ugly, text-heavy, boxy and confusing. What changed and why:
+
+- **Light pages.** A cool white page with white cards reads better in a bright shop and on a cheap phone in the sun than warm off-black. Colour now comes from the barbershop itself (pole red, mint chairs, navy pinstripe), not from a mood.
+- **One family.** Three fonts (Bodoni, Franklin, Plex Mono) made every screen look like a poster. Archivo's width axis gives a wide sign-painter wordmark, normal UI text and condensed ticket numbers from one file.
+- **Steps, not a long form.** Booking was one long page; now it is four screens with a progress bar and one fixed action. Each screen asks one question as its headline.
+- **Choice cards over text.** Barbers and services are big tappable cards with a check, price on the right, duration under the name. Extras fold by group ("Perawatan 7 pilihan") so the screen starts short.
+- **Red means money or "now".** Navy "Lanjut" for steps, red only for paying, the ticket and "Panggil". When everything is red, nothing is.
+- **Status by colour plus words.** Mint "Kursi kosong", butter "Di kursi" / "Dipanggil", always with a label, never colour alone.
+- **Reports.** Ranked bars in one hue with the number written beside them; no legend for a single series, no rainbow.
+- **Checks that caught real bugs:** screenshots at 390 px (hero ticket over the headline, wait text wrapping, "± 0 mnt"); e2e on the cashier column (a select inside a grid overflowed its column and hid the next button).
+

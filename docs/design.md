@@ -1,6 +1,6 @@
 # Consigliere Barbershop — Design Doc
 
-Status: v2.0, 2026-11-22. Stack re-audited from scratch (see §1). Earlier: v1.2 folded in birthday scope, durations, queue-now booking, refund/credit policy, repo. Source of truth for decisions is `consigliere-brief.md`; this doc says **how** we build it. Owner of technical decisions: Claude (full control granted by Nopal, 2026-11-22).
+Status: v2.1, 2026-11-23. Design language replaced with the daylight barbershop look (see §8). v2.0, 2026-11-22: stack re-audited from scratch (see §1). Earlier: v1.2 folded in birthday scope, durations, queue-now booking, refund/credit policy, repo. Source of truth for decisions is `consigliere-brief.md`; this doc says **how** we build it. Owner of technical decisions: Claude (full control granted by Nopal, 2026-11-22).
 
 ---
 
@@ -197,20 +197,22 @@ Phases 1–3 are the MVP that proves the idea.
 
 ## 8. Design language
 
-Quiet, editorial "old tailor shop / 70s film credits". Nothing loud, nothing generated-looking. Live reference: `/gaya` in the app.
+**An old-school barbershop in daylight** (v2, 2026-11-23). White tiles, the red-white-blue barber pole, mint barber chairs, chrome and take-a-number tickets. Light everywhere, modern and friendly; the gangster brand lives in the names, the pinstripe member card and the voice, not in a dark costume. The first look (dark, Bodoni serif, oxblood, "tailor shop / film credits") was dropped because Nopal found it dull, text-heavy and confusing. Live reference: `/gaya` in the app.
 
-- **Colour** (CSS tokens in `src/app/globals.css`, three themes via `data-theme`):
-  - `night` (customer web): warm off-black `#15110E`, bone `#EBE3D4`, oxblood `#6E1D1B` (lifted to `#C4665A` when used as text).
-  - `paper` (cashier, admin): cream `#F3ECDF`, ink `#1B1613`, same oxblood.
-  - `display` (tablet, TV): `#0D0B09` with `#F6F0E5`, highest contrast.
-  - Oxblood is used sparingly: the ticket number, money actions (Bayar), the call action (Panggil), errors. Never as a background wash.
-  - Banned: gradients, gold/brass, neon, glow, glassmorphism, emoji, stock illustration, drop shadows, pill buttons.
-- **Type:** Bodoni Moda (display, optical sizes; Bodoni was from Parma) · Libre Franklin (body, UI) · IBM Plex Mono (ticket numbers, prices, clocks; tabular, slashed zero). Small-caps tracked labels in the voice of film credits.
-- **Shape:** 1–2 px radius, 1 px rules, dotted price leaders, generous vertical spacing.
-- **Signature pieces:** ticket stub (bone card, perforated tear, punched notches cut with a CSS mask); pricelist rows with dotted leaders that expand downward (native `<details>`, animated with `::details-content`); closing credits footer ("Dibuat oleh Agamemnon").
-- **Layout:** phone-first single column (max ~28 rem), vertical only, no carousels or sideways swipes, sticky bottom CTA where a flow needs one. Tap targets ≥ 48 px.
-- **Cashier:** paper theme, wide desktop, one column per barber on duty, one tap per action. **Tablet/TV:** display theme, very large type, no inputs, reconnect indicator.
-- **Copy:** Indonesian, plain and warm, light "family" flavour ("Giliran Anda, Boss") that never costs clarity.
+- **Colour** (CSS tokens in `src/app/globals.css`, one light theme):
+  - Neutrals: page `#F3F5F8`, surface white, sunk `#E9EDF3`, navy ink `#0E1630`, muted and faint inks that pass 4.5:1.
+  - Pole red `#D22D23` is the one action colour: the primary button, the ticket number, money, the call action, errors. One red button per screen at most.
+  - Meaning colours, each with a soft fill and a readable ink: blue (selected, focus, links), mint (free chair, paid, done), butter (called, needs attention).
+  - Navy pinstripe (`.pinstripe`): the member card and the dark "Lanjut" button for non-money steps.
+  - The counter tablet uses `data-theme="display"`: the same palette on a pure white page for reading from across the room.
+  - Banned: dark pages, gradients, gold/brass, neon, glow, glassmorphism, emoji, stock illustration, drop shadows, pill buttons.
+- **Type:** Archivo variable, one family for everything. The wordmark runs at width 125%; headings are 600 at about 110%; ticket numbers are condensed (72%); every number is tabular. Sentence case everywhere, no tracked capitals.
+- **Shape:** controls `rounded-xl`, cards `rounded-2xl`, hero and member card `rounded-3xl`. Hairline rules only between rows of a list. No shadows: surfaces separate by tone (white on cool grey).
+- **Signature pieces:** the red take-a-number ticket (notched, with a tear line) for the queue number; the striped barber pole that turns while something is live; the navy pinstripe member card with its QR; barbers as coloured initial tiles.
+- **Flow:** one job per screen. Booking is four steps with a progress bar (cabang, barber, layanan, nama + bayar) and a fixed bottom bar showing the total and the one next action. Detail folds behind native `<details>` that open downward.
+- **Layout:** phone-first single column (max ~28 rem), vertical only, no carousels or sideways swipes. Tap targets ≥ 48 px. A bottom tab bar (Beranda, Ambil nomor or Tiketku once you hold a ticket, Member) hides inside flows.
+- **Cashier:** wide desktop, one column per barber on duty, the chair state on top (mint = free, butter = in the chair), the line below, one tap per action. **Admin:** the same white shell with tabs; reports use single-hue blue bars with values in text. **Tablet/TV:** very large type, no inputs, a QR to take a number.
+- **Copy:** Indonesian, plain and warm, few words. Headlines are questions or plain statements ("Mau dicukur siapa?", "Kamu di antrean, Bima").
 
 ---
 
@@ -229,5 +231,5 @@ Quiet, editorial "old tailor shop / 70s film credits". Nothing loud, nothing gen
 - Repo: **github.com/agamemnon-labs/consigliere-barbershop** (org repo). Single app, no monorepo. Package manager: pnpm 12. See the repo's `CLAUDE.md` for commands and rules.
 - Commit small and often while working, push to the org repo under Nopal's GitHub account. Conventional commit messages (`feat:`, `fix:`, `chore:`...). Each build phase goes on its own branch with a PR into `main`.
 - `src/domain/` pure business rules (queue, pricing, points, balance) with tests; UI never re-implements them.
-- Route groups: `src/app/(customer)` (night theme) and `src/app/(staff)` (paper theme: `/staf/masuk`, `/kasir`, `/admin`); `(display)` (display theme) for `/tablet/[branch]`. One root layout.
+- Route groups: `src/app/(customer)` (phone web with bottom tabs) and `src/app/(staff)` (`/staf/masuk`, `/kasir`, `/admin`, shared `StaffShell`); `(display)` (`data-theme="display"`) for `/tablet/[branch]`. One root layout, one light theme.
 - A `CLAUDE.md` at the root pointing to the brief and this doc, with "log every change Nopal makes in the brief's change log".

@@ -43,15 +43,21 @@ All four of check, typecheck, test and build must pass before a push. CI runs th
 - Session reads (`requireStaff`, `getStaff`) happen inside a `<Suspense>` boundary (Cache Components rule). `proxy.ts` is only an optimistic cookie check.
 - Brand facts come from `src/config/brand.ts`; nothing brand-specific elsewhere.
 - Copy is Indonesian, plain and warm.
+- Gotchas learned the hard way:
+  - `pnpm typecheck` can pass on a stale `tsconfig.tsbuildinfo`; delete it when a type error "should" appear.
+  - A client component that calls `usePathname()` (tabs, bottom nav) must sit inside `<Suspense>` on dynamic routes or the build fails.
+  - A visually hidden (`sr-only`) input inside a card label needs `relative` on the label, or focus and taps land in the wrong place. In e2e, click the card (`locator("label", { hasText })`), then assert the input is checked.
+  - Grid children default to `min-width: auto`, so a `<select>` with long options pushes the grid wider than its column. Use `grid-cols-1` and `min-w-0` on controls.
 
 ## Design rules (Nopal hates anything that looks AI-generated)
 
-- Quiet, editorial "old tailor shop / 70s film credits". See `/gaya` and `docs/design.md` §8.
-- Use the tokens in `src/app/globals.css` (`bg`, `surface`, `fg`, `muted`, `faint`, `rule`, `accent`, `accent-ink`…) and the themes `night` (customer), `paper` (cashier/admin), `display` (tablet/TV). No raw hex in components.
-- One oxblood accent, used sparingly (ticket number, money actions, call action, errors).
-- **Banned:** gradients, gold/brass, neon, glow, glassmorphism, drop shadows, pill buttons, emoji, stock illustrations, default shadcn look, lucide icon confetti, centred-hero-with-three-feature-cards layouts.
-- Phone-first, vertical only: no carousels, no sideways swipe; details expand downward. Tap targets ≥ 48 px.
-- Fonts: Bodoni Moda (display), Libre Franklin (text), IBM Plex Mono (numbers, tabular).
+- **Direction (since 2026-11-23): an old-school barbershop in daylight.** White tiles, the red-white-blue barber pole, mint chairs, take-a-number tickets. Light everywhere, modern and friendly, the gangster brand shows in names and voice, not in dark costume. Nopal rejected the old dark/serif "tailor shop" look as dull and confusing; do not bring it back. See `/gaya` and `docs/design.md` §8.
+- Use the tokens in `src/app/globals.css`: neutrals `bg` `surface` `sunk` `fg` `muted` `faint` `rule` `rule-strong`; `accent` (pole red) with `accent-ink` `accent-soft`; meaning colours `blue`/`blue-soft` (selected, focus, links), `mint`/`mint-ink` (free chair, paid, done), `butter`/`butter-ink` (called, attention); `navy` with the `.pinstripe` class (member card, dark button). One light theme everywhere; `data-theme="display"` only makes the tablet page pure white. No raw hex in components.
+- **Red is the one action colour**: the primary button, the ticket number, money and the call action. One red button per screen at most. Non-money "next" actions use the navy `dark` button. Blue, mint and butter only carry meaning, never decoration.
+- Components to reuse before writing new ones: `Button`/`ButtonLink` (`primary`, `dark`, `quiet`, `soft`), `Choice` (tappable card for radio/checkbox), `Notice` (`info`, `ok`, `warn`, `alert`), `Ticket`, `QrisPanel`, `Pole`, `Avatar`, `Steps`, `Field`, `StaffShell` + `StaffTabs`, icons in `components/icons.tsx` (`Svg` wrapper).
+- **Banned:** dark page backgrounds, gradients, gold/brass, neon, glow, glassmorphism, drop shadows, pill buttons, emoji, stock illustrations, default shadcn look, lucide icon confetti, centred-hero-with-three-feature-cards layouts, uppercase tracked eyebrows, middle-dot meta strings, arrows appended to links.
+- Phone-first, vertical only: no carousels, no sideways swipe; details expand downward. Tap targets ≥ 48 px (44 px only for secondary inline links). Cards `rounded-2xl`, hero and member card `rounded-3xl`, controls `rounded-xl`.
+- Font: **Archivo** variable only (`src/app/fonts.ts`). Wordmark at width 125% (`.wide`), headings 600 at ~110%, ticket numbers condensed (`.condensed`), all numbers tabular (`.num`).
 - **User friendly is a hard requirement.** One job per screen, little text, nothing overwhelming. Say it in fewer words; hide detail behind a tap (`<details>`) instead of printing it. If a screen feels full, cut before adding.
 - Research notes and sources: `docs/design-research.md`.
 - **Be proactive.** Research good current frontend, visual and UX practice yourself when it helps, without waiting to be asked. Fix anything that looks bad or sloppy as soon as you see it, in code or design. Record the lessons in `docs/design-research.md` or here.
@@ -59,7 +65,7 @@ All four of check, typecheck, test and build must pass before a push. CI runs th
   - Sentence-case labels, not UPPERCASE with wide tracking.
   - No italic for emphasis.
   - Spacing on a 4px grid.
-  - Weights 400–500.
+  - Weights 400–500 for text; 600 only for headings, the ticket and money figures.
   - One accent used rarely.
   - One primary and at most one secondary action per screen.
   - No trailing periods on labels and buttons, no exclamation marks.

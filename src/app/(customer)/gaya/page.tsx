@@ -16,25 +16,26 @@ export const metadata: Metadata = { title: "Lembar gaya", robots: { index: false
 
 /** Every colour token with what it is for. Values live in globals.css; this page only names them. */
 const swatches: { name: string; cls: string; use: string; ink?: string }[] = [
-  { name: "bg", cls: "bg-bg", use: "Halaman, ubin putih dingin" },
+  { name: "bg", cls: "bg-bg", use: "Halaman, ubin krem" },
   { name: "surface", cls: "bg-surface", use: "Kartu dan daftar" },
-  { name: "sunk", cls: "bg-sunk", use: "Isian tenggelam, kerangka muat" },
-  { name: "fg", cls: "bg-fg", use: "Tinta navy", ink: "text-white" },
+  { name: "sunk", cls: "bg-sunk", use: "Kertas kraft, isian, kerangka muat" },
+  { name: "fg", cls: "bg-fg", use: "Tinta espresso, tombol gelap", ink: "text-bg" },
   { name: "accent", cls: "bg-accent", use: "Merah tiang: tiket, bayar, panggil", ink: "text-accent-fg" },
   { name: "blue", cls: "bg-blue", use: "Pilihan, fokus, tautan", ink: "text-white" },
   { name: "mint", cls: "bg-mint", use: "Kursi kosong, lunas, selesai", ink: "text-mint-ink" },
   { name: "butter", cls: "bg-butter", use: "Dipanggil, perhatian", ink: "text-butter-ink" },
-  { name: "navy", cls: "pinstripe", use: "Kartu member, tombol gelap", ink: "text-navy-fg" },
+  { name: "suit", cls: "pinstripe", use: "Jas garis: kartu member", ink: "text-suit-fg" },
 ];
 
 export default function StyleSheet() {
   return (
     <Screen back={{ href: "/", label: "Beranda" }}>
       <p className="label">Lembar gaya</p>
-      <h1 className="mt-1 text-[2rem] leading-tight">Barbershop lama, di siang hari</h1>
+      <h1 className="mt-1 text-[2rem]">Barbershop keluarga, di siang hari</h1>
       <p className="mt-3 text-muted">
-        Ubin putih, tiang merah-putih-biru, kursi mint, krom, dan tiket ambil nomor. Halaman tetap tenang;
-        warna muncul di beberapa momen saja. Merah hanya untuk aksi: tiket, bayar, panggil.
+        Ubin krem, tiket kertas, papan nama lukis tangan, jas bergaris, tiang merah-putih-biru, dan lantai
+        catur. Halaman tetap tenang; warna muncul di beberapa momen saja. Merah hanya untuk aksi: tiket,
+        bayar, panggil.
       </p>
 
       <Part title="Warna">
@@ -55,22 +56,24 @@ export default function StyleSheet() {
       <Part title="Huruf">
         <div className="grid gap-4 rounded-2xl border border-rule bg-surface p-4">
           <div>
-            <p className="label">Archivo lebar, untuk papan nama</p>
+            <p className="label">Alfa Slab One, huruf papan nama</p>
             <Wordmark size="lg" className="mt-2" />
           </div>
           <div>
-            <p className="label">Judul, 600, sedikit lebar</p>
-            <p className="mt-1 text-[2rem] leading-tight font-semibold [font-stretch:110%]">
-              Mau cukur di mana?
-            </p>
+            <p className="label">Judul halaman, slab</p>
+            <p className="slab mt-1 text-[2rem] leading-tight">Mau cukur di mana?</p>
+          </div>
+          <div>
+            <p className="label">Judul bagian, Archivo 600</p>
+            <p className="mt-1 text-xl font-semibold">Antrean sekarang</p>
           </div>
           <div>
             <p className="label">Teks, 400</p>
-            <p className="mt-1">Ambil nomor dari HP, bayar QRIS, datang pas giliranmu.</p>
+            <p className="mt-1">Ambil nomor dari HP, bayar QRIS, datang pas giliranmu</p>
           </div>
           <div>
-            <p className="label">Sempit, untuk nomor antrean</p>
-            <p className="condensed num mt-1 text-7xl leading-none font-semibold text-accent">J 021</p>
+            <p className="label">Slab, untuk nomor antrean</p>
+            <p className="slab mt-1 text-7xl leading-none text-accent">P 021</p>
           </div>
           <div>
             <p className="label">Angka tabular, untuk uang dan jam</p>
@@ -82,7 +85,7 @@ export default function StyleSheet() {
         </div>
       </Part>
 
-      <Part title="Tiang dan tiket">
+      <Part title="Tiang, lantai, dan tiket">
         <div className="flex items-center gap-6 rounded-2xl border border-rule bg-surface p-4">
           <span className="flex items-center gap-2 text-sm">
             <Pole turning /> Langsung
@@ -94,12 +97,13 @@ export default function StyleSheet() {
             <Pole off /> Tutup
           </span>
         </div>
+        <div aria-hidden className="floor mt-4 rounded-sm" />
         <Ticket
           className="mt-4"
           number={21}
-          prefix="J"
+          prefix="P"
           barber="Rizal"
-          branch="Juanda"
+          branch="Jl. Pulau Kalimantan"
           waitMin={35}
           around="14.40"
         />
@@ -117,7 +121,7 @@ export default function StyleSheet() {
           </div>
         </div>
         <p className="mt-2 text-sm text-faint">
-          Merah untuk uang dan antrean, navy untuk lanjut, satu utama per layar
+          Merah untuk uang dan antrean, espresso untuk lanjut, satu utama per layar
         </p>
       </Part>
 

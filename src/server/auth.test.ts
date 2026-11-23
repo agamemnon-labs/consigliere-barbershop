@@ -12,7 +12,7 @@ beforeAll(async () => {
 describe("staff auth against the real schema", () => {
   it("signs a seeded cashier in and exposes role and branch", async () => {
     const res = await auth.api.signInEmail({
-      body: { email: "kasir.juanda@consigliere.test", password: "correct horse battery" },
+      body: { email: "kasir.kalimantan@consigliere.test", password: "correct horse battery" },
       asResponse: true,
     });
     expect(res.status).toBe(200);

@@ -55,15 +55,18 @@ export default async function Home() {
     >
       <MyTicketBanner />
 
-      <section className="relative overflow-hidden rounded-3xl bg-mint px-5 pt-44 pb-5">
-        <HeroTicket />
-        <h1 className="max-w-[12ch] text-[2.125rem] leading-[1.04]">{brand.tagline}</h1>
-        <p className="mt-3 max-w-[26ch] text-[1.0625rem] text-muted">
-          Ambil nomor dari HP, bayar QRIS, datang pas giliranmu
-        </p>
-        <ButtonLink href="/antre" className="mt-6" block>
-          Ambil nomor antrean
-        </ButtonLink>
+      <section className="overflow-hidden rounded-3xl bg-sunk">
+        <div className="relative px-5 pt-6 pb-7">
+          <HeroTicket />
+          <h1 className="max-w-[11ch] pt-40 text-[2.375rem]">{brand.tagline}</h1>
+          <p className="mt-3 max-w-[28ch] text-[1.0625rem] text-muted">
+            Ambil nomor dari HP, bayar QRIS, datang pas giliranmu
+          </p>
+          <ButtonLink href="/antre" className="mt-6" block>
+            Ambil nomor antrean
+          </ButtonLink>
+        </div>
+        <div aria-hidden className="floor" />
       </section>
 
       <section className="mt-10" aria-labelledby="antrean">
@@ -92,7 +95,7 @@ export default async function Home() {
 
       <section className="mt-10" aria-labelledby="barber">
         <SectionTitle id="barber" action={<More href="/barber">Jadwal barber</More>}>
-          Barber kami
+          Keluarga kami
         </SectionTitle>
         <Link href="/barber" className="block rounded-2xl bg-surface p-4 hover:ring-1 hover:ring-rule-strong">
           <span className="flex flex-wrap gap-2">
@@ -100,7 +103,7 @@ export default async function Home() {
               <Avatar key={b.id} name={b.name} />
             ))}
             {barbers.length > 5 ? (
-              <span className="num inline-flex size-12 items-center justify-center rounded-2xl bg-sunk font-semibold text-muted">
+              <span className="num inline-flex size-12 items-center justify-center rounded-full bg-sunk font-semibold text-muted">
                 +{barbers.length - 5}
               </span>
             ) : null}
@@ -111,21 +114,20 @@ export default async function Home() {
         </Link>
       </section>
 
-      <section className="pinstripe mt-10 rounded-3xl px-5 py-6 text-navy-fg" aria-labelledby="member">
-        <p className="wide text-sm font-semibold uppercase tracking-[0.06em] text-navy-muted">{brand.name}</p>
-        <h2 id="member" className="mt-2 text-2xl">
-          Kartu member
+      <section className="pinstripe mt-10 rounded-3xl px-5 py-6 text-suit-fg" aria-labelledby="member">
+        <h2 id="member" className="slab text-[1.875rem] leading-tight">
+          Jadi orang dalam
         </h2>
-        <p className="mt-2 max-w-[30ch] text-navy-muted">
-          Poin tiap kunjungan, saldo dengan bonus, dan potong setengah harga di bulan ulang tahun
+        <p className="mt-2 max-w-[30ch] text-suit-muted">
+          Member dapat poin tiap kunjungan, saldo dengan bonus, dan potong setengah harga di bulan ulang tahun
         </p>
         <Link
           href="/kartu"
-          className="mt-5 inline-flex min-h-12 items-center rounded-xl bg-navy-fg px-5 font-medium text-navy hover:bg-white"
+          className="mt-5 inline-flex min-h-12 items-center rounded-xl bg-suit-fg px-5 font-medium text-suit transition-colors hover:bg-surface"
         >
           Buka kartu member
         </Link>
-        <p className="mt-3 text-sm text-navy-muted">Belum member? Daftar di kasir</p>
+        <p className="mt-3 text-sm text-suit-muted">Belum member? Daftar di kasir</p>
       </section>
     </Screen>
   );
@@ -148,16 +150,16 @@ function HeroTicket() {
   return (
     <div
       aria-hidden
-      className="ticket absolute top-6 right-6 w-52 rotate-[4deg] [--notch:0.5rem] [--tear:5.75rem]"
+      className="ticket absolute top-6 right-5 w-56 rotate-[4deg] [--notch:0.5rem] [--tear:6.25rem]"
     >
-      <div className="flex h-23 flex-col justify-between px-4 pt-3">
-        <span className="text-xs text-white/80">Nomor antrean</span>
-        <span className="condensed num pb-2 text-6xl font-semibold leading-none">
-          <span className="text-3xl text-white/70">J</span> 021
+      <div className="flex h-25 flex-col justify-between px-4 pt-3">
+        <span className="text-sm text-white/90">Nomor antrean</span>
+        <span className="slab pb-2.5 text-[3.25rem] leading-none">
+          <span className="text-2xl text-white/85">P</span> 021
         </span>
       </div>
       <div className="ticket-tear mx-4" />
-      <div className="flex items-baseline justify-between px-4 pt-2 pb-3 text-xs text-white/80">
+      <div className="flex items-baseline justify-between px-4 pt-2 pb-3 text-sm text-white/90">
         <span>Giliranmu sekitar</span>
         <span className="num text-base font-semibold text-white">14.40</span>
       </div>

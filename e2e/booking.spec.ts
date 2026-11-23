@@ -5,8 +5,8 @@ test("a customer takes a number, pays by (demo) QRIS and lands in the queue", as
   await page.getByRole("link", { name: "Ambil nomor antrean" }).click();
   // Step 1: where.
   await expect(page.getByRole("heading", { name: "Mau cukur di mana?" })).toBeVisible();
-  await page.getByRole("link", { name: /Tepian/ }).click();
-  await expect(page).toHaveURL(/\/antre\?cabang=tepian$/);
+  await page.getByRole("link", { name: /Citra Niaga/ }).click();
+  await expect(page).toHaveURL(/\/antre\?cabang=citra-niaga$/);
 
   // Step 2: who. The fastest barber is picked already.
   await expect(page.getByRole("heading", { name: "Mau dicukur siapa?" })).toBeVisible();
@@ -32,17 +32,17 @@ test("a customer takes a number, pays by (demo) QRIS and lands in the queue", as
 
   await page.getByRole("button", { name: "Simulasikan pembayaran" }).click();
   await expect(page.getByRole("heading", { name: "Kamu di antrean, Bima" })).toBeVisible();
-  await expect(page.getByRole("figure", { name: /^Nomor antrean T \d{3}/ })).toBeVisible();
+  await expect(page.getByRole("figure", { name: /^Nomor antrean C \d{3}/ })).toBeVisible();
   await page.getByText("Rincian pesanan").click();
   await expect(
     page.getByRole("listitem").filter({ hasText: "Classic Shaving", visible: true }),
   ).toBeVisible();
   // The bottom bar now leads back to this ticket.
-  await expect(page.getByRole("link", { name: /^Tiketku T \d{3}$/ })).toBeVisible();
+  await expect(page.getByRole("link", { name: /^Tiketku C \d{3}$/ })).toBeVisible();
 });
 
 test("a wrong WhatsApp number gets a plain error and keeps what was typed", async ({ page }) => {
-  await page.goto("/antre?cabang=juanda");
+  await page.goto("/antre?cabang=pulau-kalimantan");
   await page.getByRole("button", { name: "Lanjut" }).click();
   await page.getByRole("button", { name: "Lanjut" }).click();
   await page.getByLabel("Nama panggilan").fill("Raka");

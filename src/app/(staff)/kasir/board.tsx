@@ -174,7 +174,7 @@ function Column({ queue, catalog }: { queue: BarberQueue; catalog: CatalogServic
               ) : null}
             </div>
             <p className="mt-1 flex items-baseline gap-2">
-              <span className="condensed num text-2xl font-semibold text-accent-ink">{chair.ticket}</span>
+              <span className="slab text-[1.375rem] leading-none text-accent-ink">{chair.ticket}</span>
               <span className="font-medium">{nameOf(chair)}</span>
             </p>
             {chair.source === "walkin" ? (
@@ -217,7 +217,7 @@ function Column({ queue, catalog }: { queue: BarberQueue; catalog: CatalogServic
             className={`border-b border-rule px-4 py-3 last:border-b-0 ${e.status === "called" ? "bg-accent-soft" : ""}`}
           >
             <div className="flex items-center gap-3">
-              <span className="condensed num w-14 shrink-0 text-xl font-semibold">{e.ticket}</span>
+              <span className="slab w-16 shrink-0 text-lg leading-none">{e.ticket}</span>
               <div className="min-w-0 flex-1">
                 <p className="truncate font-medium">{nameOf(e)}</p>
                 <p className="text-sm text-muted">

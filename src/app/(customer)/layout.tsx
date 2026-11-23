@@ -1,3 +1,4 @@
+import { connection } from "next/server";
 import { Suspense } from "react";
 import { BottomNav } from "@/components/bottom-nav";
 import { DemoRibbon } from "@/components/demo-ribbon";
@@ -8,10 +9,19 @@ export default function CustomerLayout({ children }: LayoutProps<"/">) {
     <>
       <DemoRibbon />
       {children}
-      {/* The tabs read the path, which dynamic routes only know at request time. */}
       <Suspense fallback={null}>
-        <BottomNav />
+        <Tabs />
       </Suspense>
     </>
   );
+}
+
+/**
+ * The tabs mark the page you are on, so they render per request. A prerendered copy could be
+ * built for another path (the live home once shipped with no tab marked) and then fail to
+ * hydrate against the browser's path.
+ */
+async function Tabs() {
+  await connection();
+  return <BottomNav />;
 }

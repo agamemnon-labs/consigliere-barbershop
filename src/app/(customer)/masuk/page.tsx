@@ -15,7 +15,7 @@ export default function MemberSignInPage({ searchParams }: PageProps<"/masuk">) 
   return (
     <Screen back={{ href: "/", label: "Beranda" }}>
       <span className="pinstripe inline-flex h-12 w-18 items-end rounded-lg p-2" aria-hidden>
-        <span className="h-1.5 w-6 rounded-full bg-navy-muted" />
+        <span className="h-1.5 w-6 rounded-full bg-suit-muted" />
       </span>
       <h1 className="mt-4 text-[2rem] leading-tight">Masuk kartu member</h1>
       <p className="mt-2 text-muted">Pakai nomor WhatsApp dan PIN-mu</p>

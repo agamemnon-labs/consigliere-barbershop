@@ -17,7 +17,10 @@ let svc: Record<string, { id: string; variants: { id: string }[] }>;
 
 beforeAll(async () => {
   db = (await createDemoDb({ from: DAY, days: 1, staffPassword: "x".repeat(12) })) as unknown as Database;
-  const [user] = await db.select().from(s.users).where(eq(s.users.email, "kasir.juanda@consigliere.test"));
+  const [user] = await db
+    .select()
+    .from(s.users)
+    .where(eq(s.users.email, "kasir.kalimantan@consigliere.test"));
   if (!user?.branchId) throw new Error("no cashier");
   cashier = { id: user.id, role: user.role, branchId: user.branchId };
   branchId = user.branchId;

@@ -1,13 +1,10 @@
 import "server-only";
 import { and, asc, eq, inArray } from "drizzle-orm";
 import { type Database, getDb, schema as s } from "@/db";
-import { activeEntries, estimates, ticketLabel, waitForNewcomer } from "@/domain/queue";
+import { activeEntries, branchPrefix, estimates, ticketLabel, waitForNewcomer } from "@/domain/queue";
 import { closureFor, onDuty } from "@/domain/schedule";
 
-/** Ticket prefix for a branch: its initial ("Juanda" → "J"). */
-export function branchPrefix(name: string): string {
-  return name.trim().charAt(0).toUpperCase();
-}
+export { branchPrefix };
 
 export type LiveEntry = {
   id: string;

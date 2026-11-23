@@ -1,8 +1,10 @@
 import { timingSafeEqual } from "node:crypto";
+import { connection } from "next/server";
 import { getDb } from "@/db";
 import { DEMO_MEMBER_PIN, DEMO_STAFF_PASSWORD } from "@/db/demo-credentials";
 import { seed } from "@/db/seed/seed";
 import { demoMode, env } from "@/server/env";
+import { cronJob } from "@/server/monitor";
 
 /**
  * Vercel Cron, nightly: puts the public demo back to a fresh day so visitors
@@ -10,6 +12,8 @@ import { demoMode, env } from "@/server/env";
  * Only in demo mode, and only with the cron secret.
  */
 export async function GET(request: Request) {
+  // Never prerender: without CRON_SECRET at build time the 404 below would be baked in.
+  await connection();
   const { CRON_SECRET, DEMO_STAFF_PASSWORD: password } = env();
   if (!demoMode() || !CRON_SECRET) return new Response("Not found", { status: 404 });
   const given = Buffer.from(request.headers.get("authorization") ?? "");
@@ -17,10 +21,12 @@ export async function GET(request: Request) {
   if (given.length !== expected.length || !timingSafeEqual(given, expected)) {
     return new Response("Unauthorized", { status: 401 });
   }
-  await seed(await getDb(), {
-    staffPassword: password ?? DEMO_STAFF_PASSWORD,
-    demoQueueAt: new Date(),
-    memberPin: DEMO_MEMBER_PIN,
-  });
+  await cronJob("demo-reset", "0 16 * * *", async () =>
+    seed(await getDb(), {
+      staffPassword: password ?? DEMO_STAFF_PASSWORD,
+      demoQueueAt: new Date(),
+      memberPin: DEMO_MEMBER_PIN,
+    }),
+  );
   return Response.json({ result: "reset" });
 }

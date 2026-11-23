@@ -1,6 +1,8 @@
 import { timingSafeEqual } from "node:crypto";
+import { connection } from "next/server";
 import { getDb } from "@/db";
 import { env } from "@/server/env";
+import { cronJob } from "@/server/monitor";
 import { paymentProvider } from "@/server/payments";
 import { reconcileRecent } from "@/server/reconcile";
 
@@ -10,6 +12,8 @@ import { reconcileRecent } from "@/server/reconcile";
  * this for a charge as it expires; this catches the ones nobody reopened.
  */
 export async function GET(request: Request) {
+  // Never prerender: without CRON_SECRET at build time the 404 below would be baked in.
+  await connection();
   const { CRON_SECRET } = env();
   if (!CRON_SECRET) return new Response("Not found", { status: 404 });
   const given = Buffer.from(request.headers.get("authorization") ?? "");
@@ -17,6 +21,8 @@ export async function GET(request: Request) {
   if (given.length !== expected.length || !timingSafeEqual(given, expected)) {
     return new Response("Unauthorized", { status: 401 });
   }
-  const result = await reconcileRecent(await getDb(), paymentProvider(), new Date());
+  const result = await cronJob("pembayaran-cek", "45 15 * * *", async () =>
+    reconcileRecent(await getDb(), paymentProvider(), new Date()),
+  );
   return Response.json({ result });
 }

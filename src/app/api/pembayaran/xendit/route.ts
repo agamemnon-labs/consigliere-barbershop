@@ -27,5 +27,6 @@ export async function POST(request: Request) {
   // References are booking or top-up ids; whichever recognises it settles it.
   const booking = await settlePayment(db, event, now);
   const result = booking === "ignored" ? await settleTopup(db, event, now) : booking;
+  console.info("Xendit webhook", event.reference, event.status, result);
   return Response.json({ result });
 }

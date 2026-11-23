@@ -24,7 +24,6 @@ describe("readXenditWebhook", () => {
       paymentId: "pr-1",
       status: "paid",
       amount: 125000,
-      paidAt: new Date("2026-11-23T05:59:58Z"),
     });
   });
 

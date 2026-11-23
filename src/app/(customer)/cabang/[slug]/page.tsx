@@ -64,8 +64,7 @@ export default async function BranchPage({ params }: PageProps<"/cabang/[slug]">
       }
     >
       <header>
-        <p className="text-sm font-medium text-faint">Cabang</p>
-        <h1 className="mt-1 text-[2.5rem] leading-none">{branch.name}</h1>
+        <h1 className="text-[2.5rem] leading-[1.02]">{branch.name}</h1>
         <ul className="mt-4 grid gap-2 text-[0.9375rem] text-muted">
           <li className="flex items-center gap-2.5">
             <MapPinIcon size={18} className="shrink-0 text-faint" />

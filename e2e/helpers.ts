@@ -1,6 +1,6 @@
 import { expect, type Locator, type Page } from "@playwright/test";
 
-export async function signInAsCashier(page: Page, branch: "juanda" | "pramuka" | "tepian") {
+export async function signInAsCashier(page: Page, branch: "kalimantan" | "belatuk" | "citraniaga") {
   await page.goto("/staf/masuk");
   await page.getByLabel("Email").fill(`kasir.${branch}@consigliere.test`);
   await page.getByLabel("Kata sandi").fill("consigliere-demo");

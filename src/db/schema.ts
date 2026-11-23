@@ -388,6 +388,31 @@ export const queueEntries = pgTable(
   (t) => [index().on(t.barberId, t.date, t.position), uniqueIndex().on(t.branchId, t.date, t.ticketNo)],
 ).enableRLS();
 
+/**
+ * A customer's 1–5 score for one finished visit, given from their ticket page. One per visit;
+ * barber and branch are copied from the visit so reports need no join.
+ */
+export const ratings = pgTable(
+  "ratings",
+  {
+    id: id(),
+    queueEntryId: uuid()
+      .notNull()
+      .unique()
+      .references(() => queueEntries.id, { onDelete: "cascade" }),
+    barberId: uuid()
+      .notNull()
+      .references(() => barbers.id),
+    branchId: uuid()
+      .notNull()
+      .references(() => branches.id),
+    date: date().notNull(),
+    score: smallint().notNull(),
+    createdAt: createdAt(),
+  },
+  (t) => [index().on(t.date, t.barberId), check("ratings_score_range", sql`${t.score} between 1 and 5`)],
+).enableRLS();
+
 /* ── Money ─────────────────────────────────────────────────────────────── */
 
 export const transactions = pgTable(

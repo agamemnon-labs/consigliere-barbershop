@@ -17,11 +17,17 @@ beforeAll(async () => {
 
 /** A paid online booking for this phone, already in the queue. */
 async function paidBooking(phone: string) {
-  const options = await bookingOptions(db, "juanda", at("14:00"));
+  const options = await bookingOptions(db, "pulau-kalimantan", at("14:00"));
   const haircut = options?.services.find((x) => x.slug === "haircut");
   const id = await createBooking(
     db,
-    { branchSlug: "juanda", barber: "any", services: [{ serviceId: haircut!.id }], name: "Sari", phone },
+    {
+      branchSlug: "pulau-kalimantan",
+      barber: "any",
+      services: [{ serviceId: haircut!.id }],
+      name: "Sari",
+      phone,
+    },
     at("14:00"),
     demoProvider,
   );

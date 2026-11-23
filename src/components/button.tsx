@@ -9,8 +9,8 @@ const base =
 const variants: Record<Variant, string> = {
   /** The one action of a screen: pole red. Taking a number, paying, calling the next customer. */
   primary: "bg-accent text-accent-fg hover:bg-accent-hover",
-  /** A strong action that isn't money: navy. */
-  dark: "bg-navy text-navy-fg hover:bg-fg",
+  /** A strong action that isn't money: espresso ink. */
+  dark: "bg-fg text-bg hover:bg-fg/88",
   /** Secondary action: white with a hairline. */
   quiet: "border border-rule-strong bg-surface text-fg hover:border-fg",
   /** Tertiary action inside a card: a sunk fill. */

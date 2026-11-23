@@ -43,22 +43,22 @@ async function Card() {
     <>
       <h1 className="sr-only">Kartu member {card.name}</h1>
       <figure
-        className="pinstripe step-in rounded-3xl p-5 text-navy-fg"
+        className="pinstripe step-in rounded-3xl p-5 text-suit-fg"
         aria-label={`Kartu member ${card.memberNo}`}
       >
         <div className="flex items-center justify-between">
           <span className="inline-flex items-center gap-2">
             <Pole />
-            <span className="wide text-sm font-semibold uppercase tracking-[0.04em]">{brand.name}</span>
+            <span className="slab text-lg leading-none">{brand.name}</span>
           </span>
-          <span className="text-sm text-navy-muted">Member</span>
+          <span className="text-sm text-suit-muted">Orang dalam</span>
         </div>
-        <p className="mt-6 text-2xl font-semibold">{card.name}</p>
-        <p className="condensed num text-lg text-navy-muted">{card.memberNo}</p>
+        <p className="slab mt-6 text-[1.75rem] leading-tight">{card.name}</p>
+        <p className="condensed num text-lg text-suit-muted">{card.memberNo}</p>
         <div className="mx-auto mt-5 w-full max-w-52 rounded-2xl bg-surface p-2">
           <QrCode value={card.memberNo} label={`QR kartu member ${card.memberNo}`} />
         </div>
-        <figcaption className="mt-3 text-center text-sm text-navy-muted">
+        <figcaption className="mt-3 text-center text-sm text-suit-muted">
           Tunjukkan ke kasir sebelum bayar
         </figcaption>
       </figure>

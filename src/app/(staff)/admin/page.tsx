@@ -33,8 +33,8 @@ async function Today() {
   const total = branches.reduce((s, b) => s + b.takings, 0);
   return (
     <>
-      <div className="rounded-3xl bg-navy p-5 text-navy-fg sm:p-6">
-        <p className="text-[0.9375rem] text-navy-muted">
+      <div className="rounded-3xl bg-suit p-5 text-suit-fg sm:p-6">
+        <p className="text-[0.9375rem] text-suit-muted">
           Uang masuk di semua cabang, <span className="num">{shortDate(date)}</span>
         </p>
         <p className="num mt-1 text-[2.5rem] leading-tight font-semibold">{formatRupiah(total)}</p>
@@ -43,9 +43,9 @@ async function Today() {
       <ul className="mt-4 grid gap-4 sm:grid-cols-3">
         {branches.map((b) => (
           <li key={b.id} className="flex flex-col rounded-2xl border border-rule bg-surface p-4">
-            <p className="flex items-center justify-between gap-3">
-              <span className="text-xl font-semibold [font-stretch:110%]">{b.name}</span>
-              <span className="num font-semibold">{formatRupiah(b.takings)}</span>
+            <p className="flex items-baseline justify-between gap-3">
+              <span className="text-xl leading-snug font-semibold">{b.name}</span>
+              <span className="num shrink-0 font-semibold">{formatRupiah(b.takings)}</span>
             </p>
             <dl className="mt-3 grid grid-cols-3 gap-2">
               <Stat label="Selesai" value={b.served} />

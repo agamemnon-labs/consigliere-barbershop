@@ -57,4 +57,21 @@ describe("phone top-up", () => {
     const event = { reference: id, paymentId: order.paymentId!, status: "paid" as const, amount: pkg!.pay };
     expect(await settleTopup(db, event, later)).toBe("topped_up");
   });
+
+  it("asks the gateway before expiring, so a missed webhook still tops up", async () => {
+    const [pkg] = await topupPackages(db);
+    const other = new Date(now.getTime() + 2 * 60 * 60_000);
+    const id = await createTopupOrder(db, { userId, packageId: pkg!.id }, other, demoProvider);
+    const [row] = await db.select().from(s.topupOrders).where(eq(s.topupOrders.id, id));
+    const gateway = {
+      ...demoProvider,
+      name: "xendit" as const,
+      getStatus: async (paymentId: string) =>
+        paymentId === row!.paymentId
+          ? { status: "paid" as const, amount: pkg!.pay, paidAt: other }
+          : { status: "pending" as const },
+    };
+    const later = new Date(other.getTime() + 20 * 60_000);
+    expect((await getTopupOrder(db, id, userId, later, gateway))!.status).toBe("paid");
+  });
 });

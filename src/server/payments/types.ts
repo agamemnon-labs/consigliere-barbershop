@@ -7,9 +7,16 @@ export interface PaymentProvider {
   createQris(input: QrisInput): Promise<QrisCharge>;
   /** Test mode only: pretend the customer scanned and paid. */
   simulatePaid(charge: { paymentId: string; reference: string; amount: number }): Promise<void>;
+  /** Asks the gateway directly, for when its webhook never arrived. */
+  getStatus(paymentId: string): Promise<PaymentStatus>;
   /** Sends the whole payment back to the customer's bank or e-wallet. Returns the gateway's refund id. */
   refund(charge: { paymentId: string; reference: string; amount: number }): Promise<string>;
 }
+
+/** What the gateway says about one charge right now. */
+export type PaymentStatus =
+  | { status: "paid"; amount: number | null; paidAt: Date | null }
+  | { status: "pending" | "failed" | "expired" | "unknown" };
 
 export type QrisInput = { reference: string; amount: number; expiresAt: Date; description: string };
 
@@ -21,6 +28,8 @@ export type PaymentEvent = {
   paymentId: string;
   status: "paid" | "failed";
   amount: number | null;
+  /** When the customer actually paid, if the gateway says. Webhooks can arrive later than that. */
+  paidAt?: Date | null;
 };
 
 export class PaymentError extends Error {

@@ -39,7 +39,7 @@ The problem it solves is small and very real: on a busy evening people wait an h
 - Every service, price and barber in plain view, so nobody has to ask. Haircut price follows the barber's level.
 - Live queue per branch and per barber, with the quietest branch marked.
 - Booking in four short steps: branch, barber (or "whoever is fastest"), services, name and WhatsApp. Pay by QRIS and the number lands in the queue only once the money arrives, so there are no ghost bookings.
-- A ticket that tells you your number, roughly when you're up and when to leave, updated live.
+- A ticket that tells you your number, roughly when you're up and when to leave, updated live. After the cut, one tap rates the barber from 1 to 5.
 - Membership card with a rotating QR, points, birthday-month discount and a prepaid balance you can top up from the phone.
 
 **For the cashier (wide desktop)**
@@ -53,7 +53,7 @@ The problem it solves is small and very real: on a busy evening people wait an h
 
 **For the owner (back office)**
 
-- Today across all branches, reports by branch, barber, service and payment method, barber commission, weekly barber rotation between branches, prices and levels, members, rules, and the WhatsApp outbox.
+- Today across all branches, reports by branch, barber, service and payment method, barber commission and each barber's average rating, weekly barber rotation between branches, prices and levels, members, rules, and the WhatsApp outbox.
 
 <table>
   <tr>
@@ -138,7 +138,7 @@ Home on mobile: LCP about 2.1 s, CLS 0.001. The cashier and back office sit behi
 ## Stack
 
 - **App:** Next.js 16.4 (App Router, Cache Components, React Compiler, typed routes), React 19.3, TypeScript 7 strict
-- **UI:** Tailwind CSS 4.3 on the project's own tokens and components, one variable font (Archivo), no UI kit
+- **UI:** Tailwind CSS 4.3 on the project's own tokens and components, two fonts with one job each (Alfa Slab One for the sign, Archivo for reading), no UI kit
 - **Data:** Supabase Postgres and Realtime Broadcast, Drizzle ORM, Zod 4
 - **Auth:** Better Auth, password for staff, phone and PIN for members, rate-limited in the database
 - **Payments:** Xendit QRIS behind a swappable provider, EDC payments recorded by the cashier
@@ -154,7 +154,7 @@ pnpm install
 pnpm dev
 ```
 
-Open http://localhost:3000. `/demo` gives one-tap logins for member, cashier and owner, `/tablet/juanda` is the counter screen and `/gaya` is the live style sheet. Data lives in memory and resets on restart.
+Open http://localhost:3000. `/demo` gives one-tap logins for member, cashier and owner, `/tablet/pulau-kalimantan` is the counter screen and `/gaya` is the live style sheet. Data lives in memory and resets on restart.
 
 To run against your own Supabase project instead:
 
@@ -188,7 +188,7 @@ The cron in `vercel.json` resets the demo every night at 00.00 WITA.
 
 - [Brief](docs/brief.md): who it's for, the rules agreed with the shop, and a change log of every decision
 - [Design doc](docs/design.md): stack, data model, domain rules, build phases and visual language
-- [Design research](docs/design-research.md): sources and lessons behind the daylight redesign
+- [Design research](docs/design-research.md): sources and lessons behind the redesigns and the brand character
 
 ---
 

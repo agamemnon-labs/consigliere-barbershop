@@ -79,7 +79,7 @@ async function Board({ slug }: { slug: string }) {
               role="status"
               className="flex items-center gap-8 rounded-3xl bg-accent px-8 py-4 text-accent-fg"
             >
-              <span className="condensed num text-8xl leading-none font-semibold">{c.ticket}</span>
+              <span className="slab text-[5.5rem] leading-none">{c.ticket}</span>
               <span className="text-4xl leading-tight">
                 Silakan ke kursi <span className="font-semibold">{c.barber}</span>
               </span>
@@ -102,9 +102,7 @@ async function Board({ slug }: { slug: string }) {
               <div className="mt-5">
                 <p className="text-lg text-muted">Di kursi</p>
                 {chair ? (
-                  <p className="condensed num text-7xl leading-none font-semibold text-accent-ink">
-                    {chair.ticket}
-                  </p>
+                  <p className="slab text-6xl leading-none text-accent-ink">{chair.ticket}</p>
                 ) : (
                   <p className="mt-1 inline-flex rounded-xl bg-mint px-3 py-1 text-3xl font-medium text-mint-ink">
                     Kosong
@@ -116,7 +114,7 @@ async function Board({ slug }: { slug: string }) {
                   <p className="text-lg text-muted">Berikutnya</p>
                   {next ? (
                     <p className="flex items-baseline gap-3">
-                      <span className="condensed num text-4xl font-semibold">{next.ticket}</span>
+                      <span className="slab text-[2rem] leading-none">{next.ticket}</span>
                       <span className="num text-lg text-muted">
                         {next.status === "called"
                           ? "dipanggil"
@@ -139,10 +137,10 @@ async function Board({ slug }: { slug: string }) {
         })}
       </ul>
 
-      <footer className="flex items-center justify-between gap-6 rounded-3xl bg-navy px-6 py-4 text-navy-fg">
+      <footer className="flex items-center justify-between gap-6 rounded-3xl bg-suit px-6 py-4 text-suit-fg">
         <p className="text-3xl font-semibold [font-stretch:110%]">
           Nggak mau nunggu di sini?
-          <span className="block text-xl font-normal text-navy-muted">
+          <span className="block text-xl font-normal text-suit-muted">
             Scan, ambil nomor dari HP, datang pas giliranmu
           </span>
         </p>

@@ -33,7 +33,7 @@ beforeAll(async () => {
     staffPassword: "x".repeat(12),
   })) as unknown as Database;
   const [a] = await db.select().from(s.users).where(eq(s.users.email, "admin@consigliere.test"));
-  const [c] = await db.select().from(s.users).where(eq(s.users.email, "kasir.juanda@consigliere.test"));
+  const [c] = await db.select().from(s.users).where(eq(s.users.email, "kasir.kalimantan@consigliere.test"));
   if (!a || !c) throw new Error("no staff");
   admin = { id: a.id };
   cashier = { id: c.id, role: c.role, branchId: c.branchId };

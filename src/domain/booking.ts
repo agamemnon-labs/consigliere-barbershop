@@ -157,3 +157,19 @@ export function leaveHint(
     leaveAt: leaveAt.getTime() <= now.getTime() ? null : shopClock(leaveAt),
   };
 }
+
+/** How long after a booking's pay window a missed payment can still claim its place in line. */
+export const LATE_NEWS_GRACE_MIN = 30;
+
+/**
+ * Whether money for a booking still buys a place in line, or becomes credit.
+ * It counts when it was paid inside the window. News of it can come a little late
+ * (a slow or missed webhook), but not so late that the customer has surely gone.
+ */
+export function paidInTime(opts: { paidAt: Date; expiresAt: Date; now: Date }): boolean {
+  const { paidAt, expiresAt, now } = opts;
+  return (
+    paidAt.getTime() <= expiresAt.getTime() &&
+    now.getTime() <= expiresAt.getTime() + LATE_NEWS_GRACE_MIN * 60_000
+  );
+}

@@ -69,3 +69,15 @@ Nopal called the dark serif look ugly, text-heavy, boxy and confusing. What chan
 - **Reports.** Ranked bars in one hue with the number written beside them; no legend for a single series, no rainbow.
 - **Checks that caught real bugs:** screenshots at 390 px (hero ticket over the headline, wait text wrapping, "± 0 mnt"); e2e on the cashier column (a select inside a grid overflowed its column and hid the next button).
 
+
+## Brand character pass, v3 (2026-11-23)
+
+Nopal: the daylight redesign was clean but plain, still "AI". The fix was character, not more decoration.
+
+- **Where generic came from.** Cool grey page, one neutral grotesque, colour-tile avatars, white rounded cards everywhere: every queue app looks like that. Nothing said barbershop, and nothing said Consigliere.
+- **Warm without the cliche.** Nopal asked for cream and light brown. The common generated look is cream plus a thin high-contrast serif plus terracotta. We kept cream and kraft for the neutrals but paired them with a heavy slab (sign painter, tonic label, fight poster), a true pole red (not clay) and bottle green, so the palette comes from a barbershop, not from a template.
+- **One loud face, used rarely.** Alfa Slab One has a single heavy weight, so it only appears big: the name, page titles, ticket numbers. Sections, lists and buttons stay in Archivo. Twelve candidates (Rokkitt, Zilla Slab, Alfa Slab One, Bevan, Corben, Ultra, Young Serif, Arvo, Big Shoulders, Limelight, Archivo condensed, Yellowtail) were rendered side by side on the cream page before choosing.
+- **Motifs from the world, each with one place.** Pole (live status), claim ticket (your number), pinstripe suit (membership), checkered floor (foot of the shop window). Using each once keeps them from turning into wallpaper.
+- **The wink lives in copy.** "Jadi orang dalam" (become an insider) for membership and "Keluarga kami" for the barbers carry the gangster theme in Indonesian without costumes. Keep it to a few phrases; instructions stay plain.
+- **Labels above titles are a tell.** "Cabang" over the branch name and the tracked "CONSIGLIERE" over the member promo were cut.
+- **Hydration bug found by instrumenting React.** The live home threw #418 with no component name. Patching the production React chunk in Playwright to log the fiber chain showed the bottom nav: its prerendered copy marked no tab, while the browser marked Beranda. Path-dependent UI in a shared layout now renders per request.

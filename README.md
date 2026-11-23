@@ -24,6 +24,7 @@
   <img alt="Better Auth" src="https://img.shields.io/badge/Better%20Auth-1.7-111111">
   <img alt="Xendit QRIS" src="https://img.shields.io/badge/Xendit-QRIS-1f5eff">
   <img alt="Vercel" src="https://img.shields.io/badge/Vercel-sin1-000000?logo=vercel&logoColor=white">
+  <img alt="Sentry" src="https://img.shields.io/badge/Sentry-errors%20%2B%20crons-362d59?logo=sentry&logoColor=white">
 </p>
 
 ![Customer phone: home, choosing a barber, the paid ticket, the member card](docs/screenshots/customer-phone.png)
@@ -144,6 +145,7 @@ Home on mobile: LCP about 2.1 s, CLS 0.001. The cashier and back office sit behi
 - **Payments:** Xendit QRIS behind a swappable provider, EDC payments recorded by the cashier
 - **Quality:** Vitest 5 with PGlite for real-Postgres tests, Playwright end-to-end, Biome, GitHub Actions CI
 - **Hosting:** Vercel functions in Singapore next to the database, nightly cron for the demo
+- **Monitoring:** Vercel Web Analytics (cookieless) and Speed Insights (Core Web Vitals from real phones), Sentry for server, browser and cron failures with no personal data attached
 
 ## Run it locally
 
@@ -181,6 +183,8 @@ pnpm e2e         # Playwright, after a build
 2. Import the repo into Vercel and add the variables from `.env.example`. For a public demo also set `DEMO_MODE=1`, `DEMO_STAFF_PASSWORD` (same as `SEED_STAFF_PASSWORD`) and `CRON_SECRET`. The build runs `pnpm build:deploy`, which migrates, seeds an empty database and then builds.
 3. After the first migration, make `postgres` own `public.broadcast_queue_change()` so it may call `realtime.send`, and revoke `execute` on it from `public, anon, authenticated`.
 4. Optional: add Xendit development keys (`XENDIT_SECRET_KEY`, `XENDIT_WEBHOOK_TOKEN`) and point the webhook at `<origin>/api/pembayaran/xendit`. Without them, payments stay in demo mode.
+5. Turn on Web Analytics and Speed Insights in the Vercel project (the components are already in the root layout).
+6. Optional: add the Sentry integration from the Vercel Marketplace and redeploy. It sets `NEXT_PUBLIC_SENTRY_DSN` (error reports on) and `SENTRY_AUTH_TOKEN`, `SENTRY_ORG`, `SENTRY_PROJECT` (readable stack traces). Without them the SDK never loads.
 
 The cron in `vercel.json` resets the demo every night at 00.00 WITA.
 

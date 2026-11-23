@@ -275,7 +275,7 @@ async function seedDemoQueue(
           ...base,
           position: 4,
           ticketNo: ticket++,
-          displayName: null,
+          displayName: name(),
           source: "walkin",
           status: "waiting",
         });

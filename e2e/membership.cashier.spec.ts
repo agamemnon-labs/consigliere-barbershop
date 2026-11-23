@@ -12,7 +12,7 @@ test("the counter signs up a member, tops up, and the member pays from balance w
   const phone = `0813${String(Date.now()).slice(-8)}`;
   await page.getByLabel("Nomor kartu atau WhatsApp").fill(phone);
   await page.getByRole("button", { name: "Cari" }).click();
-  await expect(page.getByText("Nomor ini belum jadi member")).toBeVisible();
+  await expect(page.getByText("Belum jadi member")).toBeVisible();
 
   const signUp = page.getByRole("region", { name: "Daftar member baru" });
   await signUp.getByLabel("Nama").fill("Uji Member");
@@ -38,7 +38,7 @@ test("the counter signs up a member, tops up, and the member pays from balance w
   const column = page.getByRole("region", { name: /^Antrean / }).first();
   await expect(column).toBeVisible();
   await clearColumn(column);
-  await column.getByText("+ Walk-in").click();
+  await column.locator("summary", { hasText: "Walk-in" }).click();
   await column.getByLabel("Nama (boleh kosong)").fill("Uji Member");
   await column.getByRole("button", { name: /^Tambah ke antrean/ }).click();
   await column.getByRole("button", { name: "Panggil" }).click();
@@ -67,7 +67,7 @@ test("a birthday member gets half off the haircut at the counter", async ({ page
   const column = page.getByRole("region", { name: /^Antrean / }).nth(1);
   await expect(column).toBeVisible();
   await clearColumn(column);
-  await column.getByText("+ Walk-in").click();
+  await column.locator("summary", { hasText: "Walk-in" }).click();
   await column.getByRole("button", { name: /^Tambah ke antrean/ }).click();
   await column.getByRole("button", { name: "Panggil" }).click();
   await column.getByRole("button", { name: "Duduk" }).click();

@@ -15,6 +15,7 @@ import { shopDate, weekday } from "@/domain/time";
 import { enqueue, numberSetting } from "@/server/enqueue";
 import type { PaymentEvent, PaymentProvider } from "@/server/payments";
 import { branchPrefix, getBranchQueue } from "@/server/queue";
+import { ratingFor } from "@/server/rating";
 
 /*
  * Online booking: price → pending booking + QRIS → paid webhook → queue entry.
@@ -298,6 +299,7 @@ export async function getTicket(db: Database, bookingId: string, now: Date) {
     ahead: number;
     waitMin: number;
   } | null = null;
+  let rating: number | null = null;
   if (entry) {
     const prefix = branchPrefix(branch.name);
     const queue = await getBranchQueue(branch.slug, entry.date, now, db);
@@ -310,6 +312,7 @@ export async function getTicket(db: Database, bookingId: string, now: Date) {
       ahead: live?.ahead ?? 0,
       waitMin: live?.waitMin ?? 0,
     };
+    if (place.status === "done") rating = await ratingFor(db, entry.id);
   }
 
   return {
@@ -323,6 +326,8 @@ export async function getTicket(db: Database, bookingId: string, now: Date) {
     barber: barber?.name ?? null,
     name: firstName(customer.name),
     place,
+    /** The customer's 1–5 for this visit, once given. */
+    rating,
   };
 }
 

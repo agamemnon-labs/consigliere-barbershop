@@ -20,6 +20,8 @@ test("the owner sees today and a report with CSV export", async ({ page }) => {
   await page.getByRole("navigation", { name: "Back office" }).getByRole("link", { name: "Laporan" }).click();
   await page.getByRole("link", { name: "7 hari" }).click();
   await expect(page.getByRole("region", { name: "Komisi barber" })).toBeVisible();
+  // Seeded online visits carry ratings, so every barber row reads "x,y dari 5".
+  await expect(page.getByRole("region", { name: "Rating barber" })).toContainText(/\d,\d dari 5/);
   const href = await page.getByRole("link", { name: "Unduh CSV" }).first().getAttribute("href");
   const res = await page.request.get(href ?? "");
   expect(res.status()).toBe(200);

@@ -9,7 +9,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "build:deploy": "sh -c 'if [ -n \"$DATABASE_URL_DIRECT\" ]; then drizzle-kit migrate || exit 1; fi; next build'",
+    "build:deploy": "sh -c 'if [ -n \"$DATABASE_URL_DIRECT\" ]; then drizzle-kit migrate || exit 1; node src/db/seed/run.ts --if-empty || exit 1; fi; next build'",
     "start": "next start",
     "check": "biome check",
     "check:fix": "biome check --write",

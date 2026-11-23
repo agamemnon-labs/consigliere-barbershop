@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import { BackLink } from "@/components/back-link";
 import { ButtonLink } from "@/components/button";
-import { Credits } from "@/components/credits";
+import { ChevronDownIcon, LogOutIcon, PlusIcon } from "@/components/icons";
+import { Notice } from "@/components/notice";
+import { Pole } from "@/components/pole";
 import { QrCode } from "@/components/qr-code";
-import { Rule } from "@/components/rule";
+import { Screen } from "@/components/screen";
+import { brand } from "@/config/brand";
 import { getDb } from "@/db";
 import { formatRupiah } from "@/domain/money";
 import { shortDate } from "@/domain/schedule";
@@ -18,13 +20,11 @@ export const metadata: Metadata = { title: "Kartu member", robots: { index: fals
 /** The member's card on their phone: the QR the cashier scans, points, balance, last visits. */
 export default function MemberCardPage() {
   return (
-    <div className="mx-auto flex max-w-md flex-col px-6 pt-[calc(1rem+env(safe-area-inset-top))]">
-      <BackLink href="/">Beranda</BackLink>
-      <Suspense fallback={<p className="py-16 text-muted">Membuka kartu…</p>}>
+    <Screen back={{ href: "/", label: "Beranda" }}>
+      <Suspense fallback={<div aria-busy className="h-112 rounded-3xl bg-sunk" />}>
         <Card />
       </Suspense>
-      <Credits />
-    </div>
+    </Screen>
   );
 }
 
@@ -33,84 +33,109 @@ async function Card() {
   const now = new Date();
   const card = await memberCard(await getDb(), userId, now);
   if (!card) {
-    return <p className="py-16 text-muted">Kartu belum ditemukan. Tanyakan ke kasir, ya.</p>;
+    return <Notice title="Kartu belum ditemukan">Tanyakan ke kasir, ya.</Notice>;
   }
   const { rule } = card;
-  const toNext = rule.redeemPoints - (card.points % rule.redeemPoints);
+  const progress = card.points % rule.redeemPoints;
   const vouchers = Math.floor(card.points / rule.redeemPoints);
 
   return (
     <>
-      <section className="pt-10">
-        <p className="label">Kartu member</p>
-        <h1 className="mt-3 text-4xl leading-tight">{card.name}</h1>
-      </section>
-
-      <figure className="stub mt-8 rounded-xs px-6 py-6" aria-label={`Kartu member ${card.memberNo}`}>
-        <div className="flex items-baseline justify-between">
-          <span className="text-[0.625rem] font-medium uppercase tracking-[0.2em] opacity-60">Member</span>
-          <span className="num text-xl text-accent">{card.memberNo}</span>
+      <h1 className="sr-only">Kartu member {card.name}</h1>
+      <figure
+        className="pinstripe step-in rounded-3xl p-5 text-navy-fg"
+        aria-label={`Kartu member ${card.memberNo}`}
+      >
+        <div className="flex items-center justify-between">
+          <span className="inline-flex items-center gap-2">
+            <Pole />
+            <span className="wide text-sm font-semibold uppercase tracking-[0.04em]">{brand.name}</span>
+          </span>
+          <span className="text-sm text-navy-muted">Member</span>
         </div>
-        <div className="mx-auto mt-5 w-full max-w-56">
+        <p className="mt-6 text-2xl font-semibold">{card.name}</p>
+        <p className="condensed num text-lg text-navy-muted">{card.memberNo}</p>
+        <div className="mx-auto mt-5 w-full max-w-52 rounded-2xl bg-surface p-2">
           <QrCode value={card.memberNo} label={`QR kartu member ${card.memberNo}`} />
         </div>
-        <figcaption className="mt-4 text-center text-sm opacity-70">
+        <figcaption className="mt-3 text-center text-sm text-navy-muted">
           Tunjukkan ke kasir sebelum bayar
         </figcaption>
       </figure>
 
       {card.status !== "active" ? (
-        <p className="mt-6 text-accent-ink">Kartu ini sedang dinonaktifkan. Hubungi kami lewat WhatsApp.</p>
+        <Notice tone="alert" title="Kartu sedang nonaktif" className="mt-4">
+          Hubungi kami lewat WhatsApp.
+        </Notice>
+      ) : null}
+      {card.birthday ? (
+        <Notice tone="ok" title="Selamat ulang tahun" className="mt-4">
+          Haircut bulan ini setengah harga.
+        </Notice>
       ) : null}
 
-      <dl className="mt-10 grid grid-cols-2 gap-x-6 border-y border-rule py-5">
-        <div>
+      <dl className="mt-4 grid grid-cols-2 gap-3">
+        <div className="rounded-2xl border border-rule bg-surface px-4 py-3">
           <dt className="label">Poin</dt>
-          <dd className="num mt-1 text-3xl">{card.points}</dd>
+          <dd className="num mt-0.5 text-2xl font-semibold">{card.points}</dd>
+          <dd className="mt-2">
+            <span className="block h-1.5 overflow-hidden rounded-full bg-sunk">
+              <span
+                className="block h-full rounded-full bg-blue"
+                style={{ width: `${Math.round((progress / rule.redeemPoints) * 100)}%` }}
+              />
+            </span>
+            <span className="mt-1.5 block text-xs text-muted">
+              {vouchers > 0
+                ? `Bisa tukar ${vouchers}× ${formatRupiah(rule.redeemValue)}`
+                : `${rule.redeemPoints - progress} lagi ke potongan ${formatRupiah(rule.redeemValue)}`}
+            </span>
+          </dd>
         </div>
-        <div className="text-right">
+        <div className="flex flex-col rounded-2xl border border-rule bg-surface px-4 py-3">
           <dt className="label">Saldo</dt>
-          <dd className="num mt-1 text-3xl">{formatRupiah(card.balance)}</dd>
+          <dd className="num mt-0.5 text-2xl font-semibold">{formatRupiah(card.balance)}</dd>
+          <dd className="mt-auto pt-2">
+            <ButtonLink href="/kartu/isi" variant="soft" className="min-h-11! w-full px-3 text-[0.9375rem]">
+              <PlusIcon size={18} />
+              Isi saldo
+            </ButtonLink>
+          </dd>
         </div>
       </dl>
-      <p className="mt-4 text-[0.9375rem] text-muted">
-        {vouchers > 0
-          ? `Bisa ditukar ${vouchers} × ${formatRupiah(rule.redeemValue)} di kasir`
-          : `${toNext} poin lagi ke potongan ${formatRupiah(rule.redeemValue)}`}
-      </p>
-      <div className="mt-6">
-        <ButtonLink href="/kartu/isi" variant="quiet" block>
-          Isi saldo
-        </ButtonLink>
-      </div>
-      {card.birthday ? (
-        <p className="mt-4 border-l-2 border-accent pl-4">
-          Selamat ulang tahun. Haircut bulan ini setengah harga
-        </p>
-      ) : null}
 
-      <Rule label="Kunjungan terakhir" className="mt-12" />
-      {card.visits.length === 0 ? (
-        <p className="mt-5 text-muted">Belum ada kunjungan.</p>
-      ) : (
-        <ul className="mt-3">
-          {card.visits.map((v) => (
-            <li key={v.id} className="border-b border-rule py-3">
-              <div className="flex items-baseline justify-between gap-4">
-                <span className="num text-sm text-muted">{shortDate(shopDate(v.createdAt))}</span>
-                <span className="num">{formatRupiah(v.total)}</span>
-              </div>
-              <p className="mt-0.5 text-[0.9375rem]">
-                {v.items.map((i) => i.name).join(", ")}
-                <span className="text-muted"> · {v.branch}</span>
-              </p>
-            </li>
-          ))}
-        </ul>
-      )}
+      <details className="row mt-4 rounded-2xl border border-rule bg-surface">
+        <summary className="flex min-h-14 items-center gap-3 px-4">
+          <span className="flex-1 font-medium">Kunjungan terakhir</span>
+          <span className="num text-muted">{card.visits.length}</span>
+          <ChevronDownIcon className="row-mark text-faint" />
+        </summary>
+        {card.visits.length === 0 ? (
+          <p className="border-t border-rule px-4 py-4 text-muted">Belum ada kunjungan.</p>
+        ) : (
+          <ul className="border-t border-rule">
+            {card.visits.map((v) => (
+              <li key={v.id} className="border-b border-rule px-4 py-3 last:border-b-0">
+                <div className="flex items-baseline justify-between gap-4">
+                  <span className="font-medium">{v.branch}</span>
+                  <span className="num">{formatRupiah(v.total)}</span>
+                </div>
+                <p className="mt-0.5 text-sm text-muted">
+                  <span className="num">{shortDate(shopDate(v.createdAt))}</span>,{" "}
+                  {v.items.map((i) => i.name).join(", ")}
+                </p>
+              </li>
+            ))}
+          </ul>
+        )}
+      </details>
 
-      <form action={signOutMember} className="mt-10 text-center">
-        <button type="submit" className="label min-h-12 hover:text-fg">
+      <form action={signOutMember} className="mt-6 flex justify-center">
+        <button
+          type="submit"
+          className="inline-flex min-h-12 items-center gap-2 px-3 text-[0.9375rem] text-muted hover:text-fg"
+        >
+          <LogOutIcon size={18} />
           Keluar dari kartu
         </button>
       </form>

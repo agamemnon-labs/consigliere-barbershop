@@ -2,7 +2,9 @@
 
 import { useActionState, useState } from "react";
 import { buttonClass } from "@/components/button";
-import { formatRupiah } from "@/domain/money";
+import { Choice } from "@/components/choice";
+import { Notice } from "@/components/notice";
+import { formatRupiah, formatShort } from "@/domain/money";
 import { startTopup, type TopupState } from "@/server/actions/topup";
 
 type Package = { id: string; pay: number; get: number };
@@ -13,39 +15,36 @@ export function TopupForm({ packages }: { packages: Package[] }) {
   const pkg = packages.find((p) => p.id === picked);
   return (
     <form action={action} className="flex flex-col">
-      <fieldset className="border-t border-rule">
+      <fieldset className="grid gap-2.5">
         <legend className="sr-only">Pilih paket</legend>
         {packages.map((p) => (
-          <label
+          <Choice
             key={p.id}
-            className="flex min-h-16 cursor-pointer items-center gap-4 border-b border-rule py-3"
-          >
-            <input
-              type="radio"
-              name="package"
-              value={p.id}
-              checked={picked === p.id}
-              onChange={() => setPicked(p.id)}
-              className="size-5 shrink-0 accent-fg"
-            />
-            <span className="flex-1">
-              <span className="num block text-lg">{formatRupiah(p.pay)}</span>
-              <span className="mt-0.5 block text-sm text-muted">
-                {p.get > p.pay ? `Jadi saldo ${formatRupiah(p.get)}` : "Tanpa bonus"}
-              </span>
-            </span>
-            {p.get > p.pay ? <span className="num text-sm">+{formatRupiah(p.get - p.pay)}</span> : null}
-          </label>
+            type="radio"
+            name="package"
+            value={p.id}
+            checked={picked === p.id}
+            onChange={() => setPicked(p.id)}
+            title={`Bayar ${formatRupiah(p.pay)}`}
+            detail={p.get > p.pay ? `Jadi saldo ${formatRupiah(p.get)}` : "Tanpa bonus"}
+            detailTone={p.get > p.pay ? "ok" : "muted"}
+            aside={p.get > p.pay ? `+${formatShort(p.get - p.pay)}` : ""}
+          />
         ))}
       </fieldset>
       {state.error ? (
-        <p role="alert" className="mt-4 text-sm text-accent-ink">
-          {state.error}
-        </p>
+        <Notice title="Belum bisa lanjut" tone="alert" className="mt-4">
+          <span role="alert">{state.error}</span>
+        </Notice>
       ) : null}
-      <button type="submit" className={`${buttonClass("accent", true)} mt-8`} disabled={pending || !pkg}>
-        {pending ? "Menyiapkan QRIS…" : pkg ? `Bayar ${formatRupiah(pkg.pay)} dengan QRIS` : "Pilih paket"}
-      </button>
+
+      <div className="fixed inset-x-0 bottom-0 z-30 border-t border-rule bg-surface pb-[env(safe-area-inset-bottom)]">
+        <div className="mx-auto max-w-md px-4 py-3">
+          <button type="submit" className={buttonClass("primary", true)} disabled={pending || !pkg}>
+            {pending ? "Menyiapkan QRIS…" : pkg ? `Bayar ${formatRupiah(pkg.pay)} pakai QRIS` : "Pilih paket"}
+          </button>
+        </div>
+      </div>
     </form>
   );
 }

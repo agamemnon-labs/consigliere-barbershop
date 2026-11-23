@@ -1,76 +1,131 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { BackLink } from "@/components/back-link";
-import { Credits } from "@/components/credits";
-import { Rule } from "@/components/rule";
+import type { ComponentType, ReactNode } from "react";
+import {
+  CardIcon,
+  ChartIcon,
+  ChevronRightIcon,
+  MonitorIcon,
+  TicketIcon,
+  WalletIcon,
+} from "@/components/icons";
+import { Screen } from "@/components/screen";
 import { demoSignIn } from "@/server/actions/demo";
 import { demoMode } from "@/server/env";
 
 export const metadata: Metadata = { title: "Coba demo", robots: { index: false } };
 
+type Icon = ComponentType<{ size?: number }>;
+
 const roles = [
-  { as: "member", title: "Member", detail: "Kartu, poin, isi saldo dari HP" },
-  { as: "cashier", title: "Kasir Juanda", detail: "Papan antrean, panggil, bayar" },
-  { as: "owner", title: "Pemilik", detail: "Laporan, komisi, rotasi, harga" },
+  {
+    as: "member",
+    title: "Member",
+    detail: "Kartu, poin, isi saldo dari HP",
+    icon: CardIcon,
+    tile: "bg-navy text-navy-fg",
+  },
+  {
+    as: "cashier",
+    title: "Kasir Juanda",
+    detail: "Papan antrean, panggil, bayar",
+    icon: WalletIcon,
+    tile: "bg-butter text-butter-ink",
+  },
+  {
+    as: "owner",
+    title: "Pemilik",
+    detail: "Laporan, komisi, rotasi, harga",
+    icon: ChartIcon,
+    tile: "bg-blue-soft text-blue",
+  },
 ] as const;
 
 /** The guided demo: one tap to see the app from each side of the counter. */
 export default function DemoPage() {
   if (!demoMode()) notFound();
   return (
-    <div className="mx-auto flex max-w-md flex-col px-6 pt-[calc(1rem+env(safe-area-inset-top))]">
-      <BackLink href="/">Beranda</BackLink>
-      <header className="pt-10 pb-10">
-        <p className="label">Demo</p>
-        <h1 className="mt-3 text-5xl leading-[1.05]">Coba sebagai</h1>
-        <p className="mt-4 text-muted">Satu ketuk, langsung masuk. Data direset tiap malam</p>
-      </header>
+    <Screen back={{ href: "/", label: "Beranda" }}>
+      <h1 className="text-[2rem] leading-tight">Coba sebagai siapa?</h1>
+      <p className="mt-2 text-muted">Satu ketuk, langsung masuk. Data direset tiap malam</p>
 
-      <Rule label="Tanpa login" />
-      <ul className="mt-2">
-        <Row href="/antre" title="Pelanggan" detail="Ambil nomor dan bayar QRIS" />
-        <Row href="/tablet/juanda" title="Layar tablet" detail="Nomor yang dipanggil di toko" />
+      <h2 className="mt-7 mb-2 text-[0.9375rem] font-medium text-muted">Tanpa login</h2>
+      <ul className="overflow-hidden rounded-2xl border border-rule bg-surface">
+        <Row
+          as={(c) => (
+            <Link href="/antre" className={c}>
+              <Inner
+                icon={TicketIcon}
+                tile="bg-accent text-accent-fg"
+                title="Pelanggan"
+                detail="Ambil nomor dan bayar QRIS"
+              />
+            </Link>
+          )}
+        />
+        <Row
+          as={(c) => (
+            <Link href="/tablet/juanda" className={c}>
+              <Inner
+                icon={MonitorIcon}
+                tile="bg-mint text-mint-ink"
+                title="Layar tablet"
+                detail="Nomor yang dipanggil di toko"
+              />
+            </Link>
+          )}
+        />
       </ul>
 
-      <Rule label="Masuk sebagai" className="mt-10" />
-      <ul className="mt-2">
+      <h2 className="mt-6 mb-2 text-[0.9375rem] font-medium text-muted">Masuk sebagai</h2>
+      <ul className="overflow-hidden rounded-2xl border border-rule bg-surface">
         {roles.map((r) => (
-          <li key={r.as} className="border-b border-rule">
-            <form action={demoSignIn.bind(null, r.as)}>
-              <button
-                type="submit"
-                className="group flex min-h-16 w-full items-center justify-between gap-4 py-3 text-left"
-              >
-                <span>
-                  <span className="block font-display text-xl group-hover:text-accent-ink">{r.title}</span>
-                  <span className="mt-0.5 block text-sm text-muted">{r.detail}</span>
-                </span>
-                <span aria-hidden className="text-muted">
-                  →
-                </span>
-              </button>
-            </form>
-          </li>
+          <Row
+            key={r.as}
+            as={(c) => (
+              <form action={demoSignIn.bind(null, r.as)}>
+                <button type="submit" className={`${c} w-full text-left`}>
+                  <Inner icon={r.icon} tile={r.tile} title={r.title} detail={r.detail} />
+                </button>
+              </form>
+            )}
+          />
         ))}
       </ul>
-      <Credits />
-    </div>
+    </Screen>
   );
 }
 
-function Row({ href, title, detail }: { href: "/antre" | "/tablet/juanda"; title: string; detail: string }) {
+function Row({ as }: { as: (className: string) => ReactNode }) {
   return (
-    <li className="border-b border-rule">
-      <Link href={href} className="group flex min-h-16 items-center justify-between gap-4 py-3">
-        <span>
-          <span className="block font-display text-xl group-hover:text-accent-ink">{title}</span>
-          <span className="mt-0.5 block text-sm text-muted">{detail}</span>
-        </span>
-        <span aria-hidden className="text-muted">
-          →
-        </span>
-      </Link>
+    <li className="border-b border-rule last:border-b-0">
+      {as("flex min-h-18 items-center gap-3 px-4 py-3 transition-colors hover:bg-bg")}
     </li>
+  );
+}
+
+function Inner({
+  icon: I,
+  tile,
+  title,
+  detail,
+}: {
+  icon: Icon;
+  tile: string;
+  title: string;
+  detail: string;
+}) {
+  return (
+    <>
+      <span className={`inline-flex size-11 shrink-0 items-center justify-center rounded-xl ${tile}`}>
+        <I size={22} />
+      </span>
+      <span className="flex-1">
+        <span className="block font-semibold">{title}</span>
+        <span className="block text-sm text-muted">{detail}</span>
+      </span>
+      <ChevronRightIcon className="text-faint" />
+    </>
   );
 }

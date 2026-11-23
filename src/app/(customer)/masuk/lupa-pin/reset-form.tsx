@@ -11,7 +11,7 @@ export function ResetPinForm() {
   const phone = state.values?.phone;
   if (!state.sent) {
     return (
-      <form action={action} className="grid gap-6">
+      <form action={action} className="grid gap-5">
         <Field
           label="Nomor WhatsApp"
           name="phone"
@@ -22,20 +22,20 @@ export function ResetPinForm() {
           defaultValue={phone}
           error={state.error}
         />
-        <Button type="submit" block disabled={pending}>
+        <Button type="submit" variant="dark" block disabled={pending} className="mt-1">
           {pending ? "Mengirim…" : "Kirim kode"}
         </Button>
       </form>
     );
   }
   return (
-    <form action={action} className="grid gap-6">
+    <form action={action} className="grid gap-5">
       <input type="hidden" name="phone" value={phone ?? ""} />
-      <p className="text-muted">
-        Kalau {phone} terdaftar sebagai member, kodenya sudah dikirim. Berlaku 10 menit.
-      </p>
+      <Notice tone="ok" title="Kode terkirim">
+        Kalau {phone} terdaftar sebagai member, kodenya sudah masuk WhatsApp. Berlaku 10 menit.
+      </Notice>
       {state.demoCode ? (
-        <Notice title="Mode demo">
+        <Notice tone="info" title="Mode demo">
           WhatsApp belum tersambung, jadi kodenya kami tampilkan di sini:{" "}
           <span className="num">{state.demoCode}</span>
         </Notice>
@@ -67,10 +67,16 @@ export function ResetPinForm() {
         required
         error={state.error}
       />
-      <Button type="submit" block disabled={pending}>
+      <Button type="submit" variant="dark" block disabled={pending} className="mt-1">
         {pending ? "Menyimpan…" : "Simpan PIN baru"}
       </Button>
-      <button type="submit" name="step" value="send" formNoValidate className="label min-h-12 hover:text-fg">
+      <button
+        type="submit"
+        name="step"
+        value="send"
+        formNoValidate
+        className="min-h-12 text-[0.9375rem] font-medium text-blue hover:underline"
+      >
         Kirim ulang kode
       </button>
     </form>

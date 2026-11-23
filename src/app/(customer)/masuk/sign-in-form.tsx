@@ -8,7 +8,7 @@ import { type FormState, signInMember } from "@/server/actions/membership";
 export function MemberSignInForm() {
   const [state, action, pending] = useActionState<FormState, FormData>(signInMember, {});
   return (
-    <form action={action} className="grid gap-6">
+    <form action={action} className="grid gap-5">
       <Field
         label="Nomor WhatsApp"
         name="phone"
@@ -28,7 +28,7 @@ export function MemberSignInForm() {
         required
         error={state.error}
       />
-      <Button type="submit" block disabled={pending}>
+      <Button type="submit" variant="dark" block disabled={pending} className="mt-1">
         {pending ? "Memeriksa…" : "Masuk"}
       </Button>
     </form>

@@ -2,13 +2,13 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { connection } from "next/server";
 import { Suspense } from "react";
-import { BackLink } from "@/components/back-link";
 import { ButtonLink } from "@/components/button";
-import { Credits } from "@/components/credits";
+import { CheckIcon } from "@/components/icons";
 import { Notice } from "@/components/notice";
-import { PayCountdown, SimulatePay } from "@/components/pay-controls";
+import { SimulatePay } from "@/components/pay-controls";
 import { PollRefresh } from "@/components/poll-refresh";
-import { QrCode } from "@/components/qr-code";
+import { QrisPanel } from "@/components/qris-panel";
+import { Screen } from "@/components/screen";
 import { getDb } from "@/db";
 import { formatRupiah } from "@/domain/money";
 import { simulateTopup } from "@/server/actions/topup";
@@ -21,13 +21,11 @@ export const metadata: Metadata = { title: "Bayar top-up", robots: { index: fals
 /** Pay one top-up by QRIS, then see the balance it added. */
 export default function TopupPayPage({ params }: PageProps<"/kartu/isi/[id]">) {
   return (
-    <div className="mx-auto flex max-w-md flex-col px-6 pt-[calc(1rem+env(safe-area-inset-top))]">
-      <BackLink href="/kartu">Kartu member</BackLink>
-      <Suspense fallback={<p className="py-16 text-muted">Membuka pembayaran…</p>}>
+    <Screen back={{ href: "/kartu", label: "Kartu member" }}>
+      <Suspense fallback={<div aria-busy className="h-96 rounded-3xl bg-sunk" />}>
         <Pay params={params} />
       </Suspense>
-      <Credits />
-    </div>
+    </Screen>
   );
 }
 
@@ -43,10 +41,13 @@ async function Pay({ params }: { params: PageProps<"/kartu/isi/[id]">["params"] 
 
   if (order.status === "paid") {
     return (
-      <section className="pt-10">
-        <p className="label">Top-up berhasil</p>
-        <h1 className="mt-3 text-4xl leading-tight">Saldo bertambah {formatRupiah(order.get)}</h1>
-        <ButtonLink href="/kartu" className="mt-10" block>
+      <section className="step-in">
+        <span className="inline-flex size-12 items-center justify-center rounded-2xl bg-mint text-mint-ink">
+          <CheckIcon size={26} strokeWidth={2.5} />
+        </span>
+        <h1 className="mt-4 text-[1.75rem]">Saldo bertambah {formatRupiah(order.get)}</h1>
+        <p className="mt-2 text-muted">Langsung bisa dipakai bayar di kasir semua cabang.</p>
+        <ButtonLink href="/kartu" className="mt-6" block>
           Lihat kartu
         </ButtonLink>
       </section>
@@ -54,39 +55,31 @@ async function Pay({ params }: { params: PageProps<"/kartu/isi/[id]">["params"] 
   }
   if (order.status !== "pending") {
     return (
-      <section className="pt-10">
-        <h1 className="text-4xl leading-tight">Waktu bayar habis</h1>
-        <p className="mt-4 text-muted">Belum ada uang yang masuk. Silakan ulangi.</p>
-        <ButtonLink href="/kartu/isi" className="mt-10" block>
+      <section className="step-in">
+        <h1 className="text-[1.75rem]">Waktu bayar habis</h1>
+        <p className="mt-2 text-muted">Belum ada uang yang masuk. Silakan ulangi.</p>
+        <ButtonLink href="/kartu/isi" className="mt-6" block>
           Isi saldo lagi
         </ButtonLink>
       </section>
     );
   }
   return (
-    <section className="pt-10">
-      <p className="label">Top-up · {order.memberNo}</p>
-      <h1 className="mt-3 text-4xl leading-tight">Bayar dengan QRIS</h1>
-      <p className="mt-4 text-muted">Saldo masuk {formatRupiah(order.get)} begitu pembayaran berhasil</p>
-      <div className="mx-auto mt-8 w-full max-w-72">
-        {order.qrString ? (
-          <QrCode value={order.qrString} label={`QRIS untuk membayar ${formatRupiah(order.pay)}`} />
-        ) : (
-          <p className="text-muted">Menyiapkan QRIS…</p>
-        )}
+    <section className="step-in">
+      <p className="label">Top-up kartu {order.memberNo}</p>
+      <h1 className="mt-1 text-[1.75rem]">Bayar dengan QRIS</h1>
+      <div className="mt-5">
+        <QrisPanel qrString={order.qrString} amount={order.pay} expiresAt={order.expiresAt} />
       </div>
-      <p className="mt-6 flex items-baseline justify-between">
-        <span className="num text-3xl text-accent-ink">{formatRupiah(order.pay)}</span>
-        <span className="text-sm text-muted">
-          Sisa waktu <PayCountdown until={order.expiresAt.toISOString()} />
-        </span>
+      <p className="mt-4 text-[0.9375rem] text-muted">
+        Saldo bertambah {formatRupiah(order.get)} begitu pembayaran berhasil.
       </p>
       {demo ? (
-        <div className="mt-8">
-          <Notice title="Mode demo">QR ini tidak bisa dibayar sungguhan. Tekan tombol di bawah</Notice>
-          <div className="mt-5">
-            <SimulatePay id={order.id} simulate={simulateTopup} />
-          </div>
+        <div className="mt-5 grid gap-3">
+          <Notice tone="info" title="Mode demo">
+            QR ini tidak bisa dibayar sungguhan. Pakai tombol ini untuk pura-pura bayar.
+          </Notice>
+          <SimulatePay id={order.id} simulate={simulateTopup} />
         </div>
       ) : null}
       <PollRefresh />

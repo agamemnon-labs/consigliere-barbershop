@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import { BackLink } from "@/components/back-link";
-import { Credits } from "@/components/credits";
+import { Notice } from "@/components/notice";
+import { Screen } from "@/components/screen";
 import { getDb } from "@/db";
 import { requireMemberUserId } from "@/server/session";
 import { topupPackages } from "@/server/topup";
@@ -12,25 +12,23 @@ export const metadata: Metadata = { title: "Isi saldo", robots: { index: false }
 /** Member tops up from the phone: pick a package, pay by QRIS. */
 export default function TopupPage() {
   return (
-    <div className="mx-auto flex max-w-md flex-col px-6 pt-[calc(1rem+env(safe-area-inset-top))]">
-      <BackLink href="/kartu">Kartu member</BackLink>
-      <header className="pt-10 pb-8">
-        <p className="label">Saldo member</p>
-        <h1 className="mt-3 text-5xl leading-[1.05]">Isi saldo</h1>
-        <p className="mt-4 text-muted">Bayar QRIS, saldo langsung masuk</p>
-      </header>
-      <Suspense fallback={<p className="py-10 text-muted">Memuat paket…</p>}>
-        <Packages />
-      </Suspense>
-      <Credits />
-    </div>
+    <Screen back={{ href: "/kartu", label: "Kartu member" }}>
+      <h1 className="text-[2rem] leading-tight">Isi saldo</h1>
+      <p className="mt-2 text-muted">
+        Bayar pakai QRIS, saldo langsung masuk. Makin besar, makin banyak bonusnya
+      </p>
+      <div className="mt-5">
+        <Suspense fallback={<div aria-busy className="h-60 rounded-2xl bg-sunk" />}>
+          <Packages />
+        </Suspense>
+      </div>
+    </Screen>
   );
 }
 
 async function Packages() {
   await requireMemberUserId();
   const packages = await topupPackages(await getDb());
-  if (packages.length === 0)
-    return <p className="text-muted">Belum ada paket top-up. Tanyakan ke kasir, ya.</p>;
+  if (packages.length === 0) return <Notice title="Belum ada paket">Tanyakan ke kasir, ya.</Notice>;
   return <TopupForm packages={packages.map((p) => ({ id: p.id, pay: p.pay, get: p.get }))} />;
 }

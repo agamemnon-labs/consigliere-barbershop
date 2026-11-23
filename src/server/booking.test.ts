@@ -104,7 +104,7 @@ describe("online booking", () => {
   });
 
   it("credits a late payment even when nothing marked the booking expired yet", async () => {
-    const booking = await haircutFor("pramuka", "6286666666666");
+    const booking = await haircutFor("belatuk", "6286666666666");
     const result = await settlePayment(
       db,
       { reference: booking.id, paymentId: booking.paymentId ?? "", status: "paid", amount: booking.amount },

@@ -383,6 +383,8 @@ export const queueEntries = pgTable(
     lateMoves: smallint().notNull().default(0),
     bookingId: uuid().references(() => bookings.id),
     estimatedMin: smallint().notNull(),
+    /** When the "2 people left" WhatsApp went out, or was skipped because the line was already short. */
+    nearAlertAt: timestamp({ withTimezone: true }),
     createdAt: createdAt(),
   },
   (t) => [index().on(t.barberId, t.date, t.position), uniqueIndex().on(t.branchId, t.date, t.ticketNo)],
@@ -534,12 +536,30 @@ export const auditLog = pgTable(
   (t) => [index().on(t.entity, t.createdAt)],
 ).enableRLS();
 
-/** WhatsApp messages (demo implementation writes here instead of sending). */
-export const outbox = pgTable("outbox", {
-  id: id(),
-  channel: text().notNull().default("whatsapp"),
-  to: text().notNull(),
-  body: text().notNull(),
-  sentAt: timestamp({ withTimezone: true }),
-  createdAt: createdAt(),
-}).enableRLS();
+export const outboxStatus = pgEnum("outbox_status", ["pending", "sent", "failed", "logged", "skipped"]);
+
+/**
+ * WhatsApp messages. Every message is written here first, then sent through the
+ * WhatsApp Cloud API when it is configured, or only logged when it isn't.
+ * `body` is the readable copy for the admin log (one-time codes masked);
+ * `params` holds the template values until the message is handed off, then is cleared.
+ */
+export const outbox = pgTable(
+  "outbox",
+  {
+    id: id(),
+    channel: text().notNull().default("whatsapp"),
+    /** "otp" (forgot PIN) or "queue_near" (2 people left). Null on rows from before kinds. */
+    kind: text(),
+    to: text().notNull(),
+    body: text().notNull(),
+    params: jsonb().$type<string[]>(),
+    status: outboxStatus().notNull().default("logged"),
+    /** WhatsApp message id (wamid…) once Meta accepted it. */
+    providerId: text(),
+    error: text(),
+    sentAt: timestamp({ withTimezone: true }),
+    createdAt: createdAt(),
+  },
+  (t) => [index().on(t.to, t.createdAt)],
+).enableRLS();

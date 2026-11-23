@@ -3,6 +3,7 @@ import { StaffTabs } from "@/components/staff-tabs";
 const TABS = [
   { href: "/admin", label: "Hari ini", exact: true },
   { href: "/admin/laporan", label: "Laporan" },
+  { href: "/admin/online", label: "Bayar online" },
   { href: "/admin/rotasi", label: "Rotasi" },
   { href: "/admin/harga", label: "Harga" },
   { href: "/admin/barber", label: "Barber" },

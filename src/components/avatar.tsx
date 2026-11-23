@@ -1,6 +1,7 @@
 /*
- * A barber's colour tile: their initial on one of four chair-and-pole tints. There are no
- * staff photos in a portfolio demo, so the tile says who it is without pretending to be a face.
+ * A barber's monogram: their initial in sign-painter slab on a round tint, like a stamp on a
+ * shop card. There are no staff photos in a portfolio demo, so it says who it is without
+ * pretending to be a face.
  */
 
 const tints = [
@@ -17,9 +18,9 @@ function tintFor(name: string) {
 }
 
 const sizes = {
-  sm: "size-10 rounded-xl text-lg",
-  md: "size-12 rounded-2xl text-xl",
-  lg: "size-16 rounded-2xl text-3xl",
+  sm: "size-10 text-lg",
+  md: "size-12 text-xl",
+  lg: "size-16 text-[1.75rem]",
 } as const;
 
 export function Avatar({
@@ -34,7 +35,7 @@ export function Avatar({
   return (
     <span
       aria-hidden
-      className={`condensed inline-flex shrink-0 items-center justify-center font-semibold ${sizes[size]} ${tintFor(name)} ${className}`}
+      className={`slab inline-flex shrink-0 items-center justify-center rounded-full leading-none ${sizes[size]} ${tintFor(name)} ${className}`}
     >
       {name.slice(0, 1).toUpperCase()}
     </span>

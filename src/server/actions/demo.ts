@@ -8,7 +8,7 @@ import { demoMode, env } from "@/server/env";
 
 const STAFF = {
   owner: { email: "owner@consigliere.test", home: "/admin" },
-  cashier: { email: "kasir.juanda@consigliere.test", home: "/kasir" },
+  cashier: { email: "kasir.kalimantan@consigliere.test", home: "/kasir" },
 } as const;
 
 /** Public demo only: sign in as a demo account with one tap. */

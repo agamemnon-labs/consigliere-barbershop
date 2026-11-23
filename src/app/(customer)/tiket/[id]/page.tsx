@@ -10,6 +10,7 @@ import { SimulatePay } from "@/components/pay-controls";
 import { Pole } from "@/components/pole";
 import { PollRefresh } from "@/components/poll-refresh";
 import { QrisPanel } from "@/components/qris-panel";
+import { RateVisit } from "@/components/rate-visit";
 import { RememberTicket } from "@/components/remember-ticket";
 import { Screen } from "@/components/screen";
 import { Ticket as TicketCard } from "@/components/ticket";
@@ -18,6 +19,7 @@ import { leaveHint } from "@/domain/booking";
 import { formatRupiah } from "@/domain/money";
 import { shopClock, shopDate } from "@/domain/time";
 import { simulatePayment } from "@/server/actions/booking";
+import { rate } from "@/server/actions/rating";
 import { getTicket, type Ticket } from "@/server/booking";
 import { paymentProvider } from "@/server/payments";
 
@@ -194,6 +196,7 @@ function InLine({ ticket, place, now }: { ticket: Ticket; place: Place; now: Dat
           </Status>
           <h1 className="mt-2 text-[1.75rem]">Terima kasih, {ticket.name}</h1>
           <p className="mt-2 text-muted">Sampai ketemu lagi di {ticket.branch.name}.</p>
+          <RateVisit bookingId={ticket.id} barber={ticket.barber} given={ticket.rating} rate={rate} />
           <ButtonLink href="/kartu" variant="quiet" block className="mt-5">
             Lihat kartu member
           </ButtonLink>

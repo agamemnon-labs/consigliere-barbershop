@@ -38,7 +38,7 @@ export async function seed(db: AnyDb, options: SeedOptions) {
 
   await db.transaction(async (tx) => {
     await tx.execute(sql`truncate table
-      audit_log, outbox, topup_orders, point_ledger, balance_ledger, credit_ledger, transactions,
+      audit_log, outbox, topup_orders, point_ledger, balance_ledger, credit_ledger, ratings, transactions,
       queue_entries, bookings, members, customers, display_devices,
       sessions, accounts, verifications, rate_limits, users,
       package_items, service_variants, services, barber_shifts, barber_level_history,
@@ -340,6 +340,8 @@ async function seedDemoSales(
   const extras = services.filter((x) => x.price !== null && x.slug !== "haircut");
   if (!haircut) return;
   const rand = lcg(20_261_123);
+  // Ratings draw from their own sequence, so adding them never shifts the seeded sales.
+  const stars = lcg(5_150_115);
   const methods = ["edc_qris", "edc_qris", "edc_card"] as const;
   for (let d = 28; d >= 1; d--) {
     const date = addDays(from, -d);
@@ -393,7 +395,26 @@ async function seedDemoSales(
     }
     if (entries.length) await tx.insert(s.queueEntries).values(entries);
     if (txs.length) await tx.insert(s.transactions).values(txs);
+    // Online customers rate from their ticket; about half of them do, mostly kindly.
+    const rated = entries
+      .filter((e) => e.source === "online" && stars() < 0.55)
+      .map((e) => ({
+        queueEntryId: e.id,
+        barberId: e.barberId,
+        branchId: e.branchId,
+        date,
+        score: demoScore(stars()),
+      }));
+    if (rated.length) await tx.insert(s.ratings).values(rated);
   }
+}
+
+/** Demo scores lean happy, like real barbershop reviews: mostly 5 and 4, now and then lower. */
+function demoScore(r: number): number {
+  if (r < 0.62) return 5;
+  if (r < 0.9) return 4;
+  if (r < 0.97) return 3;
+  return 2;
 }
 
 /** Today's already-finished demo visits get their counter bill, so takings match the board. */

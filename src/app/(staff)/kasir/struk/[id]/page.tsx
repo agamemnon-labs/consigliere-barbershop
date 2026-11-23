@@ -54,7 +54,7 @@ async function Receipt({ params }: { params: PageProps<"/kasir/struk/[id]">["par
 
       <article className="receipt mx-auto max-w-[22rem] rounded-2xl border border-rule bg-surface px-6 py-7 text-[0.8125rem] print:rounded-none print:border-0 print:p-0">
         <div className="text-center">
-          <p className="wide text-lg font-semibold uppercase tracking-[0.04em]">{brand.name}</p>
+          <p className="slab text-xl">{brand.name}</p>
           <p className="mt-1">Cabang {branch.name}</p>
           <p className="text-muted">{branch.address}</p>
         </div>

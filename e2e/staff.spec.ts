@@ -8,7 +8,7 @@ test("staff areas send signed-out visitors to the staff login", async ({ page })
 
 test("a cashier signs in, lands on the cashier screen, and signs out", async ({ page }) => {
   await page.goto("/staf/masuk");
-  await page.getByLabel("Email").fill("kasir.juanda@consigliere.test");
+  await page.getByLabel("Email").fill("kasir.kalimantan@consigliere.test");
   await page.getByLabel("Kata sandi").fill("consigliere-demo");
   await page.getByRole("button", { name: "Masuk" }).click();
   await expect(page).toHaveURL(/\/kasir$/);

@@ -7,7 +7,7 @@ import { barberWeek, type DayPlan, daysOff, shortDate } from "@/domain/schedule"
 import { type Barber, type Branch, getBarbers, getBranches, getRotation, getToday } from "@/server/catalog";
 
 export const metadata: Metadata = {
-  title: "Para barber",
+  title: "Keluarga kami",
   description: "Level, harga potong, cabang hari ini, dan jadwal libur setiap barber.",
 };
 
@@ -31,7 +31,7 @@ export default async function BarbersPage() {
 
   return (
     <Screen back={{ href: "/", label: "Beranda" }}>
-      <h1 className="text-[2rem]">Para barber</h1>
+      <h1 className="text-[2rem]">Keluarga kami</h1>
       <p className="mt-2 text-muted">Harga potong ikut level barbernya. Ketuk nama untuk jadwal seminggu</p>
 
       <div className="mt-6 flex flex-col gap-8">

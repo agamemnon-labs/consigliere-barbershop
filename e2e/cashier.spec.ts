@@ -5,7 +5,7 @@ import { clearColumn, signInAsCashier } from "./helpers";
 test.describe.configure({ mode: "serial" });
 
 test("the cashier adds a walk-in, calls, seats, takes payment and prints a receipt", async ({ page }) => {
-  await signInAsCashier(page, "juanda");
+  await signInAsCashier(page, "kalimantan");
   const column = page.getByRole("region", { name: /^Antrean / }).last();
   await expect(column).toBeVisible();
   await clearColumn(column);
@@ -48,8 +48,8 @@ test("the cashier adds a walk-in, calls, seats, takes payment and prints a recei
 });
 
 test("a cashier only sees their own branch", async ({ page }) => {
-  await signInAsCashier(page, "juanda");
+  await signInAsCashier(page, "kalimantan");
   await expect(page.getByRole("navigation", { name: "Pilih cabang" })).toHaveCount(0);
-  await page.goto("/kasir?cabang=tepian");
-  await expect(page.getByText(/^Juanda/)).toBeVisible();
+  await page.goto("/kasir?cabang=citra-niaga");
+  await expect(page.getByText(/^Jl\. Pulau Kalimantan/)).toBeVisible();
 });

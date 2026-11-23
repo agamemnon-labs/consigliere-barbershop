@@ -39,7 +39,7 @@ The problem it solves is small and very real: on a busy evening people wait an h
 - Every service, price and barber in plain view, so nobody has to ask. Haircut price follows the barber's level.
 - Live queue per branch and per barber, with the quietest branch marked.
 - Booking in four short steps: branch, barber (or "whoever is fastest"), services, name and WhatsApp. Pay by QRIS and the number lands in the queue only once the money arrives, so there are no ghost bookings.
-- A ticket that tells you your number, roughly when you're up and when to leave, updated live.
+- A ticket that tells you your number, roughly when you're up and when to leave, updated live. After the cut, one tap rates the barber from 1 to 5.
 - Membership card with a rotating QR, points, birthday-month discount and a prepaid balance you can top up from the phone.
 
 **For the cashier (wide desktop)**
@@ -53,7 +53,7 @@ The problem it solves is small and very real: on a busy evening people wait an h
 
 **For the owner (back office)**
 
-- Today across all branches, reports by branch, barber, service and payment method, barber commission, weekly barber rotation between branches, prices and levels, members, rules, and the WhatsApp outbox.
+- Today across all branches, reports by branch, barber, service and payment method, barber commission and each barber's average rating, weekly barber rotation between branches, prices and levels, members, rules, and the WhatsApp outbox.
 
 <table>
   <tr>

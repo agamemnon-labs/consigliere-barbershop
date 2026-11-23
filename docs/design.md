@@ -190,6 +190,7 @@ Each phase ends deployed and usable.
    - Commission is paid on what the shop earned per service (price minus discount): haircuts at the barber's level share on the day of the sale, everything else at the flat share from Aturan.
    - Deferred: staff accounts and tablet tokens (the tablet is public and needs none), credits & refunds screen.
 8. **Polish & portfolio** ✅ — demo ribbon on customer and staff screens (`DEMO_MODE`, always on without a database), one-tap demo logins at `/demo` (member, cashier, owner; customer and tablet need none), nightly demo reset by Vercel Cron (`/api/demo/reset`, bearer `CRON_SECRET`), four weeks of seeded sales, case study at `/studi-kasus` (linked from the credits), favicon, `faint` colour raised to pass WCAG AA. Lighthouse on mobile: performance 91–98, accessibility, best practices and SEO 100 on public pages (noindex pages score SEO 60 by design).
+9. **Rating** ✅ (2026-11-23) — after a finished online visit the ticket page asks "Gimana cukuran {barber}?" with five star buttons; one tap saves it (table `ratings`, one row per queue entry, score 1-5, rules in `src/domain/rating.ts`). Laporan shows each barber's average and count for the date range. The demo seeds ratings on about half of the past online visits.
 
 Phases 1–3 are the MVP that proves the idea.
 

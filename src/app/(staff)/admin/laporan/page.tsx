@@ -7,10 +7,12 @@ import { Notice } from "@/components/notice";
 import { getDb } from "@/db";
 import { METHOD_LABEL } from "@/domain/checkout";
 import { formatRupiah } from "@/domain/money";
+import { formatAverage } from "@/domain/rating";
 import { checkRange } from "@/domain/report";
 import { shortDate } from "@/domain/schedule";
 import { addDays, shopDate } from "@/domain/time";
 import { buildReport, type Report } from "@/server/admin";
+import { ratingsBetween } from "@/server/rating";
 import { inputClass } from "../_ui/fields";
 import { AdminShell } from "../_ui/shell";
 
@@ -82,13 +84,17 @@ async function ReportView({ searchParams }: { searchParams: PageProps<"/admin/la
           {problem}
         </Notice>
       ) : (
-        <Body report={await buildReport(await getDb(), from, to)} />
+        <Body
+          report={await buildReport(await getDb(), from, to)}
+          ratings={await ratingsBetween(await getDb(), from, to)}
+        />
       )}
     </>
   );
 }
 
-function Body({ report: r }: { report: Report }) {
+function Body({ report: r, ratings }: { report: Report; ratings: Ratings }) {
+  const rated = ratings.reduce((n, x) => n + x.count, 0);
   const csv = (kind: string) => `/admin/laporan/csv?jenis=${kind}&dari=${r.from}&sampai=${r.to}`;
   const commissionTotal = r.commission.reduce((sum, c) => sum + c.commission, 0);
   return (
@@ -122,6 +128,30 @@ function Body({ report: r }: { report: Report }) {
                   value: c.commission,
                   shown: formatRupiah(c.commission),
                   detail: `${c.services} layanan, penjualan ${formatRupiah(c.sales)}`,
+                }))}
+              />
+            )}
+          </Panel>
+          <Panel
+            title="Rating barber"
+            note={rated ? `${rated.toLocaleString("id-ID")} nilai dari pelanggan online` : undefined}
+          >
+            {ratings.length === 0 ? (
+              <Empty />
+            ) : (
+              <Bars
+                unit="rata-rata nilai dari 5"
+                max={5}
+                rows={ratings.map((x) => ({
+                  key: x.barberId,
+                  label: `${x.name} (${x.count} nilai)`,
+                  value: x.average,
+                  shown: `${formatAverage(x.average)} dari 5`,
+                  detail: `${x.count} nilai: ${x.spread
+                    .map((c, i) => (c ? `${c}× bintang ${i + 1}` : ""))
+                    .filter(Boolean)
+                    .reverse()
+                    .join(", ")}`,
                 }))}
               />
             )}
@@ -250,14 +280,16 @@ function Empty() {
   return <p className="py-2 text-muted">Belum ada data di rentang ini</p>;
 }
 
+type Ratings = Awaited<ReturnType<typeof ratingsBetween>>;
+
 type Bar = { key: string; label: string; value: number; shown: string; detail: string };
 
 /**
  * Ranked bars, one series in one colour: the label and figure on a line, a thin bar under it
  * scaled to the largest row, and the detail on hover and for screen readers.
  */
-function Bars({ rows, unit }: { rows: Bar[]; unit: string }) {
-  const max = Math.max(1, ...rows.map((r) => r.value));
+function Bars({ rows, unit, max: fixed }: { rows: Bar[]; unit: string; max?: number }) {
+  const max = fixed ?? Math.max(1, ...rows.map((r) => r.value));
   return (
     <ol className="grid gap-3">
       {rows.map((r) => (

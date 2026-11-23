@@ -10,13 +10,30 @@ Next.js 16 · React 19 · TypeScript 7 · Tailwind CSS 4 · Supabase Postgres + 
 
 ## Run it
 
+Without any setup it runs on an in-memory demo database (PGlite) with demo payments:
+
+```
+pnpm install
+pnpm dev        # http://localhost:3000, /demo for one-tap logins
+```
+
+With your own Supabase database:
+
 ```
 cp .env.example .env.local   # fill in Supabase + BETTER_AUTH_SECRET
-pnpm install
 pnpm db:migrate && pnpm db:seed
 pnpm dev
 ```
-Open `/` for the customer site, `/gaya` for the style sheet, `/staf/masuk` for staff (demo accounts are in `src/db/seed/data.ts`).
+Open `/` for the customer site, `/demo` to try every role, `/studi-kasus` for the case study, `/gaya` for the style sheet, `/staf/masuk` for staff (demo accounts are in `src/db/seed/data.ts`).
+
+## Deploy (Vercel + Supabase)
+
+1. Create a Supabase project (region Singapore). Run `pnpm db:migrate` and `pnpm db:seed` against `DATABASE_URL_DIRECT`.
+2. Import the repo in Vercel (region `sin1` is set in `vercel.json`). Add the variables from `.env.example`: `DATABASE_URL` (pooler, port 6543), `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL`, the two `NEXT_PUBLIC_SUPABASE_*` keys, and for the public demo `DEMO_MODE=1`, `DEMO_STAFF_PASSWORD` (same as `SEED_STAFF_PASSWORD`) and `CRON_SECRET`.
+3. Optional: Xendit development keys (`XENDIT_SECRET_KEY`, `XENDIT_WEBHOOK_TOKEN`) and the webhook URL `<origin>/api/pembayaran/xendit`. Without them, payments run in demo mode.
+4. The cron in `vercel.json` calls `/api/demo/reset` at 00.00 WITA to give the demo a fresh day.
+
+Checks before every push: `pnpm check`, `pnpm typecheck`, `pnpm test`, `pnpm build`; CI also runs `pnpm e2e`.
 
 ## Docs
 

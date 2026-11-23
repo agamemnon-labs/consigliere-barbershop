@@ -11,7 +11,11 @@ export const brand = {
   established: 2026,
   /** Shown on the complaints line and in the footer. E.164 without the plus. */
   whatsappComplaints: "6281200000000",
-  builtBy: { name: "Agamemnon", url: "https://github.com/agamemnon-labs" },
+  builtBy: {
+    name: "Agamemnon",
+    url: "https://github.com/agamemnon-labs",
+    repo: "https://github.com/agamemnon-labs/consigliere-barbershop",
+  },
   timezone: "Asia/Makassar",
   locale: "id-ID",
   currency: "IDR",

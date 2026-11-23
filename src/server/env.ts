@@ -16,6 +16,12 @@ const schema = z.object({
   XENDIT_SECRET_KEY: z.string().min(1).optional(),
   /** Xendit dashboard → Webhooks → verification token. Required with a secret key. */
   XENDIT_WEBHOOK_TOKEN: z.string().min(1).optional(),
+  /** "1" shows the demo ribbon and one-tap demo logins on a real database too. Always on without one. */
+  DEMO_MODE: z.enum(["0", "1"]).optional(),
+  /** Staff password the demo data was seeded with (SEED_STAFF_PASSWORD). */
+  DEMO_STAFF_PASSWORD: z.string().min(8).optional(),
+  /** Bearer token Vercel Cron sends to reset the demo data each night. */
+  CRON_SECRET: z.string().min(16).optional(),
 });
 
 export type Env = z.infer<typeof schema>;
@@ -33,4 +39,10 @@ export function authSecret(): string {
   if (BETTER_AUTH_SECRET) return BETTER_AUTH_SECRET;
   if (!DATABASE_URL) return "consigliere-demo-only-secret-do-not-use-in-production";
   throw new Error("BETTER_AUTH_SECRET is required when DATABASE_URL is set.");
+}
+
+/** Public demo: a ribbon on every screen, one-tap logins, and data that resets. */
+export function demoMode(): boolean {
+  const { DEMO_MODE, DATABASE_URL } = env();
+  return DEMO_MODE === "1" || (!DATABASE_URL && DEMO_MODE !== "0");
 }

@@ -49,3 +49,9 @@ These are applied in the UX polish pass after phase 7, customer phone screens fi
 - No periods on headlines, labels, hints or button notes. Body sentences keep them.
 - Italic is reserved for one signature spot (the ticket stub's "dengan {barber}").
 - Do not print "± 0 mnt"; say what it means ("langsung duduk").
+
+## Phase 8 checks (2026-11-23)
+
+- Lighthouse caught `text-faint` at 3.2:1 on the night theme and 2.7:1 on paper. Faint text is still text: keep it at 4.5:1 or use it only for decoration.
+- A missing favicon is a console 404 and costs Best Practices points. `src/app/icon.svg` fixes it.
+- A demo ribbon must stay one line on a 390px phone: short copy, `truncate` on the text, `shrink-0` on the link.

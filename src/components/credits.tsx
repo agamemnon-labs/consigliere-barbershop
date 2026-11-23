@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { brand } from "@/config/brand";
 
 /** Closing credits. Every surface ends the same way. */
@@ -26,12 +27,12 @@ export function Credits({ className = "" }: { className?: string }) {
         <div>
           <dt className="label">Dibuat oleh</dt>
           <dd className="mt-1">
-            <a
-              href={brand.builtBy.url}
+            <Link
+              href="/studi-kasus"
               className="font-display text-xl uppercase tracking-[0.16em] hover:text-accent-ink"
             >
               {brand.builtBy.name}
-            </a>
+            </Link>
           </dd>
         </div>
       </dl>

@@ -3,7 +3,6 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useTransition } from "react";
 import { buttonClass } from "@/components/button";
-import { simulatePayment } from "@/server/actions/booking";
 
 /** Minutes and seconds left to pay; refreshes the page when time runs out. */
 export function PayCountdown({ until }: { until: string }) {
@@ -29,8 +28,14 @@ export function PayCountdown({ until }: { until: string }) {
   );
 }
 
-/** Demo only: pay without a banking app. */
-export function SimulatePay({ bookingId }: { bookingId: string }) {
+/** Demo only: pay without a banking app. `simulate` is the server action that settles `id`. */
+export function SimulatePay({
+  id,
+  simulate,
+}: {
+  id: string;
+  simulate: (id: string) => Promise<{ error?: string }>;
+}) {
   const router = useRouter();
   const [pending, start] = useTransition();
   const [error, setError] = useState<string>();
@@ -42,7 +47,7 @@ export function SimulatePay({ bookingId }: { bookingId: string }) {
         disabled={pending}
         onClick={() =>
           start(async () => {
-            const result = await simulatePayment(bookingId);
+            const result = await simulate(id);
             setError(result.error);
             router.refresh();
           })

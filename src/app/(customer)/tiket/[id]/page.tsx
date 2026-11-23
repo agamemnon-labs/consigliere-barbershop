@@ -7,6 +7,7 @@ import { ButtonLink } from "@/components/button";
 import { Credits } from "@/components/credits";
 import { LiveRefresh } from "@/components/live-refresh";
 import { Notice } from "@/components/notice";
+import { PayCountdown, SimulatePay } from "@/components/pay-controls";
 import { QrCode } from "@/components/qr-code";
 import { Rule } from "@/components/rule";
 import { TicketStub } from "@/components/ticket-stub";
@@ -14,9 +15,9 @@ import { getDb } from "@/db";
 import { leaveHint } from "@/domain/booking";
 import { formatRupiah } from "@/domain/money";
 import { shopClock } from "@/domain/time";
+import { simulatePayment } from "@/server/actions/booking";
 import { getTicket, type Ticket } from "@/server/booking";
 import { paymentProvider } from "@/server/payments";
-import { PayCountdown, SimulatePay } from "./pay-controls";
 
 export const metadata: Metadata = { title: "Tiket antrean", robots: { index: false } };
 
@@ -118,7 +119,7 @@ function Pending({ ticket, demo }: { ticket: Ticket; demo: boolean }) {
             QR ini tidak bisa dibayar sungguhan. Tekan tombol di bawah untuk pura-pura membayar.
           </Notice>
           <div className="mt-5">
-            <SimulatePay bookingId={ticket.id} />
+            <SimulatePay id={ticket.id} simulate={simulatePayment} />
           </div>
         </div>
       ) : null}

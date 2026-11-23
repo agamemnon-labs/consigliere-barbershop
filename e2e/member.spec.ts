@@ -21,6 +21,16 @@ test("a member signs in with WhatsApp and PIN and sees their card", async ({ pag
   await expect(page.getByRole("img", { name: "QR kartu member C00002" })).toBeVisible();
   await expect(page.getByText("Rp330.000")).toBeVisible();
 
+  // Top up from the phone: pick the 300K package, pay the demo QRIS, balance goes up by 330K.
+  await page.getByRole("link", { name: "Isi saldo" }).click();
+  await page.getByLabel(/Rp300\.000/).check();
+  await page.getByRole("button", { name: "Bayar Rp300.000 dengan QRIS" }).click();
+  await expect(page.getByRole("heading", { name: "Bayar dengan QRIS" })).toBeVisible();
+  await page.getByRole("button", { name: "Simulasikan pembayaran" }).click();
+  await expect(page.getByRole("heading", { name: "Saldo bertambah Rp330.000" })).toBeVisible();
+  await page.getByRole("link", { name: "Lihat kartu" }).click();
+  await expect(page.getByText("Rp660.000")).toBeVisible();
+
   await page.getByRole("button", { name: "Keluar dari kartu" }).click();
   await expect(page).toHaveURL(/\/masuk$/);
 });

@@ -335,7 +335,8 @@ export async function takingsBetween(
     const edc = t.total - balance - credit;
     if (edc > 0) byMethod[t.method] = (byMethod[t.method] ?? 0) + edc;
   }
-  if (online.length) byMethod.online_qris = online.reduce((sum, b) => sum + b.amount, 0);
+  if (online.length)
+    byMethod.online_qris = (byMethod.online_qris ?? 0) + online.reduce((sum, b) => sum + b.amount, 0);
   const total = Object.values(byMethod).reduce((sum: number, v) => sum + (v ?? 0), 0);
   return { count: counter.length + online.length, total, byMethod, prepaid };
 }

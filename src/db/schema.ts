@@ -467,6 +467,27 @@ export const topupPackages = pgTable("topup_packages", {
   isActive: boolean().notNull().default(true),
 }).enableRLS();
 
+/** A member topping up their balance by QRIS from the phone. Balance is added only once paid. */
+export const topupOrders = pgTable(
+  "topup_orders",
+  {
+    id: id(),
+    memberId: uuid()
+      .notNull()
+      .references(() => members.id),
+    pay: integer().notNull(),
+    get: integer().notNull(),
+    status: bookingStatus().notNull().default("pending"),
+    paymentId: text().unique(),
+    qrString: text(),
+    expiresAt: timestamp({ withTimezone: true }).notNull(),
+    paidAt: timestamp({ withTimezone: true }),
+    transactionId: uuid().references(() => transactions.id),
+    createdAt: createdAt(),
+  },
+  (t) => [index().on(t.memberId, t.createdAt)],
+).enableRLS();
+
 /* ── System ────────────────────────────────────────────────────────────── */
 
 export const settings = pgTable("settings", {

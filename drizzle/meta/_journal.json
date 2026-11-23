@@ -36,6 +36,13 @@
       "when": 1795365801670,
       "tag": "0004_member_phone_login",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1795400809754,
+      "tag": "0005_member_qris_topup",
+      "breakpoints": true
     }
   ]
 }

@@ -38,7 +38,7 @@ export async function seed(db: AnyDb, options: SeedOptions) {
 
   await db.transaction(async (tx) => {
     await tx.execute(sql`truncate table
-      audit_log, outbox, point_ledger, balance_ledger, credit_ledger, transactions,
+      audit_log, outbox, topup_orders, point_ledger, balance_ledger, credit_ledger, transactions,
       queue_entries, bookings, members, customers, display_devices,
       sessions, accounts, verifications, rate_limits, users,
       package_items, service_variants, services, barber_shifts, barber_level_history,

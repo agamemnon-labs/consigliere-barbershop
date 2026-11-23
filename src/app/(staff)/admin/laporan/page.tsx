@@ -94,8 +94,8 @@ function Body({ report: r }: { report: Report }) {
   return (
     <>
       <dl className="mt-5 grid gap-3 sm:grid-cols-3">
-        <div className="rounded-2xl bg-navy p-4 text-navy-fg">
-          <dt className="text-sm text-navy-muted">Uang masuk</dt>
+        <div className="rounded-2xl bg-suit p-4 text-suit-fg">
+          <dt className="text-sm text-suit-muted">Uang masuk</dt>
           <dd className="num mt-0.5 text-[1.75rem] leading-tight font-semibold">
             {formatRupiah(r.cash.total)}
           </dd>

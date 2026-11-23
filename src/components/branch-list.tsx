@@ -70,18 +70,18 @@ function Rows({
               href={href as "/"}
               className="flex min-h-20 items-center gap-3 px-4 py-3 transition-colors hover:bg-bg/70"
             >
-              <span className="flex-1">
-                <span className="flex flex-wrap items-center gap-2">
-                  <span className="text-lg font-semibold">{branch.name}</span>
+              <span className="min-w-0 flex-1">
+                <span className="block text-lg leading-snug font-semibold">{branch.name}</span>
+                <span className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-faint">
+                  <span className="inline-flex items-center gap-1.5">
+                    <UsersIcon size={16} />
+                    {closed ? "Tutup hari ini" : `${count} barber jaga`}
+                  </span>
                   {quietest === branch.slug ? (
                     <span className="rounded-md bg-mint px-1.5 py-0.5 text-xs font-semibold text-mint-ink">
                       Paling sepi
                     </span>
                   ) : null}
-                </span>
-                <span className="mt-0.5 flex items-center gap-1.5 text-sm text-faint">
-                  <UsersIcon size={16} />
-                  {closed ? "Tutup hari ini" : `${count} barber jaga`}
                 </span>
               </span>
               <span className="shrink-0 text-right">

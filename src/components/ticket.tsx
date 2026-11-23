@@ -15,7 +15,7 @@ type Props = {
 };
 
 /**
- * The queue number as a take-a-number ticket: pole red, a huge condensed number, a perforated
+ * The queue number as a take-a-number ticket: pole red, a huge slab number, a perforated
  * tear with punched notches, and the turn time under it.
  */
 export function Ticket({
@@ -35,23 +35,23 @@ export function Ticket({
       aria-label={`Nomor antrean ${prefix} ${no}, barber ${barber}, cabang ${branch}, sekitar ${waitMin} menit lagi`}
     >
       <div className="flex h-50 flex-col px-6 pt-5">
-        <div className="flex items-baseline justify-between text-[0.9375rem] text-white/80">
+        <div className="flex items-baseline justify-between text-[0.9375rem] text-white/90">
           <span>{branch}</span>
           <span>Nomor antrean</span>
         </div>
-        <p className="condensed num mt-1 flex items-baseline gap-2 leading-none font-semibold">
-          <span className="text-4xl text-white/70">{prefix}</span>
-          <span className="text-[6.5rem] tracking-[-0.02em]">{no}</span>
+        <p className="slab mt-2 flex items-baseline gap-2.5 leading-none">
+          <span className="text-4xl text-white/85">{prefix}</span>
+          <span className="text-[5.75rem]">{no}</span>
         </p>
         <p className="mt-auto pb-4 text-lg">dengan {barber}</p>
       </div>
       <div className="ticket-tear mx-6" aria-hidden />
       <div className="flex items-end justify-between px-6 pt-4 pb-5">
         <div>
-          <p className="text-[0.9375rem] text-white/80">{aroundLabel}</p>
+          <p className="text-[0.9375rem] text-white/90">{aroundLabel}</p>
           <p className="num mt-0.5 text-4xl leading-none font-semibold">{around}</p>
         </div>
-        <p className="num text-[0.9375rem] text-white/80">
+        <p className="num text-[0.9375rem] text-white/90">
           {waitMin > 0 ? `± ${waitMin} mnt lagi` : "Sekarang"}
         </p>
       </div>

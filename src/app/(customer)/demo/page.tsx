@@ -24,7 +24,7 @@ const roles = [
     title: "Member",
     detail: "Kartu, poin, isi saldo dari HP",
     icon: CardIcon,
-    tile: "bg-navy text-navy-fg",
+    tile: "bg-suit text-suit-fg",
   },
   {
     as: "cashier",

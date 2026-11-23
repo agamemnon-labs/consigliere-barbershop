@@ -3,17 +3,13 @@ import { Pole } from "./pole";
 
 type Props = { size?: "sm" | "lg"; className?: string };
 
-/** Shop-sign wordmark: the name set wide, next to a barber pole. Rebrands from `brand.ts`. */
+/** The shop sign: the name in sign-painter slab next to a barber pole. Rebrands from `brand.ts`. */
 export function Wordmark({ size = "sm", className = "" }: Props) {
   const lg = size === "lg";
   return (
     <span className={`inline-flex items-center gap-2.5 ${className}`}>
-      <Pole className={lg ? "h-7! w-3.5!" : ""} />
-      <span
-        className={`wide font-semibold uppercase leading-none tracking-[0.04em] ${lg ? "text-3xl" : "text-[1.0625rem]"}`}
-      >
-        {brand.name}
-      </span>
+      <Pole className={lg ? "h-8! w-4!" : "h-5! w-2.5!"} />
+      <span className={`slab leading-none ${lg ? "text-[2.125rem]" : "text-[1.375rem]"}`}>{brand.name}</span>
     </span>
   );
 }

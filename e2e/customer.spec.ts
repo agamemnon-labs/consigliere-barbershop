@@ -41,6 +41,6 @@ test("every barber shows a week of rotation and their day off", async ({ page })
 
 test("the style sheet shows the palette and the ticket", async ({ page }) => {
   await page.goto("/gaya");
-  await expect(page.getByRole("heading", { name: "Barbershop lama, di siang hari" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Barbershop keluarga, di siang hari" })).toBeVisible();
   await expect(page.getByRole("figure", { name: /^Nomor antrean P 021/ })).toBeVisible();
 });

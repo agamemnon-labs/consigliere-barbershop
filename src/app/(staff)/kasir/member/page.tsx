@@ -72,17 +72,17 @@ async function Desk({ searchParams }: { searchParams: PageProps<"/kasir/member">
 
       {member ? (
         <section aria-label="Member" className="grid items-start gap-4 sm:grid-cols-2">
-          <div className="pinstripe rounded-2xl p-5 text-navy-fg">
-            <p className="condensed num text-lg text-navy-muted">{member.memberNo}</p>
+          <div className="pinstripe rounded-2xl p-5 text-suit-fg">
+            <p className="condensed num text-lg text-suit-muted">{member.memberNo}</p>
             <p className="mt-1 text-2xl font-semibold">{member.name}</p>
-            <p className="num text-navy-muted">{phoneLabel(member.phone)}</p>
+            <p className="num text-suit-muted">{phoneLabel(member.phone)}</p>
             <dl className="mt-5 grid grid-cols-2 gap-3">
               <div>
-                <dt className="text-sm text-navy-muted">Poin</dt>
+                <dt className="text-sm text-suit-muted">Poin</dt>
                 <dd className="num text-xl font-semibold">{member.points}</dd>
               </div>
               <div>
-                <dt className="text-sm text-navy-muted">Saldo</dt>
+                <dt className="text-sm text-suit-muted">Saldo</dt>
                 <dd className="num text-xl font-semibold">{formatRupiah(member.balance)}</dd>
               </div>
             </dl>

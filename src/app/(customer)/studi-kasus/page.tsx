@@ -77,7 +77,7 @@ export default function CaseStudyPage() {
   return (
     <Screen back={{ href: "/", label: "Beranda" }}>
       <p className="label">Studi kasus oleh {brand.builtBy.name}</p>
-      <h1 className="wide mt-2 text-[2rem] uppercase leading-none tracking-[0.02em]">{brand.name}</h1>
+      <h1 className="mt-2 text-[2.25rem] leading-none">{brand.name}</h1>
       <p className="mt-3 text-lg">Antrean, booking, dan member untuk barbershop tiga cabang</p>
 
       <h2 className="mt-10 text-xl">Masalahnya</h2>

@@ -6,7 +6,7 @@
 export const brand = {
   name: "Consigliere",
   legalName: "Consigliere Barbershop",
-  tagline: "Rambut rapi, urusan beres",
+  tagline: "Cukur tanpa nunggu lama",
   city: "Samarinda",
   established: 2026,
   /** Shown on the complaints line and in the footer. E.164 without the plus. */
@@ -20,10 +20,12 @@ export const brand = {
   locale: "id-ID",
   currency: "IDR",
   palette: {
-    ink: "#15110e",
-    bone: "#ebe3d4",
-    oxblood: "#6e1d1b",
-    paper: "#f3ecdf",
+    page: "#f3f5f8",
+    ink: "#0e1630",
+    poleRed: "#d22d23",
+    poleBlue: "#2548c9",
+    chairMint: "#ddf3e8",
+    navy: "#14213d",
   },
 } as const;
 

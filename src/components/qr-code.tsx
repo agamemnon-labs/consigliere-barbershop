@@ -1,9 +1,6 @@
 import { encode } from "uqr";
 
-/**
- * A QR code as one SVG path, drawn in the page's ink on a light card so any
- * phone camera reads it on the dark theme too.
- */
+/** A QR code as one SVG path, ink on white, so any phone camera reads it. */
 export function QrCode({
   value,
   label,
@@ -26,7 +23,7 @@ export function QrCode({
       role="img"
       aria-label={label}
       shapeRendering="crispEdges"
-      className={`block aspect-square w-full rounded-xs bg-stub text-stub-ink ${className}`}
+      className={`block aspect-square w-full bg-surface text-fg ${className}`}
     >
       <path d={d} fill="currentColor" />
     </svg>

@@ -1,11 +1,30 @@
 import type { ReactNode } from "react";
 
-/** A plain announcement (closures and the like). A rule in the accent colour, no box, no icon. */
-export function Notice({ title, children }: { title: string; children?: ReactNode }) {
+type Tone = "info" | "warn" | "ok" | "alert";
+
+const tones: Record<Tone, string> = {
+  info: "bg-blue-soft text-fg [&_.notice-title]:text-blue",
+  warn: "bg-butter text-fg [&_.notice-title]:text-butter-ink",
+  ok: "bg-mint text-fg [&_.notice-title]:text-mint-ink",
+  alert: "bg-accent-soft text-fg [&_.notice-title]:text-accent-ink",
+};
+
+/** A short announcement on a soft fill: closures, demo notes, confirmations. */
+export function Notice({
+  title,
+  tone = "warn",
+  children,
+  className = "",
+}: {
+  title: string;
+  tone?: Tone;
+  children?: ReactNode;
+  className?: string;
+}) {
   return (
-    <aside className="border-l-2 border-accent py-1 pl-4" aria-live="polite">
-      <p className="label text-accent-ink">{title}</p>
-      {children ? <div className="mt-1 text-[0.9375rem]">{children}</div> : null}
+    <aside className={`rounded-2xl px-4 py-3 ${tones[tone]} ${className}`} aria-live="polite">
+      <p className="notice-title text-[0.9375rem] font-semibold">{title}</p>
+      {children ? <div className="mt-0.5 text-[0.9375rem] text-muted">{children}</div> : null}
     </aside>
   );
 }

@@ -1,43 +1,23 @@
 import Link from "next/link";
 import { brand } from "@/config/brand";
 
-/** Closing credits. Every surface ends the same way. */
+/** A quiet footer at the end of every customer page: complaints and who built it. */
 export function Credits({ className = "" }: { className?: string }) {
   return (
-    <footer
-      className={`flex flex-col items-center gap-8 px-6 pt-16 pb-[calc(3rem+env(safe-area-inset-bottom))] text-center ${className}`}
-    >
-      <span aria-hidden className="h-10 w-px bg-rule-strong" />
-      <dl className="grid gap-6">
-        <div>
-          <dt className="label">Sebuah tempat cukur di</dt>
-          <dd className="mt-1 font-display text-xl">{brand.city}</dd>
-        </div>
-        <div>
-          <dt className="label">Keluhan &amp; saran</dt>
-          <dd className="mt-1">
-            <a
-              href={`https://wa.me/${brand.whatsappComplaints}`}
-              className="num text-sm underline decoration-rule-strong underline-offset-4 hover:decoration-fg"
-            >
-              WhatsApp
-            </a>
-          </dd>
-        </div>
-        <div>
-          <dt className="label">Dibuat oleh</dt>
-          <dd className="mt-1">
-            <Link
-              href="/studi-kasus"
-              className="font-display text-xl uppercase tracking-[0.16em] hover:text-accent-ink"
-            >
-              {brand.builtBy.name}
-            </Link>
-          </dd>
-        </div>
-      </dl>
-      <p className="label text-faint">
-        © {brand.established} {brand.legalName}
+    <footer className={`mt-12 border-t border-rule pt-2 pb-4 text-sm text-faint ${className}`}>
+      <a
+        href={`https://wa.me/${brand.whatsappComplaints}`}
+        className="inline-flex min-h-11 items-center hover:text-fg"
+      >
+        Keluhan dan saran lewat WhatsApp
+      </a>
+      <p className="flex flex-wrap items-center gap-x-4">
+        <span>
+          © {brand.established} {brand.legalName}, {brand.city}
+        </span>
+        <Link href="/studi-kasus" className="inline-flex min-h-11 items-center hover:text-fg">
+          Dibuat oleh {brand.builtBy.name}
+        </Link>
       </p>
     </footer>
   );

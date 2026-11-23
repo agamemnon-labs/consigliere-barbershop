@@ -4,8 +4,20 @@ import postgres from "postgres";
 import * as schema from "./schema";
 
 function connect(url: string) {
-  // Supabase's transaction pooler does not support prepared statements.
-  const client = postgres(url, { prepare: false, max: 5 });
+  const client = postgres(url, {
+    // Supabase's transaction pooler (Supavisor, port 6543) does not support prepared statements,
+    // and it hangs on pipelined queries: the answers never arrive and every page on that
+    // function instance waits until Vercel kills it. One query in flight per connection.
+    prepare: false,
+    max_pipeline: 1,
+    max: 5,
+    // A pooler that goes silent must fail the query, not hang the page.
+    connect_timeout: 10,
+    query_timeout: 20,
+    // Serverless instances sleep between requests; don't wake up on a dead socket.
+    idle_timeout: 20,
+    max_lifetime: 60 * 5,
+  });
   return drizzle(client, { schema, casing: "snake_case" });
 }
 

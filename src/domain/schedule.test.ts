@@ -2,18 +2,18 @@ import { describe, expect, it } from "vitest";
 import { barberWeek, daysOff, onDuty, type Shift, shortDate } from "./schedule";
 
 const shifts: Shift[] = [
-  { barberId: "vito", date: "2026-11-22", status: "on", branchId: "juanda" },
+  { barberId: "vito", date: "2026-11-22", status: "on", branchId: "pulau-kalimantan" },
   { barberId: "vito", date: "2026-11-23", status: "off", branchId: null },
-  { barberId: "vito", date: "2026-11-24", status: "on", branchId: "tepian" },
-  { barberId: "sonny", date: "2026-11-22", status: "on", branchId: "juanda" },
-  { barberId: "tony", date: "2026-11-22", status: "on", branchId: "tepian" },
+  { barberId: "vito", date: "2026-11-24", status: "on", branchId: "citra-niaga" },
+  { barberId: "sonny", date: "2026-11-22", status: "on", branchId: "pulau-kalimantan" },
+  { barberId: "tony", date: "2026-11-22", status: "on", branchId: "citra-niaga" },
 ];
 
 describe("barberWeek", () => {
   it("follows the rotation, days off and unplanned days", () => {
     const week = barberWeek("vito", shifts, [], "2026-11-22", 4);
     expect(week.map((d) => d.kind)).toEqual(["working", "off", "working", "unknown"]);
-    expect(week[2]).toMatchObject({ branchId: "tepian" });
+    expect(week[2]).toMatchObject({ branchId: "citra-niaga" });
   });
   it("marks a working day at a closed branch as closed", () => {
     const week = barberWeek(
@@ -29,11 +29,16 @@ describe("barberWeek", () => {
 
 describe("onDuty", () => {
   it("lists barbers working at a branch that day", () => {
-    expect(onDuty(shifts, [], "juanda", "2026-11-22")).toEqual(["vito", "sonny"]);
+    expect(onDuty(shifts, [], "pulau-kalimantan", "2026-11-22")).toEqual(["vito", "sonny"]);
   });
   it("is empty when the branch is closed", () => {
     expect(
-      onDuty(shifts, [{ branchId: "juanda", date: "2026-11-22", reason: "Lebaran" }], "juanda", "2026-11-22"),
+      onDuty(
+        shifts,
+        [{ branchId: "pulau-kalimantan", date: "2026-11-22", reason: "Lebaran" }],
+        "pulau-kalimantan",
+        "2026-11-22",
+      ),
     ).toEqual([]);
   });
 });

@@ -5,8 +5,8 @@ test("a customer takes a number, pays by (demo) QRIS and lands in the queue", as
   await page.getByRole("link", { name: "Ambil nomor antrean" }).click();
   // Step 1: where.
   await expect(page.getByRole("heading", { name: "Mau cukur di mana?" })).toBeVisible();
-  await page.getByRole("link", { name: /Tepian/ }).click();
-  await expect(page).toHaveURL(/\/antre\?cabang=tepian$/);
+  await page.getByRole("link", { name: /Citra Niaga/ }).click();
+  await expect(page).toHaveURL(/\/antre\?cabang=citra-niaga$/);
 
   // Step 2: who. The fastest barber is picked already.
   await expect(page.getByRole("heading", { name: "Mau dicukur siapa?" })).toBeVisible();
@@ -42,7 +42,7 @@ test("a customer takes a number, pays by (demo) QRIS and lands in the queue", as
 });
 
 test("a wrong WhatsApp number gets a plain error and keeps what was typed", async ({ page }) => {
-  await page.goto("/antre?cabang=juanda");
+  await page.goto("/antre?cabang=pulau-kalimantan");
   await page.getByRole("button", { name: "Lanjut" }).click();
   await page.getByRole("button", { name: "Lanjut" }).click();
   await page.getByLabel("Nama panggilan").fill("Raka");

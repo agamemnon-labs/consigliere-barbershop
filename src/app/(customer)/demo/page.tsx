@@ -28,7 +28,7 @@ const roles = [
   },
   {
     as: "cashier",
-    title: "Kasir Juanda",
+    title: "Kasir Pulau Kalimantan",
     detail: "Papan antrean, panggil, bayar",
     icon: WalletIcon,
     tile: "bg-butter text-butter-ink",
@@ -66,7 +66,7 @@ export default function DemoPage() {
         />
         <Row
           as={(c) => (
-            <Link href="/tablet/juanda" className={c}>
+            <Link href="/tablet/pulau-kalimantan" className={c}>
               <Inner
                 icon={MonitorIcon}
                 tile="bg-mint text-mint-ink"

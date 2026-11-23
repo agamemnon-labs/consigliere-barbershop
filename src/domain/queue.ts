@@ -131,7 +131,16 @@ function remaining(e: QueueEntry, now: Date): number {
   return Math.max(5, e.estimatedMin - elapsed);
 }
 
-/** "J 014" */
+/**
+ * Ticket prefix for a branch: the first letter of its own name, skipping a street word, so
+ * "Jl. Pulau Kalimantan" is P, "Jl. Belatuk" is B and "Citra Niaga" is C.
+ */
+export function branchPrefix(name: string): string {
+  const own = name.trim().replace(/^(jl\.?|jln\.?|jalan)\s+/i, "");
+  return (own || name.trim()).charAt(0).toUpperCase();
+}
+
+/** "P 014" */
 export function ticketLabel(prefix: string, n: number): string {
   return `${prefix} ${String(n).padStart(3, "0")}`;
 }

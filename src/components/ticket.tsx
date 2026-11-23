@@ -1,7 +1,7 @@
 type Props = {
   /** Ticket number for the day, e.g. 14 → "014". */
   number: number;
-  /** Branch letter prefix, e.g. "J" for Juanda. */
+  /** Branch letter prefix, e.g. "P" for Jl. Pulau Kalimantan. */
   prefix: string;
   barber: string;
   branch: string;

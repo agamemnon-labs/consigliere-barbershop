@@ -14,7 +14,7 @@ async function signInAsOwner(page: Page) {
 test("the owner sees today and a report with CSV export", async ({ page }) => {
   await signInAsOwner(page);
   await expect(page.getByText("Uang masuk di semua cabang")).toBeVisible();
-  await expect(page.getByText("Juanda", { exact: true })).toBeVisible();
+  await expect(page.getByText("Jl. Pulau Kalimantan", { exact: true })).toBeVisible();
   await expect(page.getByRole("link", { name: "Buka papan antrean" }).first()).toBeVisible();
 
   await page.getByRole("navigation", { name: "Back office" }).getByRole("link", { name: "Laporan" }).click();
@@ -51,7 +51,7 @@ test("rotation saves a changed day", async ({ page }) => {
   await page.waitForLoadState("networkidle");
   const cell = page.getByRole("combobox").first();
   const now = await cell.inputValue();
-  await cell.selectOption(now === "off" ? { label: "Juanda" } : "off");
+  await cell.selectOption(now === "off" ? { label: "Jl. Pulau Kalimantan" } : "off");
   await expect(cell).not.toHaveValue(now);
   await page.getByRole("button", { name: "Simpan rotasi" }).click();
   await expect(page.getByRole("status")).toHaveText("1 hari diubah");
@@ -78,7 +78,7 @@ test("members can be corrected with a reason, and rules save", async ({ page }) 
 
 test("a cashier can't open the back office", async ({ page }) => {
   await page.goto("/staf/masuk");
-  await page.getByLabel("Email").fill("kasir.tepian@consigliere.test");
+  await page.getByLabel("Email").fill("kasir.citraniaga@consigliere.test");
   await page.getByLabel("Kata sandi").fill("consigliere-demo");
   await page.getByRole("button", { name: "Masuk" }).click();
   await expect(page).toHaveURL(/\/kasir$/);

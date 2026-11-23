@@ -3,7 +3,7 @@ import { expect, test } from "@playwright/test";
 test("home shows today's queue per branch, and the pricelist comes from the database", async ({ page }) => {
   await page.goto("/");
   await expect(page.getByRole("heading", { name: "Antrean sekarang" })).toBeVisible();
-  await expect(page.getByRole("link", { name: /Juanda/ })).toContainText("barber jaga");
+  await expect(page.getByRole("link", { name: /Pulau Kalimantan/ })).toContainText("barber jaga");
 
   // No horizontal scrolling on a phone.
   const homeOverflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
@@ -23,9 +23,9 @@ test("home shows today's queue per branch, and the pricelist comes from the data
 
 test("a branch lists the barbers on duty today", async ({ page }) => {
   await page.goto("/");
-  await page.getByRole("link", { name: /Pramuka/ }).click();
-  await expect(page).toHaveURL(/\/cabang\/pramuka$/);
-  await expect(page.getByRole("heading", { level: 1, name: "Pramuka" })).toBeVisible();
+  await page.getByRole("link", { name: /Belatuk/ }).click();
+  await expect(page).toHaveURL(/\/cabang\/belatuk$/);
+  await expect(page.getByRole("heading", { level: 1, name: "Jl. Belatuk" })).toBeVisible();
   await expect(page.getByText(/Barber hari ini/)).toBeVisible();
   // The live line streams in under each barber: who is in the chair, or an empty chair.
   await expect(page.getByText(/Mencukur|antre|Kursi kosong, langsung duduk/).first()).toBeVisible();
@@ -42,5 +42,5 @@ test("every barber shows a week of rotation and their day off", async ({ page })
 test("the style sheet shows the palette and the ticket", async ({ page }) => {
   await page.goto("/gaya");
   await expect(page.getByRole("heading", { name: "Barbershop lama, di siang hari" })).toBeVisible();
-  await expect(page.getByRole("figure", { name: /^Nomor antrean J 021/ })).toBeVisible();
+  await expect(page.getByRole("figure", { name: /^Nomor antrean P 021/ })).toBeVisible();
 });

@@ -97,9 +97,9 @@ export default function StyleSheet() {
         <Ticket
           className="mt-4"
           number={21}
-          prefix="J"
+          prefix="P"
           barber="Rizal"
-          branch="Juanda"
+          branch="Jl. Pulau Kalimantan"
           waitMin={35}
           around="14.40"
         />

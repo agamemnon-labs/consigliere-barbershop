@@ -39,7 +39,8 @@ test("the counter signs up a member, tops up, and the member pays from balance w
   await expect(column).toBeVisible();
   await clearColumn(column);
   await column.locator("summary", { hasText: "Walk-in" }).click();
-  await column.getByLabel("Nama (boleh kosong)").fill("Uji Member");
+  await column.getByLabel("Nama", { exact: true }).fill("Uji Member");
+  await column.getByLabel("Nomor WhatsApp").fill("0813-0000-0098");
   await column.getByRole("button", { name: /^Tambah ke antrean/ }).click();
   await column.getByRole("button", { name: "Panggil" }).click();
   await column.getByRole("button", { name: "Duduk" }).click();
@@ -68,6 +69,8 @@ test("a birthday member gets half off the haircut at the counter", async ({ page
   await expect(column).toBeVisible();
   await clearColumn(column);
   await column.locator("summary", { hasText: "Walk-in" }).click();
+  await column.getByLabel("Nama", { exact: true }).fill("Uji Bram");
+  await column.getByLabel("Nomor WhatsApp").fill("0813-0000-0097");
   await column.getByRole("button", { name: /^Tambah ke antrean/ }).click();
   await column.getByRole("button", { name: "Panggil" }).click();
   await column.getByRole("button", { name: "Duduk" }).click();

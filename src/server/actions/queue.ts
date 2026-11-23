@@ -78,26 +78,26 @@ export async function queueAction(
 
 const walkIn = z.object({
   barberId: z.uuid(),
-  name: z.string().trim().max(40).optional(),
-  phone: z.string().trim().max(20).optional(),
+  name: z.string().trim().min(1, "Isi nama pelanggan.").max(40),
+  phone: z.string().trim().min(1, "Isi nomor WhatsApp pelanggan.").max(20),
 });
 
 /**
- * "+ Walk-in" on a barber column. Name and WhatsApp are optional; the ticket number
- * is what counts. With a WhatsApp number the customer can step out and gets a
- * message when two people are left ahead.
+ * "+ Walk-in" on a barber column. Every customer gives a name and WhatsApp number,
+ * members or not, so each visit is tied to a person and the customer can step out
+ * and get a message when two people are left ahead.
  */
 export async function addWalkIn(_prev: QueueActionState, form: FormData): Promise<QueueActionState> {
   const staff = await requireStaff();
   const parsed = walkIn.safeParse({
     barberId: form.get("barberId"),
-    name: form.get("name") || undefined,
-    phone: form.get("phone") || undefined,
+    name: form.get("name") ?? "",
+    phone: form.get("phone") ?? "",
   });
-  if (!parsed.success) return { error: "Data walk-in belum benar." };
+  if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? "Data walk-in belum benar." };
   const { barberId, name } = parsed.data;
-  const phone = parsed.data.phone ? normalizePhone(parsed.data.phone) : null;
-  if (parsed.data.phone && !phone) return { error: "Nomor WhatsApp belum benar." };
+  const phone = normalizePhone(parsed.data.phone);
+  if (!phone) return { error: "Nomor WhatsApp belum benar." };
   const date = shopDate();
 
   try {
@@ -120,9 +120,9 @@ export async function addWalkIn(_prev: QueueActionState, form: FormData): Promis
         barberId,
         date,
         source: "walkin",
-        displayName: name ?? null,
+        displayName: name,
         estimatedMin: haircut?.durationMin ?? 30,
-        customerId: phone ? await customerFor(tx, phone, name) : null,
+        customerId: await customerFor(tx, phone, name),
       });
     });
   } catch (error) {
@@ -134,16 +134,13 @@ export async function addWalkIn(_prev: QueueActionState, form: FormData): Promis
 }
 
 /** The customer behind a WhatsApp number, created on first visit. */
-async function customerFor(tx: Tx, phone: string, name: string | undefined): Promise<string> {
+async function customerFor(tx: Tx, phone: string, name: string): Promise<string> {
   const [found] = await tx
     .select({ id: s.customers.id })
     .from(s.customers)
     .where(eq(s.customers.phone, phone));
   if (found) return found.id;
-  const [made] = await tx
-    .insert(s.customers)
-    .values({ phone, name: name ?? "Tamu" })
-    .returning({ id: s.customers.id });
+  const [made] = await tx.insert(s.customers).values({ phone, name }).returning({ id: s.customers.id });
   if (!made) throw new Error("Customer was not inserted");
   return made.id;
 }

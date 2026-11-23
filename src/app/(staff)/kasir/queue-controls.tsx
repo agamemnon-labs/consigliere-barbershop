@@ -71,7 +71,7 @@ export function CancelPrepaid({ entryId }: { entryId: string }) {
   );
 }
 
-/** "+ Walk-in" opens a short form downward; name and WhatsApp are both optional. */
+/** "+ Walk-in" opens a short form downward: every customer gives a name and WhatsApp number. */
 export function WalkInForm({ barberId, barberName }: { barberId: string; barberName: string }) {
   const [state, action, pending] = useActionState<QueueActionState, FormData>(addWalkIn, {});
   return (
@@ -83,17 +83,18 @@ export function WalkInForm({ barberId, barberName }: { barberId: string; barberN
       <form action={action} className="grid gap-3 px-4 pt-2 pb-4">
         <input type="hidden" name="barberId" value={barberId} />
         <label className="text-sm font-medium" htmlFor={`walkin-${barberId}`}>
-          Nama (boleh kosong)
+          Nama
         </label>
         <input
           id={`walkin-${barberId}`}
           name="name"
           autoComplete="off"
           maxLength={40}
+          required
           className={walkInInput}
         />
         <label className="text-sm font-medium" htmlFor={`walkin-wa-${barberId}`}>
-          WhatsApp (boleh kosong)
+          Nomor WhatsApp
         </label>
         <input
           id={`walkin-wa-${barberId}`}
@@ -102,6 +103,7 @@ export function WalkInForm({ barberId, barberName }: { barberId: string; barberN
           inputMode="tel"
           autoComplete="off"
           maxLength={20}
+          required
           aria-describedby={`walkin-wa-hint-${barberId}`}
           className={walkInInput}
         />

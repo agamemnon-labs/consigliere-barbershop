@@ -112,7 +112,7 @@ Balances and points are **ledgers** (sum of rows), never a single mutable number
   - One unpaid booking per phone at a time (asking again returns the same QR); at most 4 bookings per phone per day.
   - Settlement is idempotent and checks payment id and amount. Money that arrives after a booking expired becomes 30-day credit on the phone number instead of a place in line.
   - The public demo (no `DATABASE_URL`) waives opening hours for online booking, with a visible note, so visitors can try it at any hour.
-- Walk-in: cashier taps "+ Walk-in" on the barber column (name optional, WhatsApp optional for "your turn" ping).
+- Walk-in: cashier taps "+ Walk-in" on the barber column and types the customer's name and WhatsApp number, both required for every customer, member or not (Nopal, 2026-11-23: real barbershops ask this at every visit). The number links the visit to a `customers` row (created on first visit) and gets the "your turn" ping.
 - "Your turn is near" WhatsApp: goes once to an online or walk-in customer with a number when 2 people or fewer are ahead (the chair counts). Someone who joins a line that is already that short gets none (`queue_entries.near_alert_at` is set at join). It is checked after every queue tap and every "Lunas".
 - Call: cashier taps **Call** on the top entry → `called`, `grace_until = now + 5 min`. Customer phone and tablet highlight it.
 - Late: when grace ends and the customer is not there, cashier taps **Late** (or it auto-triggers) → entry swaps with the next one (moves back exactly **one** position), `late_moves += 1`.

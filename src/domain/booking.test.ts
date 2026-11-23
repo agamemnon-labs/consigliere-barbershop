@@ -123,10 +123,10 @@ describe("shortestWait", () => {
 
 describe("leaveHint", () => {
   it("gives the turn time and when to set off", () => {
-    expect(leaveHint(60, at("14:00"))).toEqual({ turnAt: "15.00", leave: "Berangkat sekitar 14.35." });
+    expect(leaveHint(60, at("14:00"))).toEqual({ turnAt: "15.00", leaveAt: "14.35" });
   });
 
   it("says now when the wait is short", () => {
-    expect(leaveHint(10, at("14:00")).leave).toBe("Berangkat sekarang.");
+    expect(leaveHint(10, at("14:00")).leaveAt).toBeNull();
   });
 });

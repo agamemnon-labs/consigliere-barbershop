@@ -92,10 +92,10 @@ export function creditAvailable(rows: CreditRow[], now: Date): number {
 }
 
 export const METHOD_LABEL: Record<Method | "online_qris", string> = {
-  edc_card: "EDC · kartu",
-  edc_qris: "EDC · QRIS",
+  edc_card: "EDC kartu",
+  edc_qris: "EDC QRIS",
   online_qris: "QRIS online",
   credit: "Kredit",
   balance: "Saldo member",
-  mixed: "EDC · gabungan",
+  mixed: "EDC gabungan",
 };

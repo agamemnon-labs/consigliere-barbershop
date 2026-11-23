@@ -143,14 +143,17 @@ export function shortestWait<T extends { waitMin: number }>(barbers: T[]): T | u
 
 /**
  * When to set off. The estimate is never a promise, so we suggest arriving
- * ten minutes early and say "now" when that time has already come.
+ * ten minutes early. `leaveAt` is null when that time has already come ("now").
  */
-export function leaveHint(waitMin: number, now: Date, travelMin = 15): { turnAt: string; leave: string } {
+export function leaveHint(
+  waitMin: number,
+  now: Date,
+  travelMin = 15,
+): { turnAt: string; leaveAt: string | null } {
   const turn = new Date(now.getTime() + waitMin * 60_000);
   const leaveAt = new Date(turn.getTime() - (travelMin + 10) * 60_000);
   return {
     turnAt: shopClock(turn),
-    leave:
-      leaveAt.getTime() <= now.getTime() ? "Berangkat sekarang." : `Berangkat sekitar ${shopClock(leaveAt)}.`,
+    leaveAt: leaveAt.getTime() <= now.getTime() ? null : shopClock(leaveAt),
   };
 }

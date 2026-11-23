@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
+import { ArrowLeftIcon, ChevronDownIcon } from "@/components/icons";
 import { getDb } from "@/db";
 import { phoneLabel } from "@/domain/booking";
 import { formatRupiah } from "@/domain/money";
@@ -18,7 +19,7 @@ export const metadata: Metadata = { title: "Member", robots: { index: false } };
 export default function MemberPage({ params }: PageProps<"/admin/member/[id]">) {
   return (
     <AdminShell title="Member">
-      <Suspense fallback={<p className="text-muted">Memuat…</p>}>
+      <Suspense fallback={<div aria-busy className="h-40 rounded-2xl bg-sunk" />}>
         <Detail params={params} />
       </Suspense>
     </AdminShell>
@@ -56,60 +57,84 @@ async function Detail({ params }: { params: PageProps<"/admin/member/[id]">["par
 
   return (
     <>
-      <Link href="/admin/member" className="text-muted hover:text-fg">
-        ← Semua member
+      <Link
+        href="/admin/member"
+        className="-ml-2 inline-flex min-h-11 items-center gap-1.5 rounded-xl px-2 text-[0.9375rem] font-medium hover:bg-sunk"
+      >
+        <ArrowLeftIcon />
+        Semua member
       </Link>
-      <div className="mt-6 grid gap-10 lg:grid-cols-2">
+      <div className="mt-4 grid items-start gap-6 lg:grid-cols-2">
         <div>
-          <p className="num text-accent-ink">{m.memberNo}</p>
-          <p className="mt-1 font-display text-4xl">{m.name}</p>
-          <p className="num mt-1 text-muted">{m.phone ? phoneLabel(m.phone) : ""}</p>
-          <dl className="mt-6 grid grid-cols-2 gap-4 border-y border-rule py-4">
-            <div>
-              <dt className="label">Poin</dt>
-              <dd className="num mt-1 text-2xl">{m.points}</dd>
-            </div>
-            <div>
-              <dt className="label">Saldo</dt>
-              <dd className="num mt-1 text-2xl">{formatRupiah(m.balance)}</dd>
-            </div>
-          </dl>
+          <div className="pinstripe rounded-2xl p-5 text-navy-fg">
+            <p className="condensed num text-lg text-navy-muted">{m.memberNo}</p>
+            <p className="mt-1 text-2xl font-semibold">{m.name}</p>
+            <p className="num text-navy-muted">{m.phone ? phoneLabel(m.phone) : ""}</p>
+            <dl className="mt-5 grid grid-cols-2 gap-3">
+              <div>
+                <dt className="text-sm text-navy-muted">Poin</dt>
+                <dd className="num text-xl font-semibold">{m.points}</dd>
+              </div>
+              <div>
+                <dt className="text-sm text-navy-muted">Saldo</dt>
+                <dd className="num text-xl font-semibold">{formatRupiah(m.balance)}</dd>
+              </div>
+            </dl>
+          </div>
 
-          <details className="row mt-6 border-b border-rule">
-            <summary className="flex min-h-12 items-center">Ubah data</summary>
-            <AdminForm action={updateMemberAction} submit="Simpan" className="pb-5" label="Ubah data member">
-              <input type="hidden" name="id" value={m.id} />
-              <Input label="Nama" name="name" defaultValue={m.name} required />
-              <Input label="Nomor member" name="memberNo" defaultValue={m.memberNo} required />
-              <label className="grid gap-1.5">
-                <span className="label">Status</span>
-                <select name="status" defaultValue={m.status} className={inputClass}>
-                  <option value="active">Aktif</option>
-                  <option value="suspended">Nonaktif</option>
-                </select>
-              </label>
-            </AdminForm>
-          </details>
-          <details className="row border-b border-rule">
-            <summary className="flex min-h-12 items-center">Koreksi poin atau saldo</summary>
-            <AdminForm action={adjustMemberAction} submit="Simpan koreksi" className="pb-5" label="Koreksi">
-              <input type="hidden" name="id" value={m.id} />
-              <label className="grid gap-1.5">
-                <span className="label">Yang dikoreksi</span>
-                <select name="kind" className={inputClass}>
-                  <option value="balance">Saldo (rupiah)</option>
-                  <option value="points">Poin</option>
-                </select>
-              </label>
-              <Input
-                label="Jumlah (pakai minus untuk mengurangi)"
-                name="delta"
-                inputMode="numeric"
-                required
-              />
-              <Input label="Alasan" name="reason" required />
-            </AdminForm>
-          </details>
+          <div className="mt-4 overflow-hidden rounded-2xl border border-rule bg-surface">
+            <details className="row border-b border-rule">
+              <summary className="flex min-h-14 items-center justify-between gap-4 px-4 font-medium hover:bg-bg">
+                Ubah data
+                <ChevronDownIcon className="row-mark text-faint" />
+              </summary>
+              <AdminForm
+                action={updateMemberAction}
+                submit="Simpan"
+                className="px-4 pb-5"
+                label="Ubah data member"
+              >
+                <input type="hidden" name="id" value={m.id} />
+                <Input label="Nama" name="name" defaultValue={m.name} required />
+                <Input label="Nomor member" name="memberNo" defaultValue={m.memberNo} required />
+                <label className="grid gap-1.5">
+                  <span className="text-sm font-medium">Status</span>
+                  <select name="status" defaultValue={m.status} className={inputClass}>
+                    <option value="active">Aktif</option>
+                    <option value="suspended">Nonaktif</option>
+                  </select>
+                </label>
+              </AdminForm>
+            </details>
+            <details className="row">
+              <summary className="flex min-h-14 items-center justify-between gap-4 px-4 font-medium hover:bg-bg">
+                Koreksi poin atau saldo
+                <ChevronDownIcon className="row-mark text-faint" />
+              </summary>
+              <AdminForm
+                action={adjustMemberAction}
+                submit="Simpan koreksi"
+                className="px-4 pb-5"
+                label="Koreksi"
+              >
+                <input type="hidden" name="id" value={m.id} />
+                <label className="grid gap-1.5">
+                  <span className="text-sm font-medium">Yang dikoreksi</span>
+                  <select name="kind" className={inputClass}>
+                    <option value="balance">Saldo (rupiah)</option>
+                    <option value="points">Poin</option>
+                  </select>
+                </label>
+                <Input
+                  label="Jumlah (pakai minus untuk mengurangi)"
+                  name="delta"
+                  inputMode="numeric"
+                  required
+                />
+                <Input label="Alasan" name="reason" required />
+              </AdminForm>
+            </details>
+          </div>
         </div>
 
         <section aria-label="Riwayat">
@@ -117,11 +142,11 @@ async function Detail({ params }: { params: PageProps<"/admin/member/[id]">["par
           {rows.length === 0 ? (
             <p className="mt-3 text-muted">Belum ada</p>
           ) : (
-            <ul className="mt-3 border-t border-rule">
+            <ul className="mt-3 overflow-hidden rounded-2xl border border-rule bg-surface">
               {rows.map((r) => (
                 <li
                   key={r.id}
-                  className="flex items-baseline gap-4 border-b border-rule py-2.5 text-[0.9375rem]"
+                  className="flex items-baseline gap-4 border-b border-rule px-4 py-2.5 text-[0.9375rem] last:border-b-0"
                 >
                   <span className="num w-16 text-sm text-muted">
                     {shortDate(shopDate(r.at)).replace(/^\w+, /, "")}

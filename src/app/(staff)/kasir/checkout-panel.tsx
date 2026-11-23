@@ -2,6 +2,7 @@
 
 import { useActionState, useState, useTransition } from "react";
 import { buttonClass } from "@/components/button";
+import { XIcon } from "@/components/icons";
 import { applyBirthday, applyVoucher, redeemableUnits } from "@/domain/membership";
 import { formatRupiah } from "@/domain/money";
 import { lookupPayer, type PayerInfo, type PayState, payAction } from "@/server/actions/checkout";
@@ -25,13 +26,15 @@ type Props = {
   /** Services already on the bill when the panel opens (haircut for a walk-in, nothing for prepaid online). */
   preset: string[];
   label: string;
+  /** "dark" when settling the bill is the next job, "quiet" when it only adds extras. */
+  variant?: "dark" | "quiet";
 };
 
 /**
  * Opens under the chair: what was done, who pays, how. One tap on "Lunas"
  * records the payment and frees the chair. The EDC machine takes the money.
  */
-export function CheckoutPanel({ entryId, haircutPrice, catalog, preset, label }: Props) {
+export function CheckoutPanel({ entryId, haircutPrice, catalog, preset, label, variant = "dark" }: Props) {
   const [state, action, pending] = useActionState<PayState, FormData>(payAction, {});
   const [lines, setLines] = useState<Line[]>(() => preset.map((serviceId, key) => ({ key, serviceId })));
   const [nextKey, setNextKey] = useState(preset.length);
@@ -90,13 +93,11 @@ export function CheckoutPanel({ entryId, haircutPrice, catalog, preset, label }:
 
   return (
     <details className="row mt-3">
-      <summary className={`${buttonClass("primary", true)} min-h-11 cursor-pointer list-none`}>
-        {label}
-      </summary>
-      <form action={action} className="mt-3 grid gap-3 text-sm">
+      <summary className={`${buttonClass(variant, true)} min-h-11 cursor-pointer list-none`}>{label}</summary>
+      <form action={action} className="mt-3 grid grid-cols-1 gap-3 rounded-xl bg-bg p-3 text-sm">
         <input type="hidden" name="entryId" value={entryId} />
         {priced.map((l) => (
-          <div key={l.key} className="grid gap-1.5 border-b border-rule pb-2">
+          <div key={l.key} className="grid grid-cols-1 gap-1.5 border-b border-rule pb-2">
             <input type="hidden" name="service" value={l.serviceId} />
             <div className="flex items-baseline gap-2">
               <span className="flex-1">{l.svc?.name}</span>
@@ -104,10 +105,10 @@ export function CheckoutPanel({ entryId, haircutPrice, catalog, preset, label }:
               <button
                 type="button"
                 aria-label={`Hapus ${l.svc?.name}`}
-                className="label min-h-8 px-1 hover:text-fg"
+                className="inline-flex size-8 items-center justify-center rounded-lg text-muted hover:bg-sunk hover:text-fg"
                 onClick={() => setLines((ls) => ls.filter((x) => x.key !== l.key))}
               >
-                ✕
+                <XIcon size={16} />
               </button>
             </div>
             {l.svc?.priceType === "variant" ? (
@@ -116,14 +117,14 @@ export function CheckoutPanel({ entryId, haircutPrice, catalog, preset, label }:
                 required
                 value={l.variantId ?? ""}
                 onChange={(e) => update(l.key, { variantId: e.currentTarget.value })}
-                className="min-h-10 border border-rule-strong bg-transparent px-2"
+                className={control}
               >
                 <option value="" disabled>
                   Pilih ukuran
                 </option>
                 {l.svc.variants.map((v) => (
                   <option key={v.id} value={v.id}>
-                    {v.name} · {formatRupiah(v.price)}
+                    {v.name} ({formatRupiah(v.price)})
                   </option>
                 ))}
               </select>
@@ -140,7 +141,7 @@ export function CheckoutPanel({ entryId, haircutPrice, catalog, preset, label }:
                   onChange={(e) =>
                     update(l.key, { price: Number(e.currentTarget.value.replace(/\D/g, "")) || 0 })
                   }
-                  className="num min-h-10 flex-1 border-0 border-b border-rule-strong bg-transparent text-right outline-none focus:border-fg"
+                  className={`${control} num flex-1 text-right`}
                 />
               </label>
             ) : null}
@@ -157,7 +158,7 @@ export function CheckoutPanel({ entryId, haircutPrice, catalog, preset, label }:
               setLines((ls) => [...ls, { key: nextKey, serviceId: id }]);
               setNextKey((k) => k + 1);
             }}
-            className="min-h-10 border border-dashed border-rule-strong bg-transparent px-2 text-muted"
+            className={`${control} border-dashed text-muted`}
           >
             <option value="">+ Tambah layanan</option>
             {available.map((c) => (
@@ -168,7 +169,7 @@ export function CheckoutPanel({ entryId, haircutPrice, catalog, preset, label }:
           </select>
         ) : null}
 
-        <div className="grid gap-1.5">
+        <div className="grid grid-cols-1 gap-1.5">
           <label htmlFor={`payer-${entryId}`} className="label">
             Kartu member atau WhatsApp
           </label>
@@ -194,12 +195,12 @@ export function CheckoutPanel({ entryId, haircutPrice, catalog, preset, label }:
                   if (query) startCheck(async () => setPayer(await lookupPayer(query)));
                 }
               }}
-              className="min-h-10 flex-1 border-0 border-b border-rule-strong bg-transparent outline-none focus:border-fg"
+              className={`${control} min-w-0 flex-1`}
             />
             <button
               type="button"
               disabled={!query || checking}
-              className="label min-h-10 px-2 hover:text-fg disabled:opacity-40"
+              className={`${buttonClass("soft")} min-h-11 px-4`}
               onClick={() => startCheck(async () => setPayer(await lookupPayer(query)))}
             >
               {checking ? "…" : "Cek"}
@@ -209,13 +210,14 @@ export function CheckoutPanel({ entryId, haircutPrice, catalog, preset, label }:
           {payer.phone ? <input type="hidden" name="phone" value={payer.phone} /> : null}
 
           {member && rules ? (
-            <div className="grid gap-1 border-l-2 border-fg pl-3">
+            <div className="grid gap-1 rounded-xl bg-blue-soft px-3 py-2">
               <input type="hidden" name="memberId" value={member.id} />
               <p>
                 {member.name} <span className="num text-muted">{member.memberNo}</span>
               </p>
               <p className="label">
-                {member.points} poin · saldo <span className="num">{formatRupiah(member.balance)}</span>
+                <span className="num">{member.points}</span> poin, saldo{" "}
+                <span className="num">{formatRupiah(member.balance)}</span>
               </p>
               {member.birthday ? (
                 <label className="flex min-h-10 items-center gap-2">
@@ -225,7 +227,7 @@ export function CheckoutPanel({ entryId, haircutPrice, catalog, preset, label }:
                     value="1"
                     checked={birthday}
                     onChange={(e) => setBirthday(e.currentTarget.checked)}
-                    className="size-4 accent-fg"
+                    className="size-4 accent-blue"
                   />
                   Bulan ulang tahun: diskon {rules.birthday.percent}% haircut
                 </label>
@@ -243,7 +245,7 @@ export function CheckoutPanel({ entryId, haircutPrice, catalog, preset, label }:
                     value={unitsUsed}
                     disabled={maxUnits === 0}
                     onChange={(e) => setUnits(Number(e.currentTarget.value))}
-                    className="min-h-10 border border-rule-strong bg-transparent px-2 disabled:opacity-40"
+                    className={`${control} disabled:opacity-40`}
                   >
                     {[...Array(maxUnits + 1).keys()].map((n) => (
                       <option key={n} value={n}>
@@ -262,7 +264,7 @@ export function CheckoutPanel({ entryId, haircutPrice, catalog, preset, label }:
                     type="checkbox"
                     checked={useBalance}
                     onChange={(e) => setUseBalance(e.currentTarget.checked)}
-                    className="size-4 accent-fg"
+                    className="size-4 accent-blue"
                   />
                   Bayar pakai saldo
                 </label>
@@ -279,7 +281,7 @@ export function CheckoutPanel({ entryId, haircutPrice, catalog, preset, label }:
                       autoComplete="off"
                       maxLength={6}
                       required
-                      className="num min-h-10 w-28 border-0 border-b border-rule-strong bg-transparent text-center tracking-[0.4em] outline-none focus:border-fg"
+                      className={`${control} num w-28 text-center tracking-[0.4em]`}
                     />
                   </label>
                 </>
@@ -294,7 +296,7 @@ export function CheckoutPanel({ entryId, haircutPrice, catalog, preset, label }:
                   type="checkbox"
                   checked={useCredit}
                   onChange={(e) => setUseCredit(e.currentTarget.checked)}
-                  className="size-4 accent-fg"
+                  className="size-4 accent-blue"
                 />
                 Pakai kredit <span className="num">{formatRupiah(payer.credit)}</span>
               </label>
@@ -315,7 +317,7 @@ export function CheckoutPanel({ entryId, haircutPrice, catalog, preset, label }:
           ).map(([value, text]) => (
             <label
               key={value}
-              className="flex min-h-11 cursor-pointer items-center justify-center gap-2 border border-rule-strong has-checked:border-fg has-checked:bg-fg has-checked:text-bg"
+              className="relative flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-xl border border-rule-strong bg-surface font-medium has-checked:border-blue has-checked:bg-blue-soft has-checked:ring-1 has-checked:ring-blue has-focus-visible:outline-2 has-focus-visible:outline-blue"
             >
               <input
                 type="radio"
@@ -331,13 +333,13 @@ export function CheckoutPanel({ entryId, haircutPrice, catalog, preset, label }:
         </fieldset>
         {due === 0 && lines.length > 0 ? <input type="hidden" name="edc" value="edc_card" /> : null}
 
-        <dl className="grid gap-0.5 border-t border-rule-strong pt-2">
+        <dl className="grid gap-0.5 border-t border-rule pt-2">
           {discounts > 0 ? <Row term="Diskon" value={discounts} /> : null}
           {creditUsed > 0 ? <Row term="Kredit" value={creditUsed} /> : null}
           {balanceUsed > 0 ? <Row term="Saldo" value={balanceUsed} /> : null}
           <div className="flex items-baseline justify-between">
             <dt className="label">Tagih di EDC</dt>
-            <dd className="num text-xl text-accent-ink">{formatRupiah(due)}</dd>
+            <dd className="num text-xl font-semibold">{formatRupiah(due)}</dd>
           </div>
         </dl>
         {state.error ? (
@@ -347,7 +349,7 @@ export function CheckoutPanel({ entryId, haircutPrice, catalog, preset, label }:
         ) : null}
         <button
           type="submit"
-          className={`${buttonClass("accent", true)} min-h-11`}
+          className={`${buttonClass("primary", true)} min-h-11`}
           disabled={pending || lines.length === 0}
         >
           {pending ? "Menyimpan…" : due === 0 && paidOther > 0 ? "Lunas tanpa EDC" : "Lunas"}
@@ -365,3 +367,6 @@ function Row({ term, value }: { term: string; value: number }) {
     </div>
   );
 }
+
+const control =
+  "min-h-11 min-w-0 rounded-xl border border-rule-strong bg-surface px-3 outline-none focus:border-blue focus:ring-3 focus:ring-blue-soft";

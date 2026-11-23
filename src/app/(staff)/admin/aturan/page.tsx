@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
+import { PlusIcon } from "@/components/icons";
 import { getDb } from "@/db";
 import { savePackageAction, saveRulesAction } from "@/server/actions/admin";
 import { rules } from "@/server/backoffice";
@@ -12,7 +13,7 @@ export const metadata: Metadata = { title: "Aturan", robots: { index: false } };
 export default function RulesPage() {
   return (
     <AdminShell title="Aturan">
-      <Suspense fallback={<p className="text-muted">Memuat…</p>}>
+      <Suspense fallback={<div aria-busy className="h-40 rounded-2xl bg-sunk" />}>
         <Rules />
       </Suspense>
     </AdminShell>
@@ -71,7 +72,7 @@ async function Rules() {
             required
           />
           <fieldset className="grid gap-1 sm:col-span-2">
-            <legend className="label mb-1">Berlaku untuk</legend>
+            <legend className="mb-1 text-sm font-medium">Berlaku untuk</legend>
             <div className="flex flex-wrap gap-x-6">
               {CATEGORY.map(([value, text]) => (
                 <Check
@@ -134,11 +135,11 @@ async function Rules() {
         </Group>
       </AdminForm>
 
-      <section aria-label="Paket top-up" className="mt-12">
+      <section aria-label="Paket top-up" className="mt-8">
         <h2 className="text-xl">Paket top-up</h2>
-        <ul className="mt-3 border-t border-rule">
+        <ul className="mt-3 overflow-hidden rounded-2xl border border-rule bg-surface">
           {r.packages.map((p) => (
-            <li key={p.id} className="border-b border-rule py-4">
+            <li key={p.id} className="border-b border-rule px-4 py-4 last:border-b-0">
               <AdminForm
                 action={savePackageAction}
                 submit="Simpan"
@@ -160,13 +161,16 @@ async function Rules() {
             </li>
           ))}
         </ul>
-        <details className="row mt-2">
-          <summary className="flex min-h-12 items-center text-muted hover:text-fg">+ Paket baru</summary>
+        <details className="row mt-3 rounded-2xl border border-dashed border-rule-strong">
+          <summary className="flex min-h-12 items-center gap-1.5 px-4 font-medium text-blue">
+            <PlusIcon size={18} />
+            Paket baru
+          </summary>
           <AdminForm
             action={savePackageAction}
             submit="Tambah paket"
             label="Paket baru"
-            className="pb-5 sm:grid-cols-2"
+            className="px-4 pb-5 sm:grid-cols-2"
           >
             <Input label="Bayar (Rp)" name="pay" inputMode="numeric" required />
             <Input label="Dapat saldo (Rp)" name="get" inputMode="numeric" required />
@@ -179,8 +183,8 @@ async function Rules() {
 
 function Group({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <fieldset className="grid gap-4 border-t border-rule pt-5 pb-3 sm:grid-cols-2">
-      <legend className="float-left mb-1 w-full text-xl">{title}</legend>
+    <fieldset className="grid gap-4 rounded-2xl border border-rule bg-surface p-4 sm:grid-cols-2">
+      <legend className="float-left mb-1 w-full text-lg font-semibold [font-stretch:110%]">{title}</legend>
       {children}
     </fieldset>
   );

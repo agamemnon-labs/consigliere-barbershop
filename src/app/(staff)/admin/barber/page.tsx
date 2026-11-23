@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
+import { Avatar } from "@/components/avatar";
+import { ChevronDownIcon } from "@/components/icons";
 import { getDb } from "@/db";
 import { shopDate } from "@/domain/time";
 import { changeLevelAction, setBarberActiveAction } from "@/server/actions/admin";
@@ -13,7 +15,7 @@ export const metadata: Metadata = { title: "Barber", robots: { index: false } };
 export default function BarbersPage() {
   return (
     <AdminShell title="Barber">
-      <Suspense fallback={<p className="text-muted">Memuat…</p>}>
+      <Suspense fallback={<div aria-busy className="h-40 rounded-2xl bg-sunk" />}>
         <Barbers />
       </Suspense>
     </AdminShell>
@@ -27,15 +29,25 @@ async function Barbers() {
   const { barbers, levels } = await barberList(db);
   const levelName = (id: string) => levels.find((l) => l.id === id)?.name ?? "";
   return (
-    <ul className="border-t border-rule">
+    <ul className="overflow-hidden rounded-2xl border border-rule bg-surface">
       {barbers.map((b) => (
-        <li key={b.id} className="border-b border-rule">
+        <li key={b.id} className="border-b border-rule last:border-b-0">
           <details className="row">
-            <summary className="flex min-h-14 items-center justify-between gap-4 py-3">
-              <span className={b.isActive ? "text-lg" : "text-lg text-muted line-through"}>{b.name}</span>
-              <span className="text-muted">{levelName(b.levelId)}</span>
+            <summary className="flex min-h-14 items-center justify-between gap-4 px-4 py-3 hover:bg-bg">
+              <span className="flex items-center gap-3">
+                <Avatar name={b.name} size="sm" className={b.isActive ? "" : "opacity-50"} />
+                <span>
+                  <span className={`block font-semibold ${b.isActive ? "" : "text-muted line-through"}`}>
+                    {b.name}
+                  </span>
+                  <span className="block text-sm text-muted">
+                    {b.isActive ? levelName(b.levelId) : "Nonaktif"}
+                  </span>
+                </span>
+              </span>
+              <ChevronDownIcon className="row-mark text-faint" />
             </summary>
-            <div className="grid gap-6 pb-5 sm:grid-cols-[1fr_auto] sm:items-end">
+            <div className="grid gap-6 px-4 pb-5 sm:grid-cols-[1fr_auto] sm:items-end">
               <AdminForm
                 action={changeLevelAction}
                 submit="Ubah level"
@@ -45,7 +57,7 @@ async function Barbers() {
                 <input type="hidden" name="barberId" value={b.id} />
                 <div className="grid gap-4 sm:grid-cols-2">
                   <label className="grid gap-1.5">
-                    <span className="label">Level</span>
+                    <span className="text-sm font-medium">Level</span>
                     <select name="levelId" defaultValue={b.levelId} className={inputClass}>
                       {levels.map((l) => (
                         <option key={l.id} value={l.id}>
@@ -55,7 +67,7 @@ async function Barbers() {
                     </select>
                   </label>
                   <label className="grid gap-1.5">
-                    <span className="label">Mulai berlaku</span>
+                    <span className="text-sm font-medium">Mulai berlaku</span>
                     <input type="date" name="from" min={today} defaultValue={today} className={inputClass} />
                   </label>
                 </div>

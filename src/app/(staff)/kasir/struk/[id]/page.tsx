@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
+import { ArrowLeftIcon } from "@/components/icons";
 import { StaffShell } from "@/components/staff-shell";
 import { brand } from "@/config/brand";
 import { getDb } from "@/db";
@@ -12,6 +13,7 @@ import { shortDate } from "@/domain/schedule";
 import { shopClock, shopDate } from "@/domain/time";
 import { getReceipt } from "@/server/checkout";
 import { requireStaff } from "@/server/session";
+import { CashierTabs } from "../../tabs";
 import { PrintButton } from "./print-button";
 
 export const metadata: Metadata = { title: "Struk", robots: { index: false } };
@@ -19,7 +21,7 @@ export const metadata: Metadata = { title: "Struk", robots: { index: false } };
 /** A receipt sized for a 58 mm thermal printer; the browser's print dialog does the rest. */
 export default function ReceiptPage({ params }: PageProps<"/kasir/struk/[id]">) {
   return (
-    <StaffShell title="Struk" allow={["cashier", "admin", "owner"]}>
+    <StaffShell title="Kasir" allow={["cashier", "admin", "owner"]} tabs={<CashierTabs />}>
       <Suspense fallback={<p className="p-6 text-muted">Membuka struk…</p>}>
         <Receipt params={params} />
       </Suspense>
@@ -40,15 +42,19 @@ async function Receipt({ params }: { params: PageProps<"/kasir/struk/[id]">["par
   return (
     <div className="px-6 py-8">
       <div className="mx-auto mb-6 flex max-w-[22rem] items-center justify-between print:hidden">
-        <Link href="/kasir" className="label min-h-11 content-center hover:text-fg">
-          ← Kembali ke antrean
+        <Link
+          href="/kasir"
+          className="-ml-2 inline-flex min-h-11 items-center gap-1.5 rounded-xl px-2 text-[0.9375rem] font-medium hover:bg-sunk"
+        >
+          <ArrowLeftIcon />
+          Antrean
         </Link>
         <PrintButton />
       </div>
 
-      <article className="receipt mx-auto max-w-[22rem] border border-rule bg-surface px-6 py-7 text-[0.8125rem] print:border-0 print:p-0">
+      <article className="receipt mx-auto max-w-[22rem] rounded-2xl border border-rule bg-surface px-6 py-7 text-[0.8125rem] print:rounded-none print:border-0 print:p-0">
         <div className="text-center">
-          <p className="font-display text-xl uppercase tracking-[0.2em]">{brand.name}</p>
+          <p className="wide text-lg font-semibold uppercase tracking-[0.04em]">{brand.name}</p>
           <p className="mt-1">Cabang {branch.name}</p>
           <p className="text-muted">{branch.address}</p>
         </div>
@@ -117,7 +123,7 @@ async function Receipt({ params }: { params: PageProps<"/kasir/struk/[id]">["par
 
         {receipt.member ? (
           <p className="mt-3 border-t border-dashed border-rule-strong pt-3 text-center">
-            Member <span className="num">{receipt.member.memberNo}</span> · {receipt.member.name}
+            Member <span className="num">{receipt.member.memberNo}</span>, {receipt.member.name}
             {receipt.pointsEarned > 0 ? (
               <>
                 <br />+{receipt.pointsEarned} poin dari kunjungan ini

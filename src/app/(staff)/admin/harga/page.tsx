@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
+import { ChevronDownIcon } from "@/components/icons";
 import { getDb } from "@/db";
 import { formatRupiah } from "@/domain/money";
 import { updateLevelAction, updateServiceAction } from "@/server/actions/admin";
@@ -13,7 +14,7 @@ export const metadata: Metadata = { title: "Harga", robots: { index: false } };
 export default function PricesPage() {
   return (
     <AdminShell title="Harga dan layanan">
-      <Suspense fallback={<p className="text-muted">Memuat…</p>}>
+      <Suspense fallback={<div aria-busy className="h-40 rounded-2xl bg-sunk" />}>
         <Prices />
       </Suspense>
     </AdminShell>
@@ -28,9 +29,9 @@ async function Prices() {
     <>
       <section aria-label="Haircut per level">
         <h2 className="text-xl">Haircut per level barber</h2>
-        <ul className="mt-3 border-t border-rule">
+        <ul className="mt-3 overflow-hidden rounded-2xl border border-rule bg-surface">
           {levels.map((l) => (
-            <li key={l.id} className="border-b border-rule py-4">
+            <li key={l.id} className="border-b border-rule px-4 py-4 last:border-b-0">
               <AdminForm
                 action={updateLevelAction}
                 submit="Simpan"
@@ -39,7 +40,7 @@ async function Prices() {
                 className="sm:grid-cols-[8rem_1fr_1fr_auto] sm:items-end"
               >
                 <input type="hidden" name="id" value={l.id} />
-                <p className="text-lg sm:pb-2">{l.name}</p>
+                <p className="text-lg font-semibold [font-stretch:110%] sm:pb-2">{l.name}</p>
                 <Input
                   label="Harga haircut"
                   name="haircutPrice"
@@ -60,17 +61,25 @@ async function Prices() {
         </ul>
       </section>
 
-      <section aria-label="Layanan" className="mt-12">
+      <section aria-label="Layanan" className="mt-8">
         <h2 className="text-xl">Layanan</h2>
-        <ul className="mt-3 border-t border-rule">
+        <ul className="mt-3 overflow-hidden rounded-2xl border border-rule bg-surface">
           {services.map((svc) => (
-            <li key={svc.id} className="border-b border-rule">
+            <li key={svc.id} className="border-b border-rule last:border-b-0">
               <details className="row">
-                <summary className="flex min-h-14 items-center justify-between gap-4 py-3">
-                  <span className={svc.isActive ? "" : "text-muted line-through"}>{svc.name}</span>
+                <summary className="flex min-h-14 items-center justify-between gap-4 px-4 py-3 hover:bg-bg">
+                  <span className={`flex-1 ${svc.isActive ? "font-medium" : "text-muted line-through"}`}>
+                    {svc.name}
+                  </span>
                   <span className="num text-muted">{summaryPrice(svc)}</span>
+                  <ChevronDownIcon size={18} className="row-mark text-faint" />
                 </summary>
-                <AdminForm action={updateServiceAction} submit="Simpan" className="pb-5" label={svc.name}>
+                <AdminForm
+                  action={updateServiceAction}
+                  submit="Simpan"
+                  className="px-4 pb-5"
+                  label={svc.name}
+                >
                   <input type="hidden" name="id" value={svc.id} />
                   <div className="grid gap-4 sm:grid-cols-3">
                     {svc.priceType === "fixed" ? (
@@ -110,7 +119,7 @@ async function Prices() {
                     />
                   </div>
                   {svc.priceType === "by_level" ? (
-                    <p className="text-sm text-muted">Harganya ikut level barber, atur di atas.</p>
+                    <p className="text-sm text-muted">Harganya ikut level barber, atur di atas</p>
                   ) : null}
                   <Check label="Tampil dan bisa dipesan" name="isActive" defaultChecked={svc.isActive} />
                 </AdminForm>

@@ -1,7 +1,8 @@
 import "server-only";
 import { and, eq, max } from "drizzle-orm";
 import { type Database, schema as s } from "@/db";
-import { nextPosition } from "@/domain/queue";
+import { shortLineAtJoin } from "@/domain/notify";
+import { activeEntries, nextPosition } from "@/domain/queue";
 
 export type Tx = Parameters<Parameters<Database["transaction"]>[0]>[0];
 
@@ -33,7 +34,13 @@ export async function enqueue(
     .where(and(eq(s.queueEntries.branchId, entry.branchId), eq(s.queueEntries.date, entry.date)));
   const [row] = await tx
     .insert(s.queueEntries)
-    .values({ ...entry, position: nextPosition(line), ticketNo: (last ?? 0) + 1 })
+    .values({
+      ...entry,
+      position: nextPosition(line),
+      ticketNo: (last ?? 0) + 1,
+      // Joining a line that is already short: they can see it, so no "near" message later.
+      nearAlertAt: shortLineAtJoin(activeEntries(line).length) ? new Date() : null,
+    })
     .returning();
   if (!row) throw new Error("Queue entry was not inserted");
   return row;

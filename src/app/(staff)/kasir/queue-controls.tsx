@@ -71,7 +71,7 @@ export function CancelPrepaid({ entryId }: { entryId: string }) {
   );
 }
 
-/** "+ Walk-in" opens a one-field form downward; the name is optional. */
+/** "+ Walk-in" opens a short form downward; name and WhatsApp are both optional. */
 export function WalkInForm({ barberId, barberName }: { barberId: string; barberName: string }) {
   const [state, action, pending] = useActionState<QueueActionState, FormData>(addWalkIn, {});
   return (
@@ -90,8 +90,24 @@ export function WalkInForm({ barberId, barberName }: { barberId: string; barberN
           name="name"
           autoComplete="off"
           maxLength={40}
-          className="min-h-11 rounded-xl border border-rule-strong bg-surface px-3 outline-none focus:border-blue focus:ring-3 focus:ring-blue-soft"
+          className={walkInInput}
         />
+        <label className="text-sm font-medium" htmlFor={`walkin-wa-${barberId}`}>
+          WhatsApp (boleh kosong)
+        </label>
+        <input
+          id={`walkin-wa-${barberId}`}
+          name="phone"
+          type="tel"
+          inputMode="tel"
+          autoComplete="off"
+          maxLength={20}
+          aria-describedby={`walkin-wa-hint-${barberId}`}
+          className={walkInInput}
+        />
+        <p id={`walkin-wa-hint-${barberId}`} className="-mt-1 text-sm text-faint">
+          Kami kabari saat tinggal 2 orang lagi
+        </p>
         <button type="submit" className={`${buttonClass("dark", true)} min-h-11`} disabled={pending}>
           {pending ? "Menambahkan…" : `Tambah ke antrean ${barberName}`}
         </button>
@@ -104,6 +120,9 @@ export function WalkInForm({ barberId, barberName }: { barberId: string; barberN
     </details>
   );
 }
+
+const walkInInput =
+  "min-h-11 rounded-xl border border-rule-strong bg-surface px-3 outline-none focus:border-blue focus:ring-3 focus:ring-blue-soft";
 
 function useReadyAt(iso?: string | null) {
   const at = iso ? new Date(iso).getTime() : 0;

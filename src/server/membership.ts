@@ -2,6 +2,7 @@ import "server-only";
 import { createHash, randomInt } from "node:crypto";
 import { hashPassword, verifyPassword } from "better-auth/crypto";
 import { and, count, desc, eq, gt, ilike, or } from "drizzle-orm";
+import { brand } from "@/config/brand";
 import { type Database, schema as s } from "@/db";
 import { normalizePhone } from "@/domain/booking";
 import { creditAvailable } from "@/domain/checkout";
@@ -15,9 +16,11 @@ import {
   pinProblem,
   topupRows,
 } from "@/domain/membership";
+import { OTP_MINUTES, otpBody } from "@/domain/notify";
 import { shopDate } from "@/domain/time";
 import type { Cashier } from "@/server/checkout";
 import { numberSetting, type Tx } from "@/server/enqueue";
+import { queueMessage } from "@/server/whatsapp";
 
 const LOCK_AFTER = 5;
 const LOCK_MIN = 15;
@@ -270,10 +273,15 @@ export async function checkPin(db: Database | Tx, memberId: string, pin: string,
 const hashCode = (code: string) => createHash("sha256").update(code).digest("hex");
 
 /**
- * "Lupa PIN": a 6-digit code goes to the member's WhatsApp (the outbox).
- * Returns the code only so the public demo can show it; never shown otherwise.
+ * "Lupa PIN": a 6-digit code goes to the member's WhatsApp (through the outbox).
+ * Returns the code only so the in-memory demo can show it; never shown otherwise.
+ * The caller delivers `messageId` once the response has gone out.
  */
-export async function requestPinReset(db: Database, phoneInput: string, now: Date): Promise<string | null> {
+export async function requestPinReset(
+  db: Database,
+  phoneInput: string,
+  now: Date,
+): Promise<{ code: string; messageId: string } | null> {
   const phone = normalizePhone(phoneInput);
   if (!phone) return null;
   const [user] = await db.select({ id: s.users.id }).from(s.users).where(eq(s.users.phoneNumber, phone));
@@ -284,13 +292,15 @@ export async function requestPinReset(db: Database, phoneInput: string, now: Dat
   await db.insert(s.verifications).values({
     identifier,
     value: hashCode(code),
-    expiresAt: new Date(now.getTime() + 10 * 60_000),
+    expiresAt: new Date(now.getTime() + OTP_MINUTES * 60_000),
   });
-  await db.insert(s.outbox).values({
+  const messageId = await queueMessage(db, {
+    kind: "otp",
     to: phone,
-    body: `Kode ganti PIN Consigliere: ${code}. Berlaku 10 menit. Jangan berikan ke siapa pun, termasuk kasir.`,
+    params: [code],
+    body: otpBody(brand.name),
   });
-  return code;
+  return { code, messageId };
 }
 
 export async function resetPin(db: Database, phoneInput: string, code: string, pin: string, now: Date) {

@@ -186,8 +186,13 @@ describe("paying as a member", () => {
 
 describe("forgot PIN", () => {
   it("resets with the WhatsApp code and clears the lock", async () => {
-    const code = await requestPinReset(db, "0812-0000-0002", now);
+    const reset = await requestPinReset(db, "0812-0000-0002", now);
+    const code = reset?.code;
     expect(code).toMatch(/^\d{6}$/);
+    // The log copy never carries the code; only the template values do, until delivery.
+    const [message] = await db.select().from(s.outbox).where(eq(s.outbox.id, reset!.messageId));
+    expect(message).toMatchObject({ kind: "otp", status: "pending", params: [code] });
+    expect(message!.body).not.toContain(code!);
     await expect(resetPin(db, "0812-0000-0002", "000000", "582914", now)).rejects.toThrow("Kode salah");
     await resetPin(db, "0812-0000-0002", code!, "582914", now);
     const rizal = (await findMember(db, "C00002", now))!;

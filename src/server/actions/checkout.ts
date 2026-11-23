@@ -1,13 +1,15 @@
 "use server";
 
+import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
-import { getDb } from "@/db";
+import { getDb, schema as s } from "@/db";
 import { normalizePhone } from "@/domain/booking";
 import { CheckoutError } from "@/domain/checkout";
 import { MemberError } from "@/domain/membership";
 import { creditFor, payAndFinish } from "@/server/checkout";
 import { birthdayRule, findMember, pointsRule } from "@/server/membership";
+import { alertNearTurnsLater } from "@/server/notify-after";
 import { requireStaff } from "@/server/session";
 
 export type PayState = { error?: string; ok?: number };
@@ -44,9 +46,10 @@ export async function payAction(_prev: PayState, data: FormData): Promise<PaySta
   const { entryId, edc, services, phone, useCredit, memberId, birthday, redeemUnits, balance, pin } =
     parsed.data;
 
+  const db = await getDb();
   try {
     await payAndFinish(
-      await getDb(),
+      db,
       {
         entryId,
         edc,
@@ -72,6 +75,12 @@ export async function payAction(_prev: PayState, data: FormData): Promise<PaySta
     if (error instanceof CheckoutError || error instanceof MemberError) return { error: error.message };
     throw error;
   }
+  // The chair is free, so everyone behind moved up one.
+  const [line] = await db
+    .select({ barberId: s.queueEntries.barberId, date: s.queueEntries.date })
+    .from(s.queueEntries)
+    .where(eq(s.queueEntries.id, entryId));
+  if (line) alertNearTurnsLater(line.barberId, line.date);
   revalidatePath("/kasir");
   return { ok: Date.now() };
 }

@@ -11,7 +11,7 @@ test("the cashier adds a walk-in, calls, seats, takes payment and prints a recei
   await clearColumn(column);
 
   const name = `Uji ${Date.now() % 10_000}`;
-  await column.getByText("+ Walk-in").click();
+  await column.locator("summary", { hasText: "Walk-in" }).click();
   await column.getByLabel("Nama (boleh kosong)").fill(name);
   await column.getByRole("button", { name: /^Tambah ke antrean/ }).click();
   const row = column.getByRole("listitem").filter({ hasText: name });
@@ -37,13 +37,13 @@ test("the cashier adds a walk-in, calls, seats, takes payment and prints a recei
   await expect(column.getByText(name)).toBeHidden();
 
   const takings = page.getByRole("region", { name: "Pemasukan hari ini" });
-  await expect(takings).toContainText("EDC · kartu");
+  await expect(takings).toContainText("EDC kartu");
   await takings.getByRole("link").first().click();
   await expect(page).toHaveURL(/\/kasir\/struk\//);
   const receipt = page.locator("article.receipt");
   await expect(receipt).toContainText("Coloring Fashion");
   await expect(receipt).toContainText("Rp350.000");
-  await expect(receipt).toContainText("EDC · kartu");
+  await expect(receipt).toContainText("EDC kartu");
   await expect(page.getByRole("button", { name: "Cetak" })).toBeVisible();
 });
 

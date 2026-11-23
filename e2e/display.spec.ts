@@ -12,5 +12,5 @@ test("the counter tablet shows ticket numbers and never names", async ({ page })
 
 test("an unknown branch tablet shows the not-found page", async ({ page }) => {
   await page.goto("/tablet/nowhere");
-  await expect(page.getByRole("heading", { name: "Halaman ini tidak ada di buku kami" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Halaman ini tidak ada" })).toBeVisible();
 });

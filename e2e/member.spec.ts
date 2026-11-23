@@ -3,7 +3,7 @@ import { expect, test } from "@playwright/test";
 test("the member card asks for a login first", async ({ page }) => {
   await page.goto("/kartu");
   await expect(page).toHaveURL(/\/masuk/);
-  await expect(page.getByRole("heading", { name: "Masuk", exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Masuk kartu member" })).toBeVisible();
 });
 
 test("a member signs in with WhatsApp and PIN and sees their card", async ({ page }) => {
@@ -24,7 +24,7 @@ test("a member signs in with WhatsApp and PIN and sees their card", async ({ pag
   // Top up from the phone: pick the 300K package, pay the demo QRIS, balance goes up by 330K.
   await page.getByRole("link", { name: "Isi saldo" }).click();
   await page.getByLabel(/Rp300\.000/).check();
-  await page.getByRole("button", { name: "Bayar Rp300.000 dengan QRIS" }).click();
+  await page.getByRole("button", { name: "Bayar Rp300.000 pakai QRIS" }).click();
   await expect(page.getByRole("heading", { name: "Bayar dengan QRIS" })).toBeVisible();
   await page.getByRole("button", { name: "Simulasikan pembayaran" }).click();
   await expect(page.getByRole("heading", { name: "Saldo bertambah Rp330.000" })).toBeVisible();
@@ -53,5 +53,5 @@ test("a member who forgot their PIN sets a new one with the WhatsApp code", asyn
   await page.getByLabel("PIN").fill("482913");
   await page.getByRole("button", { name: "Masuk" }).click();
   await expect(page.getByRole("heading", { name: "Bram Wicaksono" })).toBeVisible();
-  await expect(page.getByText("Selamat ulang tahun.")).toBeVisible();
+  await expect(page.getByText("Selamat ulang tahun")).toBeVisible();
 });

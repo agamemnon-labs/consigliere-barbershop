@@ -3,18 +3,28 @@ import { expect, test } from "@playwright/test";
 test("a customer takes a number, pays by (demo) QRIS and lands in the queue", async ({ page }) => {
   await page.goto("/");
   await page.getByRole("link", { name: "Ambil nomor antrean" }).click();
-  await expect(page.getByRole("heading", { name: "Ambil nomor", exact: true })).toBeVisible();
+  // Step 1: where.
+  await expect(page.getByRole("heading", { name: "Mau cukur di mana?" })).toBeVisible();
   await page.getByRole("link", { name: /Tepian/ }).click();
   await expect(page).toHaveURL(/\/antre\?cabang=tepian$/);
 
-  await expect(page.getByLabel("Haircut")).toBeChecked();
-  await page.getByText("Tambah layanan lain").click();
-  await page.getByLabel("Classic Shaving").check();
-  await expect(page.getByRole("button", { name: /^Bayar Rp/ })).toBeVisible();
+  // Step 2: who. The fastest barber is picked already.
+  await expect(page.getByRole("heading", { name: "Mau dicukur siapa?" })).toBeVisible();
+  await expect(page.getByLabel("Siapa saja, paling cepat")).toBeChecked();
+  await page.getByRole("button", { name: "Lanjut" }).click();
 
+  // Step 3: what. Haircut is on; extras open downward by group.
+  await expect(page.getByLabel("Haircut")).toBeChecked();
+  await page.locator("summary", { hasText: "Perawatan" }).click();
+  // Tap the card itself, the way a thumb does; the real checkbox is visually hidden.
+  await page.locator("label", { hasText: "Classic Shaving" }).click();
+  await expect(page.getByLabel("Classic Shaving")).toBeChecked();
+  await page.getByRole("button", { name: "Lanjut" }).click();
+
+  // Step 4: name, number, pay.
   await page.getByLabel("Nama panggilan").fill("Bima");
   await page.getByLabel("Nomor WhatsApp").fill("0812 9999 0001");
-  await page.getByRole("button", { name: /^Bayar Rp/ }).click();
+  await page.getByRole("button", { name: /^Bayar .+ pakai QRIS$/ }).click();
 
   await expect(page).toHaveURL(/\/tiket\/[0-9a-f-]{36}$/);
   await expect(page.getByRole("heading", { name: "Bayar dengan QRIS" })).toBeVisible();
@@ -23,16 +33,21 @@ test("a customer takes a number, pays by (demo) QRIS and lands in the queue", as
   await page.getByRole("button", { name: "Simulasikan pembayaran" }).click();
   await expect(page.getByRole("heading", { name: "Kamu di antrean, Bima" })).toBeVisible();
   await expect(page.getByRole("figure", { name: /^Nomor antrean T \d{3}/ })).toBeVisible();
+  await page.getByText("Rincian pesanan").click();
   await expect(
     page.getByRole("listitem").filter({ hasText: "Classic Shaving", visible: true }),
   ).toBeVisible();
+  // The bottom bar now leads back to this ticket.
+  await expect(page.getByRole("link", { name: /^Tiketku T \d{3}$/ })).toBeVisible();
 });
 
 test("a wrong WhatsApp number gets a plain error and keeps what was typed", async ({ page }) => {
   await page.goto("/antre?cabang=juanda");
+  await page.getByRole("button", { name: "Lanjut" }).click();
+  await page.getByRole("button", { name: "Lanjut" }).click();
   await page.getByLabel("Nama panggilan").fill("Raka");
   await page.getByLabel("Nomor WhatsApp").fill("12345");
-  await page.getByRole("button", { name: /^Bayar Rp/ }).click();
+  await page.getByRole("button", { name: /^Bayar .+ pakai QRIS$/ }).click();
   await expect(page.getByRole("alert").filter({ hasText: "Nomor WhatsApp" })).toContainText("belum benar");
   await expect(page.getByLabel("Nama panggilan")).toHaveValue("Raka");
 });

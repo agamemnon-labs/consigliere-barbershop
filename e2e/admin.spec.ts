@@ -14,7 +14,8 @@ async function signInAsOwner(page: Page) {
 test("the owner sees today and a report with CSV export", async ({ page }) => {
   await signInAsOwner(page);
   await expect(page.getByText("Uang masuk di semua cabang")).toBeVisible();
-  await expect(page.getByRole("link", { name: "Juanda" })).toBeVisible();
+  await expect(page.getByText("Juanda", { exact: true })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Buka papan antrean" }).first()).toBeVisible();
 
   await page.getByRole("navigation", { name: "Back office" }).getByRole("link", { name: "Laporan" }).click();
   await page.getByRole("link", { name: "7 hari" }).click();
@@ -35,15 +36,16 @@ test("a price change shows on the public pricelist", async ({ page }) => {
   await form.getByRole("button", { name: "Simpan" }).click();
   await expect(form.getByRole("status")).toHaveText("Tersimpan");
 
-  await page.goto("/");
-  await page.getByText("Harga lainnya").click();
-  await expect(page.getByText("Classic Shaving").locator("..").locator("..")).toContainText("75K");
+  await page.goto("/harga");
+  await expect(page.locator("details.row", { hasText: "Classic Shaving" }).locator("summary")).toContainText(
+    "75K",
+  );
 });
 
 test("rotation saves a changed day", async ({ page }) => {
   await signInAsOwner(page);
   await page.goto("/admin/rotasi");
-  await page.getByRole("link", { name: "Minggu depan →" }).click();
+  await page.getByRole("link", { name: "Minggu depan" }).click();
   await expect(page).toHaveURL(/minggu=/);
   // The grid is a controlled form: let it hydrate before changing a cell.
   await page.waitForLoadState("networkidle");

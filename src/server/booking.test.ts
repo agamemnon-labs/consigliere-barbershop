@@ -134,7 +134,7 @@ describe("online booking", () => {
   });
 
   it("counts money paid in time even when the news comes after the window", async () => {
-    const booking = await haircutFor("tepian", "6287777777777");
+    const booking = await haircutFor("citra-niaga", "6287777777777");
     const result = await settlePayment(
       db,
       {
@@ -150,8 +150,8 @@ describe("online booking", () => {
   });
 
   it("asks the gateway before expiring, so a missed webhook still gets its place", async () => {
-    const paid = await haircutFor("juanda", "6288888888881");
-    const unpaid = await haircutFor("juanda", "6288888888882");
+    const paid = await haircutFor("pulau-kalimantan", "6288888888881");
+    const unpaid = await haircutFor("pulau-kalimantan", "6288888888882");
     const gateway = gatewaySaying({
       [paid.paymentId ?? ""]: { status: "paid", amount: paid.amount, paidAt: at("14:10") },
     });
@@ -164,7 +164,7 @@ describe("online booking", () => {
   });
 
   it("credits a missed payment found much later", async () => {
-    const booking = await haircutFor("pramuka", "6288888888883");
+    const booking = await haircutFor("belatuk", "6288888888883");
     await expireStale(db, at("14:16"));
     const gateway = gatewaySaying({
       [booking.paymentId ?? ""]: { status: "paid", amount: booking.amount, paidAt: at("14:10") },

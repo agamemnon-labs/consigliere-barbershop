@@ -22,6 +22,23 @@ const schema = z.object({
   DEMO_STAFF_PASSWORD: z.string().min(8).optional(),
   /** Bearer token Vercel Cron sends to reset the demo data each night. */
   CRON_SECRET: z.string().min(16).optional(),
+  /** WhatsApp Cloud API: a system user's permanent token. Unset (with the id) = messages are only logged. */
+  WHATSAPP_TOKEN: z.string().min(1).optional(),
+  /** WhatsApp Manager → phone number → "Phone number ID" (digits, not the phone number itself). */
+  WHATSAPP_PHONE_NUMBER_ID: z.string().regex(/^\d+$/).optional(),
+  /** Graph API version. */
+  WHATSAPP_API_VERSION: z
+    .string()
+    .regex(/^v\d+\.\d+$/)
+    .default("v25.0"),
+  /** Approved authentication template (copy-code button) for the forgot-PIN code. */
+  WHATSAPP_TEMPLATE_OTP: z.string().min(1).default("kode_pin"),
+  /** Approved utility template for "your turn is near", with four values: name, branch, how near, ticket. */
+  WHATSAPP_TEMPLATE_NEAR: z.string().min(1).default("antrean_dekat"),
+  /** Language code both templates were approved in. */
+  WHATSAPP_TEMPLATE_LANG: z.string().min(2).default("id"),
+  /** Optional: only these numbers get real messages (comma separated). Empty = everyone. */
+  WHATSAPP_ALLOWLIST: z.string().optional(),
 });
 
 export type Env = z.infer<typeof schema>;

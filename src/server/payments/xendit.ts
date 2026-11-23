@@ -130,8 +130,6 @@ const webhook = z.object({
     payment_request_id: z.string(),
     status: z.string(),
     request_amount: z.number().optional(),
-    captures: z.array(z.object({ capture_timestamp: z.string().optional() })).optional(),
-    updated: z.string().optional(),
   }),
 });
 
@@ -160,7 +158,8 @@ export function readXenditWebhook(
     paymentId: data.payment_request_id,
     status,
     amount: data.request_amount ?? null,
-    paidAt: status === "paid" ? when(data.captures?.[0]?.capture_timestamp ?? data.updated) : null,
+    // No paidAt: a webhook's own timestamps proved unreliable in test mode (a capture
+    // made after the window was stamped before it), so arrival time decides, as the brief says.
   };
 }
 

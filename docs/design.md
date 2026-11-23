@@ -40,7 +40,7 @@ Laravel and split SPA + API stay rejected for the reasons in v1.2 (more ops, two
 - **Auth:** Better Auth, cookie prefix `consigliere`. `proxy.ts` does an optimistic cookie check for `/kasir` and `/admin`; the real role check is `requireStaff()` on the server, inside a Suspense boundary (Cache Components rule). Public sign-up is off; staff are created by the owner. Sign-in is limited to 5 tries per 15 min (DB-backed so it holds across serverless instances). The counter tablet is a public, read-only URL that shows ticket numbers only (never names), so it needs no login; `display_devices` stays for a later TV pairing flow if needed.
 - **Payments:** `src/server/payments` exposes a `PaymentProvider` (create QRIS, simulate in test mode). Xendit is used when `XENDIT_SECRET_KEY` is set; otherwise a demo provider issues an unpayable QR and a "Simulasikan pembayaran" button settles the booking directly. The webhook is `POST /api/pembayaran/xendit`, verified with `x-callback-token` (`XENDIT_WEBHOOK_TOKEN`); `payment.capture` with status `SUCCEEDED` settles the booking whose id is the `reference_id`. The customer's ticket page is `/tiket/<bookingId>`. Safety net for a missed webhook: before a page expires an unpaid charge it asks Xendit (`GET /v3/payment_requests/{id}`), and a daily cron (`/api/pembayaran/cek`, 23.45 WITA, `CRON_SECRET`) sweeps the last 24 hours; on Vercel Pro make that every 5 minutes. A webhook that arrives after the 15-minute window becomes credit (Xendit test-mode timestamps proved unreliable, so arrival time decides). A charge found paid by the status check keeps its place if Xendit says it was paid inside the window and the check runs within 30 minutes (`paidInTime`); otherwise it becomes credit.
 - **Realtime:** Broadcast from Database. A trigger on `queue_entries` and `barber_shifts` calls `realtime.send` on topic `queue:<branchId>` (event `changed`, payload `{branchId, at}`). The client (`LiveRefresh`) calls `router.refresh()` on each event, polls every 60 s while live and every 15 s when the socket is down or Supabase isn't configured, and refreshes when the tab comes back. The trigger is a no-op where the `realtime` schema doesn't exist (PGlite demo and tests).
-- **WhatsApp messages** (OTP, "2 orang lagi"): `Notifier` interface; demo writes to `outbox`, viewable in admin.
+- **WhatsApp messages** (OTP, "2 orang lagi"): Meta's WhatsApp Cloud API with approved templates (`src/server/whatsapp.ts`). Every message is written to `outbox` first and handed to Meta after the response (`after()`), so WhatsApp never slows a tap. Without `WHATSAPP_TOKEN` + `WHATSAPP_PHONE_NUMBER_ID` messages are only logged, viewable in Admin → Pesan with their status (sent, failed with Meta's reason, logged, skipped). Template values (the code, a name) are cleared from the row once handled; the log copy never holds a code. Guards for a public demo: at most 5 real messages per number per day, and an optional `WHATSAPP_ALLOWLIST`.
 - **QR member card:** signed, rotating token (not the raw member number).
 - **Demo database:** with no `DATABASE_URL`, the app boots an in-memory Postgres (PGlite) with the real migrations and the demo seed (`src/db/demo.ts`). Local dev, CI e2e and a zero-config preview work without Supabase; data resets on restart, so production always sets `DATABASE_URL`.
 - **Caching:** public reads in `src/server/catalog.ts` use `use cache` with tags `catalog` and `rotation`; "today" is a cached WITA date that refreshes every minute.
@@ -113,6 +113,7 @@ Balances and points are **ledgers** (sum of rows), never a single mutable number
   - Settlement is idempotent and checks payment id and amount. Money that arrives after a booking expired becomes 30-day credit on the phone number instead of a place in line.
   - The public demo (no `DATABASE_URL`) waives opening hours for online booking, with a visible note, so visitors can try it at any hour.
 - Walk-in: cashier taps "+ Walk-in" on the barber column (name optional, WhatsApp optional for "your turn" ping).
+- "Your turn is near" WhatsApp: goes once to an online or walk-in customer with a number when 2 people or fewer are ahead (the chair counts). Someone who joins a line that is already that short gets none (`queue_entries.near_alert_at` is set at join). It is checked after every queue tap and every "Lunas".
 - Call: cashier taps **Call** on the top entry → `called`, `grace_until = now + 5 min`. Customer phone and tablet highlight it.
 - Late: when grace ends and the customer is not there, cashier taps **Late** (or it auto-triggers) → entry swaps with the next one (moves back exactly **one** position), `late_moves += 1`.
 - Absent again at the **second call** → `no_show`. A prepaid no-show becomes 30-day credit (see Refunds).
@@ -164,7 +165,7 @@ Balances and points are **ledgers** (sum of rows), never a single mutable number
 - **Credits & refunds:** open credits per phone number, expiries, manual refund with reason.
 - **Reports:** revenue by branch / barber / service / payment method, customer counts, top-up cash vs bonus liability, date range, CSV export.
 - **Staff accounts** and tablet device tokens.
-- **Outbox:** WhatsApp messages sent (demo).
+- **Outbox:** every WhatsApp message and its delivery status.
 
 ---
 
@@ -223,7 +224,7 @@ Phases 1–3 are the MVP that proves the idea.
 ## 9. Risks & notes
 
 - **Stored value (balance):** before any real use, check Bank Indonesia rules on stored value / e-money (closed-loop limits). Portfolio is fine.
-- **WhatsApp:** real OTP/notifications need a provider (WhatsApp Cloud API or a local gateway) and a verified number. Interface is ready; demo uses on-screen OTP.
+- **WhatsApp:** built on the WhatsApp Cloud API. Real sending needs a Meta app, the shop's number registered on the Cloud API (it must not be on the WhatsApp app), and two approved templates: `kode_pin` (authentication, copy-code button) and `antrean_dekat` (utility, four values: name, branch, how near, ticket). Meta charges per delivered template message. The in-memory demo still shows the forgot-PIN code on screen.
 - **Clock and day boundaries:** all "today" logic in WITA, queue resets at close.
 - **Abuse:** booking rate limit per phone number; payment required before queue spot blocks fake bookings.
 - **Realtime drop:** tablet and cashier show a "reconnecting" badge and fall back to polling.

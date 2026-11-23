@@ -35,6 +35,7 @@ The problem it solves is small and very real: on a busy evening people wait an h
 ## What it does
 
 **For customers (phone, no account needed)**
+
 - Every service, price and barber in plain view, so nobody has to ask. Haircut price follows the barber's level.
 - Live queue per branch and per barber, with the quietest branch marked.
 - Booking in four short steps: branch, barber (or "whoever is fastest"), services, name and WhatsApp. Pay by QRIS and the number lands in the queue only once the money arrives, so there are no ghost bookings.
@@ -42,13 +43,16 @@ The problem it solves is small and very real: on a busy evening people wait an h
 - Membership card with a rotating QR, points, birthday-month discount and a prepaid balance you can top up from the phone.
 
 **For the cashier (wide desktop)**
+
 - One column per barber on duty. Call, seat, late, done: one tap each.
 - Add a walk-in to any chair, charge at the chair, take EDC card or QRIS, apply member balance with the member's own PIN, print a 58 mm receipt.
 
 **For the counter tablet**
+
 - A big, read-only board: who's being called, who's next at each chair, and a QR to join the queue from your own phone. Shows ticket numbers only, never names.
 
 **For the owner (back office)**
+
 - Today across all branches, reports by branch, barber, service and payment method, barber commission, weekly barber rotation between branches, prices and levels, members, rules, and the WhatsApp outbox.
 
 <table>
@@ -122,12 +126,12 @@ A few decisions behind it:
 
 Lighthouse 12.8 against the live site, median of three runs (mobile uses Lighthouse's default throttled phone profile), measured 23 November 2026.
 
-| Page | Performance | Accessibility | Best practices | SEO |
-|---|---:|---:|---:|---:|
-| Home, mobile | 99 | 95 | 96 | 100 |
-| Booking, mobile | 99 | 100 | 100 | 100 |
-| Home, desktop | 100 | 95 | 96 | 100 |
-| Counter tablet, desktop | 99 | 100 | 100 | not indexed on purpose |
+| Page                    | Performance | Accessibility | Best practices |                    SEO |
+| ----------------------- | ----------: | ------------: | -------------: | ---------------------: |
+| Home, mobile            |          99 |            95 |             96 |                    100 |
+| Booking, mobile         |          99 |           100 |            100 |                    100 |
+| Home, desktop           |         100 |            95 |             96 |                    100 |
+| Counter tablet, desktop |          99 |           100 |            100 | not indexed on purpose |
 
 Home on mobile: LCP about 2.1 s, CLS 0.001. The cashier and back office sit behind a login, so they aren't in the table.
 

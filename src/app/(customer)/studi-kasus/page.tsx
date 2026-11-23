@@ -1,8 +1,14 @@
 import type { Metadata } from "next";
-import { BackLink } from "@/components/back-link";
 import { ButtonLink } from "@/components/button";
-import { Credits } from "@/components/credits";
-import { Rule } from "@/components/rule";
+import {
+  ChartIcon,
+  CheckIcon,
+  ChevronDownIcon,
+  MonitorIcon,
+  TicketIcon,
+  WalletIcon,
+} from "@/components/icons";
+import { Screen } from "@/components/screen";
 import { brand } from "@/config/brand";
 
 export const metadata: Metadata = {
@@ -14,11 +20,31 @@ const surfaces = [
   {
     title: "Pelanggan",
     where: "HP",
-    what: "Lihat harga dan barber, ambil nomor, bayar QRIS, pantau giliran",
+    what: "Lihat antrean, ambil nomor, bayar QRIS, pantau giliran",
+    icon: TicketIcon,
+    tile: "bg-accent text-accent-fg",
   },
-  { title: "Kasir", where: "Desktop", what: "Papan antrean per barber, panggil, bayar di EDC, struk" },
-  { title: "Tablet toko", where: "Layar", what: "Nomor yang dipanggil, tanpa nama pelanggan" },
-  { title: "Back office", where: "Pemilik", what: "Laporan, komisi, rotasi barber, harga, member" },
+  {
+    title: "Kasir",
+    where: "Desktop",
+    what: "Papan antrean per barber, panggil, bayar, struk",
+    icon: WalletIcon,
+    tile: "bg-butter text-butter-ink",
+  },
+  {
+    title: "Tablet toko",
+    where: "Layar",
+    what: "Nomor yang dipanggil, tanpa nama pelanggan",
+    icon: MonitorIcon,
+    tile: "bg-mint text-mint-ink",
+  },
+  {
+    title: "Back office",
+    where: "Pemilik",
+    what: "Laporan, komisi, rotasi barber, harga, member",
+    icon: ChartIcon,
+    tile: "bg-blue-soft text-blue",
+  },
 ];
 
 const decisions = [
@@ -49,69 +75,64 @@ const stack = [
 /** The portfolio write-up: what was built, why, and the decisions behind it. */
 export default function CaseStudyPage() {
   return (
-    <div className="mx-auto flex max-w-md flex-col px-6 pt-[calc(1rem+env(safe-area-inset-top))]">
-      <BackLink href="/">Beranda</BackLink>
-      <header className="pt-10 pb-12">
-        <p className="label">Studi kasus · {brand.builtBy.name}</p>
-        <h1 className="mt-3 text-5xl leading-[1.05]">{brand.name}</h1>
-        <p className="mt-4 text-muted">Antrean, booking, dan member untuk barbershop tiga cabang</p>
-      </header>
+    <Screen back={{ href: "/", label: "Beranda" }}>
+      <p className="label">Studi kasus oleh {brand.builtBy.name}</p>
+      <h1 className="wide mt-2 text-[2rem] uppercase leading-none tracking-[0.02em]">{brand.name}</h1>
+      <p className="mt-3 text-lg">Antrean, booking, dan member untuk barbershop tiga cabang</p>
 
-      <Rule label="Masalahnya" />
-      <p className="mt-6 text-[1.0625rem] leading-relaxed">
+      <h2 className="mt-10 text-xl">Masalahnya</h2>
+      <p className="mt-2 text-[1.0625rem] leading-relaxed text-muted">
         Pelanggan datang lalu menunggu tanpa tahu berapa lama. Harga ditanya ke kasir. Barber bergiliran antar
         cabang, jadi tidak ada yang tahu siapa jaga di mana.
       </p>
 
-      <Rule label="Satu aplikasi, empat layar" className="mt-14" />
-      <ul className="mt-4">
-        {surfaces.map((s) => (
-          <li key={s.title} className="border-b border-rule py-4">
-            <p className="flex items-baseline justify-between gap-4">
-              <span className="font-display text-xl">{s.title}</span>
-              <span className="label">{s.where}</span>
-            </p>
-            <p className="mt-1 text-[0.9375rem] text-muted">{s.what}</p>
+      <h2 className="mt-10 text-xl">Satu aplikasi, empat layar</h2>
+      <ul className="mt-3 grid grid-cols-2 gap-3">
+        {surfaces.map((x) => (
+          <li key={x.title} className="rounded-2xl border border-rule bg-surface p-4">
+            <span className={`inline-flex size-10 items-center justify-center rounded-xl ${x.tile}`}>
+              <x.icon size={20} />
+            </span>
+            <p className="mt-3 font-semibold">{x.title}</p>
+            <p className="text-sm text-faint">{x.where}</p>
+            <p className="mt-1.5 text-sm text-muted">{x.what}</p>
           </li>
         ))}
       </ul>
 
-      <Rule label="Keputusan yang penting" className="mt-14" />
-      <ul className="mt-4 border-t border-rule">
+      <h2 className="mt-10 text-xl">Keputusan yang penting</h2>
+      <ul className="mt-3 overflow-hidden rounded-2xl border border-rule bg-surface">
         {decisions.map(([title, body]) => (
-          <li key={title} className="border-b border-rule">
+          <li key={title} className="border-b border-rule last:border-b-0">
             <details className="row">
-              <summary className="flex min-h-14 items-center justify-between gap-4 py-3">
-                <span className="text-[1.0625rem]">{title}</span>
-                <span aria-hidden className="row-mark inline-block w-3 text-center text-muted">
-                  +
-                </span>
+              <summary className="flex min-h-14 items-center justify-between gap-4 px-4 py-3">
+                <span className="font-medium">{title}</span>
+                <ChevronDownIcon className="row-mark shrink-0 text-faint" />
               </summary>
-              <p className="pr-7 pb-5 text-[0.9375rem] text-muted">{body}</p>
+              <p className="px-4 pb-4 text-[0.9375rem] text-muted">{body}</p>
             </details>
           </li>
         ))}
       </ul>
 
-      <Rule label="Dibangun dengan" className="mt-14" />
-      <ul className="mt-6 grid gap-3 text-[0.9375rem]">
+      <h2 className="mt-10 text-xl">Dibangun dengan</h2>
+      <ul className="mt-3 grid gap-2.5 text-[0.9375rem]">
         {stack.map((line) => (
           <li key={line} className="flex gap-3">
-            <span aria-hidden className="text-faint">
-              —
-            </span>
+            <CheckIcon size={18} className="mt-0.5 shrink-0 text-mint-ink" />
             <span>{line}</span>
           </li>
         ))}
       </ul>
 
-      <Rule label="Rupa" className="mt-14" />
-      <p className="mt-6 text-[1.0625rem] leading-relaxed">
-        Toko jahit tua dan kredit film tahun 70-an. Satu warna aksen, huruf Bodoni, angka yang rata. Tiap
-        layar punya satu tugas.
+      <h2 className="mt-10 text-xl">Rupa</h2>
+      <p className="mt-2 text-[1.0625rem] leading-relaxed text-muted">
+        Barbershop lama di siang hari: ubin putih, tiang merah-putih-biru, kursi mint, dan tiket nomor antrean
+        yang merah. Satu huruf, Archivo, lebar untuk papan nama dan sempit untuk nomor. Tiap layar punya satu
+        tugas.
       </p>
 
-      <div className="mt-14 grid gap-3">
+      <div className="mt-10 grid gap-3">
         <ButtonLink href="/demo" block>
           Coba demo
         </ButtonLink>
@@ -119,7 +140,6 @@ export default function CaseStudyPage() {
           Lihat kode
         </ButtonLink>
       </div>
-      <Credits />
-    </div>
+    </Screen>
   );
 }

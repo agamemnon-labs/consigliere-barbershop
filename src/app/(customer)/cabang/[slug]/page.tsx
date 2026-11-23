@@ -3,15 +3,17 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { connection } from "next/server";
 import { Suspense } from "react";
-import { BackLink } from "@/components/back-link";
+import { Avatar } from "@/components/avatar";
 import { ButtonLink } from "@/components/button";
-import { Credits } from "@/components/credits";
+import { ClockIcon, MapPinIcon } from "@/components/icons";
 import { LiveRefresh } from "@/components/live-refresh";
 import { Notice } from "@/components/notice";
-import { Rule } from "@/components/rule";
+import { Pole } from "@/components/pole";
+import { Screen } from "@/components/screen";
+import { SectionTitle } from "@/components/section-title";
 import { brand } from "@/config/brand";
 import { formatShort } from "@/domain/money";
-import { closureFor, onDuty, shortDate } from "@/domain/schedule";
+import { closureFor, onDuty } from "@/domain/schedule";
 import { clockLabel, shopDate } from "@/domain/time";
 import { type Barber, getBarbers, getBranches, getRotation, getToday } from "@/server/catalog";
 import { getBranchQueue } from "@/server/queue";
@@ -29,6 +31,7 @@ export async function generateMetadata({ params }: PageProps<"/cabang/[slug]">):
     : {};
 }
 
+/** One branch today: who is cutting, how long the line is per barber, and one button to join. */
 export default async function BranchPage({ params }: PageProps<"/cabang/[slug]">) {
   const { slug } = await params;
   const today = await getToday();
@@ -47,63 +50,65 @@ export default async function BranchPage({ params }: PageProps<"/cabang/[slug]">
   const maps =
     branch.mapsUrl ??
     `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${branch.address}, ${brand.city}`)}`;
+  const canBook = onDutyToday.length > 0 && !closed;
 
   return (
-    <div className="mx-auto flex max-w-md flex-col px-6 pt-[calc(1rem+env(safe-area-inset-top))]">
-      <BackLink href="/">Beranda</BackLink>
-
-      <header className="pt-10 pb-12">
-        <p className="label">Cabang</p>
-        <h1 className="mt-3 text-5xl">{branch.name}</h1>
-        <p className="mt-4 text-muted">{branch.address}</p>
-        <dl className="mt-8 grid grid-cols-[auto_1fr] gap-x-6 gap-y-3 text-[0.9375rem]">
-          <dt className="label self-center">Buka</dt>
-          <dd className="num">
-            {hours ? `Setiap hari, ${clockLabel(hours[0])}–${clockLabel(hours[1])}` : "—"}
-          </dd>
-          <dt className="label self-center">Peta</dt>
-          <dd>
-            <a
-              href={maps}
-              className="underline decoration-rule-strong underline-offset-4 hover:decoration-fg"
-            >
-              Buka di Google Maps
+    <Screen
+      back={{ href: "/", label: "Beranda" }}
+      bar={
+        canBook ? (
+          <ButtonLink href={`/antre?cabang=${branch.slug}`} block>
+            Ambil nomor di {branch.name}
+          </ButtonLink>
+        ) : undefined
+      }
+    >
+      <header>
+        <p className="text-sm font-medium text-faint">Cabang</p>
+        <h1 className="mt-1 text-[2.5rem] leading-none">{branch.name}</h1>
+        <ul className="mt-4 grid gap-2 text-[0.9375rem] text-muted">
+          <li className="flex items-center gap-2.5">
+            <MapPinIcon size={18} className="shrink-0 text-faint" />
+            <a href={maps} className="underline decoration-rule-strong underline-offset-4 hover:text-fg">
+              {branch.address}
             </a>
-          </dd>
-        </dl>
+          </li>
+          <li className="flex items-center gap-2.5">
+            <ClockIcon size={18} className="shrink-0 text-faint" />
+            <span>
+              Setiap hari{" "}
+              <span className="num">{hours ? `${clockLabel(hours[0])}–${clockLabel(hours[1])}` : "—"}</span>
+            </span>
+          </li>
+        </ul>
       </header>
 
       {closed ? (
-        <div className="mb-10">
-          <Notice title="Tutup hari ini">{closed.reason}</Notice>
-        </div>
+        <Notice title="Tutup hari ini" tone="alert" className="mt-6">
+          {closed.reason}
+        </Notice>
       ) : null}
 
-      <Rule label={`Barber hari ini · ${shortDate(today)}`} />
-      {onDutyToday.length > 0 ? (
-        <Suspense fallback={<BarberRows barbers={onDutyToday} />}>
-          <LiveBarberRows slug={branch.slug} branchId={branch.id} barbers={onDutyToday} />
-        </Suspense>
-      ) : (
-        <p className="mt-6 text-muted">{closed ? "Sampai jumpa besok" : "Jadwal hari ini belum diisi"}</p>
-      )}
-      {onDutyToday.length > 0 && !closed ? (
-        <ButtonLink href={`/antre?cabang=${branch.slug}`} className="mt-8" block>
-          Ambil nomor di {branch.name}
-        </ButtonLink>
-      ) : null}
-      <p className="mt-6 text-sm text-muted">
-        Barber bergiliran antar cabang.{" "}
-        <Link
-          href="/barber"
-          className="underline decoration-rule-strong underline-offset-4 hover:decoration-fg"
-        >
+      <section className="mt-8" aria-labelledby="barber-hari-ini">
+        <SectionTitle id="barber-hari-ini">Barber hari ini</SectionTitle>
+        {onDutyToday.length > 0 ? (
+          <Suspense fallback={<BarberRows barbers={onDutyToday} />}>
+            <LiveBarberRows slug={branch.slug} branchId={branch.id} barbers={onDutyToday} />
+          </Suspense>
+        ) : (
+          <p className="rounded-2xl bg-surface px-4 py-6 text-center text-muted">
+            {closed ? "Sampai jumpa besok" : "Jadwal hari ini belum diisi"}
+          </p>
+        )}
+      </section>
+
+      <p className="mt-6 text-[0.9375rem] text-muted">
+        Barber pindah-pindah cabang.{" "}
+        <Link href="/barber" className="font-medium text-blue hover:underline">
           Lihat jadwal seminggu
         </Link>
       </p>
-
-      <Credits />
-    </div>
+    </Screen>
   );
 }
 
@@ -145,22 +150,25 @@ async function LiveBarberRows({
 
 function BarberRows({ barbers, live }: { barbers: Barber[]; live?: Map<string, Live> }) {
   return (
-    <ul className="mt-4">
+    <ul className="divide-y divide-rule rounded-2xl bg-surface">
       {barbers.map((b) => {
         const q = live?.get(b.slug);
         return (
-          <li key={b.id} className="border-b border-rule">
-            <Link href={`/barber#${b.slug}`} className="group block py-4">
-              <span className="flex items-baseline">
-                <span className="font-display text-xl group-hover:text-accent-ink">{b.name}</span>
-                <span className="label ml-3">{b.level.name}</span>
-                <span className="leader" aria-hidden />
-                <span className="num">{formatShort(b.level.haircutPrice)}</span>
-              </span>
-              <span className="mt-1 block min-h-5 text-sm text-muted">
-                {q ? <LiveLine q={q} /> : "\u00a0"}
-              </span>
-            </Link>
+          <li key={b.id} className="flex min-h-20 items-center gap-3 px-4 py-3">
+            <Avatar name={b.name} />
+            <div className="min-w-0 flex-1">
+              <p className="flex items-baseline gap-2">
+                <span className="text-lg font-semibold">{b.name}</span>
+                <span className="text-sm text-faint">{b.level.name}</span>
+              </p>
+              <p className="mt-0.5 min-h-5 text-sm text-muted">{q ? <Chair q={q} /> : " "}</p>
+            </div>
+            <div className="shrink-0 text-right">
+              <p className="num font-semibold">{formatShort(b.level.haircutPrice)}</p>
+              <p className="num min-h-4 text-xs text-faint">
+                {q ? (q.waitMin > 0 ? `± ${q.waitMin} mnt` : "") : ""}
+              </p>
+            </div>
           </li>
         );
       })}
@@ -168,16 +176,23 @@ function BarberRows({ barbers, live }: { barbers: Barber[]; live?: Map<string, L
   );
 }
 
-function LiveLine({ q }: { q: Live }) {
-  if (!q.chair && q.waiting === 0) return <span className="text-fg">Kursi kosong, bisa langsung duduk</span>;
+function Chair({ q }: { q: Live }) {
+  if (!q.chair && q.waiting === 0)
+    return <span className="font-medium text-mint-ink">Kursi kosong, langsung duduk</span>;
   return (
-    <>
+    <span className="inline-flex items-center gap-1.5">
       {q.chair ? (
         <>
-          Di kursi <span className="num text-fg">{q.chair}</span> ·{" "}
+          <Pole turning className="h-3! w-1.5!" />
+          <span>
+            Mencukur <span className="num font-medium text-fg">{q.chair}</span>
+          </span>
+          <span aria-hidden className="text-faint">
+            /
+          </span>
         </>
       ) : null}
-      {q.waiting} menunggu · giliran baru <span className="num text-fg">± {q.waitMin} mnt</span>
-    </>
+      <span>{q.waiting > 0 ? `${q.waiting} antre` : "belum ada yang antre"}</span>
+    </span>
   );
 }

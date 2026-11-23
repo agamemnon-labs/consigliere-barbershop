@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
-import { BackLink } from "@/components/back-link";
-import { Credits } from "@/components/credits";
+import { Avatar } from "@/components/avatar";
+import { ChevronDownIcon } from "@/components/icons";
+import { Screen } from "@/components/screen";
 import { formatShort } from "@/domain/money";
 import { barberWeek, type DayPlan, daysOff, shortDate } from "@/domain/schedule";
 import { type Barber, type Branch, getBarbers, getBranches, getRotation, getToday } from "@/server/catalog";
@@ -10,6 +11,7 @@ export const metadata: Metadata = {
   description: "Level, harga potong, cabang hari ini, dan jadwal libur setiap barber.",
 };
 
+/** Every barber by level: where they cut today, and their week behind one tap. */
 export default async function BarbersPage() {
   const today = await getToday();
   const [barbers, branches, { shifts, closures }] = await Promise.all([
@@ -28,26 +30,22 @@ export default async function BarbersPage() {
   }
 
   return (
-    <div className="mx-auto flex max-w-md flex-col px-6 pt-[calc(1rem+env(safe-area-inset-top))]">
-      <BackLink href="/">Beranda</BackLink>
+    <Screen back={{ href: "/", label: "Beranda" }}>
+      <h1 className="text-[2rem]">Para barber</h1>
+      <p className="mt-2 text-muted">Harga potong ikut level barbernya. Ketuk nama untuk jadwal seminggu</p>
 
-      <header className="pt-10 pb-12">
-        <h1 className="text-5xl">Para barber</h1>
-        <p className="mt-4 text-muted">Ketuk nama untuk melihat jadwalnya minggu ini</p>
-      </header>
-
-      <div className="flex flex-col gap-12">
+      <div className="mt-6 flex flex-col gap-8">
         {groups.map((g) => (
           <section key={g.level.id} aria-labelledby={`lvl-${g.level.slug}`}>
-            <header className="mb-2 flex items-baseline justify-between">
-              <h2 id={`lvl-${g.level.slug}`} className="text-2xl">
+            <header className="mb-3 flex items-baseline justify-between">
+              <h2 id={`lvl-${g.level.slug}`} className="text-xl">
                 {g.level.name}
               </h2>
-              <p className="num text-muted">Potong {formatShort(g.level.haircutPrice)}</p>
+              <p className="num font-semibold">{formatShort(g.level.haircutPrice)}</p>
             </header>
-            <ul className="border-t border-rule">
+            <ul className="divide-y divide-rule rounded-2xl bg-surface">
               {g.barbers.map((b) => (
-                <li key={b.id} className="border-b border-rule">
+                <li key={b.id}>
                   <BarberRow
                     barber={b}
                     week={barberWeek(b.id, shifts, closures, today, 7)}
@@ -59,9 +57,7 @@ export default async function BarbersPage() {
           </section>
         ))}
       </div>
-
-      <Credits />
-    </div>
+    </Screen>
   );
 }
 
@@ -77,29 +73,28 @@ function BarberRow({
   const first = week[0];
   const off = daysOff(week);
   return (
-    <details className="row">
-      <summary className="flex min-h-16 items-baseline py-4">
-        <span className="font-display text-2xl">{barber.name}</span>
-        <span className="leader" aria-hidden />
-        <span className="text-[0.9375rem]">
-          {first ? <TodayLabel day={first} branchName={branchName} /> : "—"}
+    <details className="row" id={barber.slug}>
+      <summary className="flex min-h-18 items-center gap-3 px-4 py-3">
+        <Avatar name={barber.name} />
+        <span className="flex-1">
+          <span className="block text-lg font-semibold">{barber.name}</span>
+          <span className="block text-sm text-muted">
+            {first ? <TodayLabel day={first} branchName={branchName} /> : "—"}
+          </span>
         </span>
-        <span aria-hidden className="row-mark ml-4 inline-block w-3 text-center text-muted">
-          +
-        </span>
+        <ChevronDownIcon size={18} className="row-mark shrink-0 text-faint" />
       </summary>
-      <div id={barber.slug} className="scroll-mt-6 pr-7 pb-6">
-        {barber.bio ? <p className="font-display text-lg">{barber.bio}</p> : null}
-        {off.length > 0 ? <p className="label mt-4">Libur rutin · {off.join(", ")}</p> : null}
-        <ol className="mt-4 grid gap-y-2 text-[0.9375rem]">
+      <div className="scroll-mt-20 px-4 pb-4">
+        {barber.bio ? <p className="text-[0.9375rem] text-muted">{barber.bio}</p> : null}
+        <ol className="mt-3 grid gap-px overflow-hidden rounded-xl bg-rule">
           {week.map((d) => (
-            <li key={d.date} className="flex items-baseline">
-              <span className="num text-sm text-muted">{shortDate(d.date)}</span>
-              <span className="leader" aria-hidden />
+            <li key={d.date} className="flex items-center justify-between bg-bg px-3 py-2 text-[0.9375rem]">
+              <span className="num text-muted">{shortDate(d.date)}</span>
               <DayLabel day={d} branchName={branchName} />
             </li>
           ))}
         </ol>
+        {off.length > 0 ? <p className="mt-2 text-sm text-faint">Libur rutin: {off.join(", ")}</p> : null}
       </div>
     </details>
   );
@@ -108,24 +103,24 @@ function BarberRow({
 function TodayLabel({ day, branchName }: { day: DayPlan; branchName: Map<string, string> }) {
   switch (day.kind) {
     case "working":
-      return <>{branchName.get(day.branchId)}</>;
+      return <>Hari ini di {branchName.get(day.branchId)}</>;
     case "off":
-      return <span className="text-muted">Libur</span>;
+      return <>Hari ini libur</>;
     case "closed":
-      return <span className="text-accent-ink">Tutup</span>;
+      return <span className="text-accent-ink">Hari ini tutup</span>;
     case "unknown":
-      return <span className="text-muted">—</span>;
+      return <>Belum dijadwalkan</>;
   }
 }
 
 function DayLabel({ day, branchName }: { day: DayPlan; branchName: Map<string, string> }) {
   switch (day.kind) {
     case "working":
-      return <span>{branchName.get(day.branchId)}</span>;
+      return <span className="font-medium">{branchName.get(day.branchId)}</span>;
     case "off":
-      return <span className="text-muted">Libur</span>;
+      return <span className="text-faint">Libur</span>;
     case "closed":
-      return <span className="text-accent-ink">Tutup · {day.reason}</span>;
+      return <span className="text-accent-ink">Tutup, {day.reason}</span>;
     case "unknown":
       return <span className="text-faint">Belum dijadwalkan</span>;
   }

@@ -1,30 +1,52 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import Link from "next/link";
+import { useActionState, useEffect, useRef, useState } from "react";
+import { Avatar } from "@/components/avatar";
 import { buttonClass } from "@/components/button";
+import { Choice } from "@/components/choice";
 import { Field } from "@/components/field";
-import { Rule } from "@/components/rule";
+import { ArrowLeftIcon, ChevronDownIcon, ScissorsIcon } from "@/components/icons";
+import { Notice } from "@/components/notice";
+import { Pole } from "@/components/pole";
+import { Steps } from "@/components/steps";
 import { type LineItem, priceItem, shortestWait, totals } from "@/domain/booking";
 import { formatRupiah, formatShort } from "@/domain/money";
 import { type BookState, book } from "@/server/actions/booking";
 import type { BookingOptions } from "@/server/booking";
 
 type Options = NonNullable<BookingOptions>;
+type Service = Options["services"][number];
 
-const CATEGORY: Record<string, string> = {
-  haircut: "Potong",
-  chemical: "Kimia",
-  refreshment: "Perawatan",
-  package: "Paket",
-};
+const EXTRAS: { key: string; label: string }[] = [
+  { key: "refreshment", label: "Perawatan" },
+  { key: "chemical", label: "Chemical" },
+  { key: "package", label: "Paket" },
+];
 
-export function BookingForm({ options, demo }: { options: Options; demo: boolean }) {
+/** Steps 2 to 4 of taking a number, one job per screen. The branch was step 1. */
+export function BookingFlow({
+  options,
+  demo,
+  demoHours,
+}: {
+  options: Options;
+  demo: boolean;
+  demoHours: boolean;
+}) {
   const [state, action, pending] = useActionState<BookState, FormData>(book, {});
+  const [step, setStep] = useState<2 | 3 | 4>(2);
   const fastest = shortestWait(options.barbers);
   const [barberId, setBarberId] = useState<string>("any");
   const haircut = options.services.find((x) => x.priceType === "by_level");
   const [picked, setPicked] = useState<Set<string>>(() => new Set(haircut ? [haircut.id] : []));
   const [variants, setVariants] = useState<Record<string, string>>({});
+  const top = useRef<HTMLDivElement>(null);
+
+  // A server error is always about the last step (name, number, or the queue moved).
+  useEffect(() => {
+    if (state.error) setStep(4);
+  }, [state.error]);
 
   const barber = barberId === "any" ? fastest : options.barbers.find((b) => b.id === barberId);
   const items: LineItem[] = [];
@@ -35,6 +57,12 @@ export function BookingForm({ options, demo }: { options: Options; demo: boolean
   }
   const { amount, durationMin } = totals(items);
 
+  function go(next: 2 | 3 | 4) {
+    setStep(next);
+    top.current?.scrollIntoView({ block: "start" });
+    window.scrollTo({ top: 0 });
+  }
+
   function toggle(id: string, on: boolean) {
     setPicked((prev) => {
       const next = new Set(prev);
@@ -44,211 +72,301 @@ export function BookingForm({ options, demo }: { options: Options; demo: boolean
     });
   }
 
-  const groups = Object.entries(CATEGORY)
-    .map(([key, label]) => ({ label, services: options.services.filter((x) => x.category === key) }))
-    .filter((g) => g.services.length > 0);
-
-  const extrasPicked = groups.slice(1).some((g) => g.services.some((x) => picked.has(x.id)));
-
-  function renderGroup(g: (typeof groups)[number]) {
-    return (
-      <fieldset key={g.label} className="mt-5">
-        <legend className="label mb-1">{g.label}</legend>
-        {g.services.map((svc) => {
-          const on = picked.has(svc.id);
-          const price =
-            svc.priceType === "by_level"
-              ? (barber?.haircutPrice ?? 0)
-              : svc.priceType === "variant"
-                ? (svc.variants.find((v) => v.id === (variants[svc.id] ?? svc.variants[0]?.id))?.price ?? 0)
-                : (svc.price ?? 0);
-          return (
-            <div key={svc.id}>
-              <Choice
-                type="checkbox"
-                name="service"
-                value={svc.id}
-                checked={on}
-                onChange={(e) => toggle(svc.id, e.currentTarget.checked)}
-                title={svc.name}
-                detail={`± ${svc.durationMin} mnt`}
-                aside={formatShort(price)}
-              />
-              {on && svc.variants.length > 0 ? (
-                <div className="grid grid-cols-2 gap-2 pb-3 pl-9">
-                  {svc.variants.map((v) => (
-                    <label
-                      key={v.id}
-                      className="flex min-h-12 cursor-pointer items-center gap-3 border border-rule px-3 has-checked:border-fg"
-                    >
-                      <input
-                        type="radio"
-                        name={`variant-${svc.id}`}
-                        value={v.id}
-                        checked={(variants[svc.id] ?? svc.variants[0]?.id) === v.id}
-                        onChange={() => setVariants((m) => ({ ...m, [svc.id]: v.id }))}
-                        className="size-4 accent-fg"
-                      />
-                      <span className="text-sm">
-                        {v.name} <span className="num text-muted">{formatShort(v.price)}</span>
-                      </span>
-                    </label>
-                  ))}
-                </div>
-              ) : null}
-            </div>
-          );
-        })}
-      </fieldset>
-    );
+  function priceOf(svc: Service) {
+    if (svc.priceType === "by_level") return barber?.haircutPrice ?? 0;
+    if (svc.priceType === "variant")
+      return svc.variants.find((v) => v.id === (variants[svc.id] ?? svc.variants[0]?.id))?.price ?? 0;
+    return svc.price ?? 0;
   }
 
+  const back =
+    step === 2 ? (
+      <Link
+        href="/antre"
+        className="-ml-2 inline-flex min-h-11 items-center gap-1.5 rounded-xl px-2 text-[0.9375rem] font-medium hover:bg-sunk"
+      >
+        <ArrowLeftIcon />
+        Ganti cabang
+      </Link>
+    ) : (
+      <button
+        type="button"
+        onClick={() => go((step - 1) as 2 | 3)}
+        className="-ml-2 inline-flex min-h-11 items-center gap-1.5 rounded-xl px-2 text-[0.9375rem] font-medium hover:bg-sunk"
+      >
+        <ArrowLeftIcon />
+        Kembali
+      </button>
+    );
+
   return (
-    <form action={action} className="flex flex-col">
-      <input type="hidden" name="branch" value={options.branch.slug} />
+    <>
+      <header className="sticky top-0 z-30 border-b border-rule bg-bg">
+        <div className="mx-auto flex h-14 max-w-md items-center justify-between gap-4 px-4">
+          {back}
+          <span className="text-[0.9375rem] font-semibold">{options.branch.name}</span>
+        </div>
+      </header>
 
-      <Rule label="1 · Barber" />
-      <fieldset className="mt-3">
-        <legend className="sr-only">Pilih barber</legend>
-        {fastest ? (
-          <Choice
-            type="radio"
-            name="barber"
-            value="any"
-            checked={barberId === "any"}
-            onChange={() => setBarberId("any")}
-            title="Siapa saja yang paling cepat"
-            detail={`Sekarang ${fastest.name}, ${fastest.waitMin > 0 ? `± ${fastest.waitMin} mnt` : "langsung duduk"}`}
-            aside={formatShort(fastest.haircutPrice)}
-          />
-        ) : null}
-        {options.barbers.map((b) => (
-          <Choice
-            key={b.id}
-            type="radio"
-            name="barber"
-            value={b.id}
-            checked={barberId === b.id}
-            onChange={() => setBarberId(b.id)}
-            title={b.name}
-            titleClass="font-display text-xl"
-            detail={`${b.level} · ${b.waiting > 0 ? `${b.waiting} menunggu, ± ${b.waitMin} mnt` : "kursi kosong"}`}
-            aside={formatShort(b.haircutPrice)}
-          />
-        ))}
-      </fieldset>
+      <form
+        action={action}
+        className="mx-auto flex max-w-md flex-col px-4 pt-5 pb-[calc(7.5rem+env(safe-area-inset-bottom))]"
+      >
+        <div ref={top} className="scroll-mt-20" />
+        <input type="hidden" name="branch" value={options.branch.slug} />
+        <Steps at={step} of={4} />
 
-      <Rule label="2 · Layanan" className="mt-10" />
-      {groups.slice(0, 1).map(renderGroup)}
-      {groups.length > 1 ? (
-        <details className="row mt-4 border-y border-rule" open={extrasPicked}>
-          <summary className="flex min-h-12 cursor-pointer items-center justify-between text-[0.9375rem]">
-            <span>Tambah layanan lain</span>
-            <span className="label">Kimia · perawatan · paket</span>
-          </summary>
-          <div className="pb-4">
-            {groups.slice(1).map(renderGroup)}
-            <p className="mt-4 text-sm text-muted">Coloring dibayar di kasir, harganya tergantung rambut</p>
+        {/* Step 2: barber */}
+        <div hidden={step !== 2} className="step-in mt-6">
+          <h1 className="text-[2rem] leading-tight">Mau dicukur siapa?</h1>
+          <p className="mt-2 text-muted">Harga potong ikut level barbernya</p>
+          {demoHours ? (
+            <Notice title="Mode demo" tone="info" className="mt-4">
+              Jam buka diabaikan supaya bisa dicoba kapan saja
+            </Notice>
+          ) : null}
+          <fieldset className="mt-5 grid gap-2.5">
+            <legend className="sr-only">Barber</legend>
+            {fastest ? (
+              <Choice
+                type="radio"
+                name="barber"
+                value="any"
+                checked={barberId === "any"}
+                onChange={() => setBarberId("any")}
+                lead={
+                  <span className="inline-flex size-12 shrink-0 items-center justify-center rounded-2xl bg-sunk">
+                    <Pole turning className="h-6! w-3!" />
+                  </span>
+                }
+                title="Siapa saja, paling cepat"
+                detail={`Sekarang ${fastest.name}, ${fastest.waitMin > 0 ? `± ${fastest.waitMin} mnt` : "langsung duduk"}`}
+                aside={formatShort(fastest.haircutPrice)}
+              />
+            ) : null}
+            {options.barbers.map((b) => (
+              <Choice
+                key={b.id}
+                type="radio"
+                name="barber"
+                value={b.id}
+                checked={barberId === b.id}
+                onChange={() => setBarberId(b.id)}
+                lead={<Avatar name={b.name} />}
+                title={b.name}
+                tag={b.level}
+                detail={b.waiting > 0 ? `${b.waiting} antre, ± ${b.waitMin} mnt` : "Kursi kosong"}
+                detailTone={b.waiting > 0 ? "muted" : "ok"}
+                aside={formatShort(b.haircutPrice)}
+              />
+            ))}
+          </fieldset>
+        </div>
+
+        {/* Step 3: services */}
+        <div hidden={step !== 3} className="step-in mt-6">
+          <h1 className="text-[2rem] leading-tight">Mau layanan apa?</h1>
+          <p className="mt-2 text-muted">Haircut sudah termasuk cuci, pijat dan styling</p>
+          <fieldset className="mt-5 grid gap-2.5">
+            <legend className="sr-only">Layanan</legend>
+            {options.services
+              .filter((s) => s.category === "haircut")
+              .map((svc) => (
+                <ServiceChoice
+                  key={svc.id}
+                  svc={svc}
+                  on={picked.has(svc.id)}
+                  price={priceOf(svc)}
+                  onToggle={toggle}
+                  variant={variants[svc.id]}
+                  onVariant={(v) => setVariants((m) => ({ ...m, [svc.id]: v }))}
+                />
+              ))}
+          </fieldset>
+          <h2 className="mt-8 text-lg">Tambah layanan lain</h2>
+          <div className="mt-3 grid gap-2.5">
+            {EXTRAS.map(({ key, label }) => {
+              const list = options.services.filter((s) => s.category === key);
+              if (list.length === 0) return null;
+              const count = list.filter((s) => picked.has(s.id)).length;
+              return (
+                <details key={key} className="row rounded-2xl bg-surface" open={count > 0}>
+                  <summary className="flex min-h-14 items-center gap-3 px-4">
+                    <span className="flex-1 font-medium">{label}</span>
+                    {count > 0 ? (
+                      <span className="num rounded-md bg-blue-soft px-1.5 py-0.5 text-xs font-semibold text-blue">
+                        {count} dipilih
+                      </span>
+                    ) : (
+                      <span className="text-sm text-faint">{list.length} pilihan</span>
+                    )}
+                    <ChevronDownIcon size={18} className="row-mark text-faint" />
+                  </summary>
+                  <fieldset className="grid gap-2 px-2 pb-2">
+                    <legend className="sr-only">{label}</legend>
+                    {list.map((svc) => (
+                      <ServiceChoice
+                        key={svc.id}
+                        svc={svc}
+                        on={picked.has(svc.id)}
+                        price={priceOf(svc)}
+                        onToggle={toggle}
+                        variant={variants[svc.id]}
+                        onVariant={(v) => setVariants((m) => ({ ...m, [svc.id]: v }))}
+                        inset
+                      />
+                    ))}
+                  </fieldset>
+                </details>
+              );
+            })}
           </div>
-        </details>
-      ) : null}
+          <p className="mt-4 text-sm text-faint">Coloring dibayar di kasir, harganya tergantung rambut</p>
+        </div>
 
-      <Rule label="3 · Atas nama" className="mt-10" />
-      <div className="mt-6 grid gap-6">
-        <Field
-          label="Nama panggilan"
-          name="name"
-          autoComplete="given-name"
-          maxLength={60}
-          required
-          defaultValue={state.values?.name}
-          hint="Layar di toko hanya menampilkan nomor"
-        />
-        <Field
-          label="Nomor WhatsApp"
-          name="phone"
-          type="tel"
-          inputMode="tel"
-          autoComplete="tel"
-          required
-          defaultValue={state.values?.phone}
-          hint="Kami kabari saat giliranmu dekat"
-        />
-      </div>
+        {/* Step 4: name, number, pay */}
+        <div hidden={step !== 4} className="step-in mt-6">
+          <h1 className="text-[2rem] leading-tight">Atas nama siapa?</h1>
+          <p className="mt-2 text-muted">Layar di toko cuma menampilkan nomor, bukan nama</p>
+          <div className="mt-5 grid gap-5">
+            <Field
+              label="Nama panggilan"
+              name="name"
+              autoComplete="given-name"
+              maxLength={60}
+              required
+              enterKeyHint="next"
+              defaultValue={state.values?.name}
+            />
+            <Field
+              label="Nomor WhatsApp"
+              name="phone"
+              type="tel"
+              inputMode="tel"
+              autoComplete="tel"
+              required
+              enterKeyHint="done"
+              defaultValue={state.values?.phone}
+              hint="Kami kabari kalau giliranmu sudah dekat"
+            />
+          </div>
 
-      <div className="mt-10 border-t border-rule-strong pt-5">
-        <ul className="grid gap-2 text-[0.9375rem]">
-          {items.map((i) => (
-            <li key={i.serviceId} className="flex items-baseline">
-              <span>{i.name}</span>
-              <span className="leader" aria-hidden />
-              <span className="num">{formatRupiah(i.price)}</span>
-            </li>
-          ))}
-        </ul>
-        <p className="mt-4 flex items-baseline justify-between">
-          <span className="label">Total · ± {durationMin} mnt</span>
-          <span className="num text-2xl">{formatRupiah(amount)}</span>
-        </p>
-        {state.error ? (
-          <p role="alert" className="mt-4 text-sm text-accent-ink">
-            {state.error}
+          <section className="mt-6 rounded-2xl bg-surface p-4" aria-label="Ringkasan">
+            <div className="flex items-center gap-3 border-b border-rule pb-3">
+              {barber ? <Avatar name={barber.name} size="sm" /> : null}
+              <p className="flex-1">
+                <span className="block font-semibold">{barber?.name ?? "Barber"}</span>
+                <span className="block text-sm text-muted">
+                  {barberId === "any" ? "Yang paling cepat" : "Pilihanmu"}, {options.branch.name}
+                </span>
+              </p>
+              <span className="inline-flex items-center gap-1 text-sm text-muted">
+                <ScissorsIcon size={16} />
+                <span className="num">{durationMin} mnt</span>
+              </span>
+            </div>
+            <ul className="grid gap-1.5 pt-3 text-[0.9375rem]">
+              {items.map((i) => (
+                <li key={i.serviceId} className="flex items-baseline">
+                  <span>{i.name}</span>
+                  <span className="leader" aria-hidden />
+                  <span className="num">{formatRupiah(i.price)}</span>
+                </li>
+              ))}
+            </ul>
+          </section>
+          <p className="mt-3 text-sm text-faint">
+            Bayar dalam 15 menit lewat QRIS{demo ? ", pakai uang demo" : ""}. Nomormu langsung masuk antrean
           </p>
-        ) : null}
-        <button
-          type="submit"
-          className={`${buttonClass("accent", true)} mt-6`}
-          disabled={pending || items.length === 0}
-        >
-          {pending ? "Menyiapkan QRIS…" : `Bayar ${formatRupiah(amount)} dengan QRIS`}
-        </button>
-        <p className="mt-3 text-center text-sm text-muted">
-          Batas bayar 15 menit{demo ? " · uang demo" : ""}
-        </p>
-      </div>
-    </form>
+          {state.error ? (
+            <Notice title="Belum bisa lanjut" tone="alert" className="mt-4">
+              <span role="alert">{state.error}</span>
+            </Notice>
+          ) : null}
+        </div>
+
+        <div className="fixed inset-x-0 bottom-0 z-30 border-t border-rule bg-surface pb-[env(safe-area-inset-bottom)]">
+          <div className="mx-auto flex max-w-md items-center gap-4 px-4 py-3">
+            <p className="shrink-0">
+              <span className="block text-xs text-faint">Total</span>
+              <span className="num block text-lg font-semibold leading-tight">{formatRupiah(amount)}</span>
+            </p>
+            {step < 4 ? (
+              <button
+                type="button"
+                className={`${buttonClass("dark")} flex-1`}
+                disabled={items.length === 0}
+                onClick={() => go((step + 1) as 3 | 4)}
+              >
+                Lanjut
+              </button>
+            ) : (
+              <button
+                type="submit"
+                className={`${buttonClass("primary")} flex-1`}
+                disabled={pending || items.length === 0}
+              >
+                {pending ? "Menyiapkan QRIS…" : `Bayar ${formatShort(amount)} pakai QRIS`}
+              </button>
+            )}
+          </div>
+        </div>
+      </form>
+    </>
   );
 }
 
-type ChoiceProps = {
-  type: "radio" | "checkbox";
-  name: string;
-  value: string;
-  checked: boolean;
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  title: string;
-  titleClass?: string;
-  detail: string;
-  aside: string;
-};
-
-/** One tappable row: control, name and detail, price on the right. */
-function Choice({
-  type,
-  name,
-  value,
-  checked,
-  onChange,
-  title,
-  titleClass = "",
-  detail,
-  aside,
-}: ChoiceProps) {
+function ServiceChoice({
+  svc,
+  on,
+  price,
+  onToggle,
+  variant,
+  onVariant,
+  inset = false,
+}: {
+  svc: Service;
+  on: boolean;
+  price: number;
+  onToggle: (id: string, on: boolean) => void;
+  variant: string | undefined;
+  onVariant: (id: string) => void;
+  inset?: boolean;
+}) {
   return (
-    <label className="flex min-h-16 cursor-pointer items-center gap-4 border-b border-rule py-3">
-      <input
-        type={type}
-        name={name}
-        value={value}
-        checked={checked}
-        onChange={onChange}
-        className="size-5 shrink-0 accent-fg"
+    <div>
+      <Choice
+        type="checkbox"
+        name="service"
+        value={svc.id}
+        checked={on}
+        onChange={(e) => onToggle(svc.id, e.currentTarget.checked)}
+        title={svc.name}
+        detail={`± ${svc.durationMin} mnt`}
+        aside={formatShort(price)}
+        inset={inset}
       />
-      <span className="flex-1">
-        <span className={`block ${titleClass}`}>{title}</span>
-        <span className="mt-0.5 block text-sm text-muted">{detail}</span>
-      </span>
-      <span className="num shrink-0">{aside}</span>
-    </label>
+      {on && svc.variants.length > 0 ? (
+        <div className="mt-2 grid grid-cols-2 gap-2 px-2">
+          {svc.variants.map((v) => (
+            <label
+              key={v.id}
+              className="relative flex min-h-12 cursor-pointer items-center justify-between gap-2 rounded-xl bg-surface px-3 ring-1 ring-rule-strong has-checked:ring-2 has-checked:ring-blue"
+            >
+              <input
+                type="radio"
+                name={`variant-${svc.id}`}
+                value={v.id}
+                checked={(variant ?? svc.variants[0]?.id) === v.id}
+                onChange={() => onVariant(v.id)}
+                className="sr-only"
+              />
+              <span className="text-sm font-medium">{v.name}</span>
+              <span className="num text-sm text-muted">{formatShort(v.price)}</span>
+            </label>
+          ))}
+        </div>
+      ) : null}
+    </div>
   );
 }

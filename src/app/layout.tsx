@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { brand } from "@/config/brand";
-import { bodoni, franklin, plexMono } from "./fonts";
+import { archivo } from "./fonts";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -14,18 +14,14 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: brand.palette.ink,
-  colorScheme: "dark light",
+  themeColor: brand.palette.page,
+  colorScheme: "light",
   viewportFit: "cover",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html
-      lang="id"
-      data-theme="night"
-      className={`${bodoni.variable} ${franklin.variable} ${plexMono.variable}`}
-    >
+    <html lang="id" className={archivo.variable}>
       <body className="min-h-dvh">{children}</body>
     </html>
   );

@@ -1,99 +1,94 @@
 @import "tailwindcss";
 
 /*
- * Consigliere design tokens.
+ * Consigliere design tokens (v2, 2026-11-23).
  *
- * Direction: a quiet, editorial old tailor shop / 70s film credits feel.
- * Warm off-black, bone, and a single oxblood accent used sparingly.
- * No gradients, glow, glass, emoji or stock illustration. Thin rules,
- * generous spacing, serif display over a plain sans, tabular numbers.
+ * Direction: an old-school barbershop in daylight. White tiles, the red-white-blue
+ * barber pole, mint barber chairs, chrome, take-a-number tickets. Light everywhere.
  *
- * Three themes, chosen per surface with `data-theme`:
- *   night   customer web (phone), dark
- *   paper   cashier and admin, light cream for long hours
- *   display counter tablet and TV, darkest, highest contrast
+ * Chrome stays quiet: cool white page, white surfaces, navy ink. Colour lives in a
+ * few moments: the red ticket, the barbers' colour tiles, the mint "free chair",
+ * the navy member card, and the striped pole that turns while something is live.
+ *
+ * Red (pole red) is the one action colour: the primary button, the ticket, money.
+ * Blue, mint and butter only carry meaning (selected, free/done, called/attention).
  */
 
-:root,
-[data-theme="night"] {
-  --bg: #15110e;
-  --surface: #1d1814;
-  --fg: #ebe3d4;
-  --muted: #a69b8b;
-  --faint: #8c8173;
-  --rule: rgb(235 227 212 / 0.14);
-  --rule-strong: rgb(235 227 212 / 0.34);
-  --accent: #6e1d1b;
-  --accent-fg: #f3eadb;
-  /* Oxblood lifted just enough to read as text on the dark ground. */
-  --accent-ink: #c4665a;
-  --stub: #ebe3d4;
-  --stub-ink: #15110e;
-  color-scheme: dark;
-}
+:root {
+  /* Neutrals: a cool white ramp, tinted toward navy ink. */
+  --bg: #f3f5f8;
+  --surface: #ffffff;
+  --sunk: #e9edf3;
+  --fg: #0e1630;
+  --muted: #4e5873;
+  --faint: #646e86;
+  --rule: rgb(14 22 48 / 0.09);
+  --rule-strong: rgb(14 22 48 / 0.2);
 
-[data-theme="paper"] {
-  --bg: #f3ecdf;
-  --surface: #faf6ee;
-  --fg: #1b1613;
-  --muted: #675c50;
-  --faint: #736759;
-  --rule: rgb(27 22 19 / 0.13);
-  --rule-strong: rgb(27 22 19 / 0.32);
-  --accent: #6e1d1b;
-  --accent-fg: #f6efe2;
-  --accent-ink: #7a2420;
-  --stub: #faf6ee;
-  --stub-ink: #1b1613;
+  /* Pole red: the one action colour. White text on it is 5.1:1. */
+  --accent: #d22d23;
+  --accent-hover: #bb261d;
+  --accent-fg: #ffffff;
+  --accent-ink: #b4231b;
+  --accent-soft: #fde8e6;
+
+  /* Meaning colours, each with a soft fill and an ink that reads on it. */
+  --blue: #2548c9;
+  --blue-soft: #e5ebfc;
+  --mint: #ddf3e8;
+  --mint-ink: #0b6a45;
+  --butter: #fff1c7;
+  --butter-ink: #7a5600;
+
+  /* Pinstripe navy: the member card and the dark primary button. */
+  --navy: #14213d;
+  --navy-fg: #f3f5f8;
+  --navy-muted: #9aa6c4;
+
   color-scheme: light;
 }
 
+/* Counter tablet and TV: same palette, the page goes pure white for distance reading. */
 [data-theme="display"] {
-  --bg: #0d0b09;
-  --surface: #171310;
-  --fg: #f6f0e5;
-  --muted: #c2b7a6;
-  --faint: #857a6c;
-  --rule: rgb(246 240 229 / 0.18);
-  --rule-strong: rgb(246 240 229 / 0.42);
-  --accent: #7a2420;
-  --accent-fg: #f6efe2;
-  --accent-ink: #d77568;
-  --stub: #f6f0e5;
-  --stub-ink: #0d0b09;
-  color-scheme: dark;
+  --bg: #ffffff;
+  --surface: #f3f5f8;
 }
 
 @theme inline {
   --color-bg: var(--bg);
   --color-surface: var(--surface);
+  --color-sunk: var(--sunk);
   --color-fg: var(--fg);
   --color-muted: var(--muted);
   --color-faint: var(--faint);
   --color-rule: var(--rule);
   --color-rule-strong: var(--rule-strong);
   --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
   --color-accent-fg: var(--accent-fg);
   --color-accent-ink: var(--accent-ink);
-  --color-stub: var(--stub);
-  --color-stub-ink: var(--stub-ink);
+  --color-accent-soft: var(--accent-soft);
+  --color-blue: var(--blue);
+  --color-blue-soft: var(--blue-soft);
+  --color-mint: var(--mint);
+  --color-mint-ink: var(--mint-ink);
+  --color-butter: var(--butter);
+  --color-butter-ink: var(--butter-ink);
+  --color-navy: var(--navy);
+  --color-navy-fg: var(--navy-fg);
+  --color-navy-muted: var(--navy-muted);
 
-  --font-display: var(--font-bodoni), "Bodoni 72", "Didot", Georgia, serif;
-  --font-sans: var(--font-franklin), "Franklin Gothic", "Helvetica Neue", Arial, sans-serif;
-  --font-mono: var(--font-plex-mono), ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --font-sans: var(--font-archivo), "Helvetica Neue", Arial, sans-serif;
+  --font-display: var(--font-archivo), "Helvetica Neue", Arial, sans-serif;
 
-  --radius-xs: 1px;
-  --radius-sm: 2px;
-  --tracking-credits: 0.22em;
-  --tracking-label: 0.16em;
-
-  --ease-out-quiet: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --ease-out-quiet: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 @layer base {
   html {
     -webkit-text-size-adjust: 100%;
     text-rendering: optimizeLegibility;
+    -webkit-tap-highlight-color: transparent;
   }
 
   body {
@@ -101,7 +96,7 @@
     color: var(--fg);
     font-family: var(--font-sans);
     font-size: 1rem;
-    line-height: 1.55;
+    line-height: 1.5;
     font-feature-settings: "kern", "liga";
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -111,11 +106,11 @@
   h2,
   h3 {
     font-family: var(--font-display);
-    font-weight: 400;
-    font-optical-sizing: auto;
+    font-weight: 600;
+    font-stretch: 110%;
     text-wrap: balance;
-    line-height: 1.08;
-    letter-spacing: -0.01em;
+    line-height: 1.1;
+    letter-spacing: -0.015em;
   }
 
   p {
@@ -123,13 +118,13 @@
   }
 
   ::selection {
-    background: var(--accent);
-    color: var(--accent-fg);
+    background: var(--blue-soft);
+    color: var(--fg);
   }
 
   :focus-visible {
-    outline: 2px solid var(--accent-ink);
-    outline-offset: 3px;
+    outline: 2px solid var(--blue);
+    outline-offset: 2px;
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -139,28 +134,34 @@
       /* biome-ignore lint/complexity/noImportantStyles: reduced motion must win over component transitions */
       animation-duration: 0.01ms !important;
       /* biome-ignore lint/complexity/noImportantStyles: same as above */
+      animation-iteration-count: 1 !important;
+      /* biome-ignore lint/complexity/noImportantStyles: same as above */
       transition-duration: 0.01ms !important;
     }
   }
 }
 
 @layer components {
-  /*
-   * Quiet label above a value or a group. Sentence case, normal tracking:
-   * uppercase tracked labels read as generated UI (see docs/design-research.md).
-   */
+  /* Small label above a value or a group. Sentence case, normal tracking. */
   .label {
-    font-family: var(--font-sans);
     font-size: 0.8125rem;
     font-weight: 500;
     color: var(--muted);
     line-height: 1.35;
   }
 
+  /* Every figure: tabular, so columns of money and clocks line up. */
   .num {
-    font-family: var(--font-mono);
-    font-variant-numeric: tabular-nums slashed-zero;
-    font-feature-settings: "tnum", "zero";
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum";
+  }
+
+  /* Width is the voice: wide for signage, condensed for ticket numbers. */
+  .wide {
+    font-stretch: 125%;
+  }
+  .condensed {
+    font-stretch: 72%;
   }
 
   /* Dotted leader between a name and its price, as on a printed pricelist. */
@@ -173,26 +174,55 @@
   }
 
   /*
-   * Ticket stub: bone card with a perforated tear line and punched notches.
-   * The notches are cut with a mask, so the page colour shows through.
+   * The barber pole. Red, white and blue stripes in a small rounded post; it only turns
+   * when what it labels is live (an open shop, an updating queue, someone in the chair).
    */
-  .stub {
-    --notch: 0.6rem;
-    --tear: 68%;
-    background: var(--stub);
-    color: var(--stub-ink);
-    mask:
-      radial-gradient(circle at var(--tear) 0, transparent var(--notch), #000 calc(var(--notch) + 0.5px)) top
-      / 100% 51% no-repeat,
-      radial-gradient(circle at var(--tear) 100%, transparent var(--notch), #000 calc(var(--notch) + 0.5px))
-      bottom / 100% 51% no-repeat;
+  .pole {
+    display: inline-block;
+    flex: none;
+    width: 0.5rem;
+    height: 1rem;
+    border-radius: 0.25rem;
+    box-shadow: inset 0 0 0 1px rgb(14 22 48 / 0.12);
+    background:
+      repeating-linear-gradient(-45deg, var(--accent) 0 3px, #fff 3px 6px, var(--blue) 6px 9px, #fff 9px 12px)
+      0 0 / 100% 17px;
   }
-  .stub-tear {
-    background-image: linear-gradient(var(--stub-ink) 50%, transparent 0);
-    background-size: 1px 6px;
-    background-repeat: repeat-y;
-    opacity: 0.35;
-    width: 1px;
+  .pole[data-live="true"] {
+    animation: pole-turn 1.6s linear infinite;
+  }
+  .pole[data-off="true"] {
+    filter: grayscale(1);
+    opacity: 0.55;
+    animation: none;
+  }
+
+  /*
+   * Take-a-number ticket: pole red, with punched notches on both sides of the tear line.
+   * The notches are cut with a mask, so whatever is behind shows through.
+   */
+  .ticket {
+    --notch: 0.75rem;
+    --tear: 64%;
+    background: var(--accent);
+    color: var(--accent-fg);
+    border-radius: 1.25rem;
+    mask:
+      radial-gradient(circle at 0 var(--tear), transparent var(--notch), #000 calc(var(--notch) + 0.5px)) left
+      / 51% 100% no-repeat,
+      radial-gradient(circle at 100% var(--tear), transparent var(--notch), #000 calc(var(--notch) + 0.5px))
+      right / 51% 100% no-repeat;
+  }
+  .ticket-tear {
+    height: 2px;
+    background-image: linear-gradient(90deg, rgb(255 255 255 / 0.55) 50%, transparent 0);
+    background-size: 10px 2px;
+  }
+
+  /* Pinstripe for the member card: a suit, not a gradient. */
+  .pinstripe {
+    background-color: var(--navy);
+    background-image: repeating-linear-gradient(90deg, rgb(255 255 255 / 0.06) 0 1px, transparent 1px 14px);
   }
 
   /* Native <details> rows that open downward, no JavaScript. */
@@ -207,17 +237,35 @@
     transition: rotate 200ms var(--ease-out-quiet);
   }
   .row[open] > summary .row-mark {
-    rotate: 45deg;
+    rotate: 180deg;
   }
   .row::details-content {
     block-size: 0;
     overflow: clip;
     transition:
-      block-size 240ms var(--ease-out-quiet),
-      content-visibility 240ms allow-discrete;
+      block-size 260ms var(--ease-out-quiet),
+      content-visibility 260ms allow-discrete;
   }
   .row[open]::details-content {
     block-size: auto;
+  }
+
+  /* A step of a flow comes in from the side it was reached from. */
+  .step-in {
+    animation: step-in 320ms var(--ease-out-quiet) both;
+  }
+}
+
+@keyframes pole-turn {
+  to {
+    background-position: 0 17px;
+  }
+}
+
+@keyframes step-in {
+  from {
+    opacity: 0;
+    translate: 0 8px;
   }
 }
 
@@ -233,7 +281,11 @@
     size: 58mm auto;
     margin: 3mm;
   }
-  body:has(.receipt) header {
+  body {
+    background: #fff;
+  }
+  body:has(.receipt) header,
+  body:has(.receipt) nav {
     display: none;
   }
 }

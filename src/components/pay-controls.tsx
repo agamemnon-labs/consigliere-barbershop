@@ -43,7 +43,7 @@ export function SimulatePay({
     <div>
       <button
         type="button"
-        className={buttonClass("quiet", true)}
+        className={buttonClass("primary", true)}
         disabled={pending}
         onClick={() =>
           start(async () => {

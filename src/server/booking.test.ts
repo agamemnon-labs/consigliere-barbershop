@@ -4,8 +4,26 @@ import type { Database } from "@/db";
 import { createDemoDb } from "@/db/demo";
 import * as s from "@/db/schema";
 import { BookingError } from "@/domain/booking";
-import { bookingOptions, createBooking, expireStale, getTicket, settlePayment } from "./booking";
-import { demoProvider } from "./payments";
+import {
+  bookingOptions,
+  createBooking,
+  expireStale,
+  getTicket,
+  reconcileBookings,
+  settlePayment,
+} from "./booking";
+import { demoProvider, type PaymentProvider, type PaymentStatus } from "./payments";
+
+/** A gateway that answers status checks from a table, for missed-webhook cases. */
+function gatewaySaying(answers: Record<string, PaymentStatus>): PaymentProvider {
+  return {
+    ...demoProvider,
+    name: "xendit",
+    async getStatus(paymentId) {
+      return answers[paymentId] ?? { status: "pending" };
+    },
+  };
+}
 
 const DAY = "2026-11-23";
 const at = (clock: string) => new Date(`${DAY}T${clock}:00+08:00`);
@@ -113,6 +131,45 @@ describe("online booking", () => {
     expect(result).toBe("credited");
     const entries = await db.select().from(s.queueEntries).where(eq(s.queueEntries.bookingId, booking.id));
     expect(entries).toHaveLength(0);
+  });
+
+  it("counts money paid in time even when the news comes after the window", async () => {
+    const booking = await haircutFor("citra-niaga", "6287777777777");
+    const result = await settlePayment(
+      db,
+      {
+        reference: booking.id,
+        paymentId: booking.paymentId ?? "",
+        status: "paid",
+        amount: booking.amount,
+        paidAt: at("14:14"),
+      },
+      at("14:20"),
+    );
+    expect(result).toBe("queued");
+  });
+
+  it("asks the gateway before expiring, so a missed webhook still gets its place", async () => {
+    const paid = await haircutFor("pulau-kalimantan", "6288888888881");
+    const unpaid = await haircutFor("pulau-kalimantan", "6288888888882");
+    const gateway = gatewaySaying({
+      [paid.paymentId ?? ""]: { status: "paid", amount: paid.amount, paidAt: at("14:10") },
+    });
+    await expireStale(db, at("14:16"), gateway);
+
+    const [after] = await db.select().from(s.bookings).where(eq(s.bookings.id, paid.id));
+    expect(after?.status).toBe("paid");
+    const [left] = await db.select().from(s.bookings).where(eq(s.bookings.id, unpaid.id));
+    expect(left?.status).toBe("expired");
+  });
+
+  it("credits a missed payment found much later", async () => {
+    const booking = await haircutFor("belatuk", "6288888888883");
+    await expireStale(db, at("14:16"));
+    const gateway = gatewaySaying({
+      [booking.paymentId ?? ""]: { status: "paid", amount: booking.amount, paidAt: at("14:10") },
+    });
+    expect(await reconcileBookings(db, gateway, [booking], at("23:45"))).toEqual(["credited"]);
   });
 
   it("stops taking numbers 45 minutes before closing", async () => {

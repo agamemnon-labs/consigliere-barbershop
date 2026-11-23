@@ -227,7 +227,9 @@ export async function settlePayment(db: Database, event: PaymentEvent, now: Date
 
     const [customer] = await tx.select().from(s.customers).where(eq(s.customers.id, booking.customerId));
 
-    if (booking.status !== "pending" || !booking.barberId) {
+    // Expiry is only written on reads, so a booking still marked pending may already be past its time.
+    const late = booking.status !== "pending" || booking.expiresAt <= now;
+    if (late || !booking.barberId) {
       const days = await numberSetting(tx, "credit_valid_days", 30);
       if (customer?.phone) {
         await tx.insert(s.creditLedger).values({

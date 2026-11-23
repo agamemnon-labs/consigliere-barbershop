@@ -3,6 +3,10 @@
   "regions": ["sin1"],
   "crons": [
     {
+      "path": "/api/pembayaran/cek",
+      "schedule": "45 15 * * *"
+    },
+    {
       "path": "/api/demo/reset",
       "schedule": "0 16 * * *"
     }

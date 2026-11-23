@@ -5,6 +5,7 @@ import {
   leaveHint,
   normalizePhone,
   onlineOpen,
+  paidInTime,
   phoneLabel,
   priceItem,
   shopMinutes,
@@ -128,5 +129,26 @@ describe("leaveHint", () => {
 
   it("says now when the wait is short", () => {
     expect(leaveHint(10, at("14:00")).leaveAt).toBeNull();
+  });
+});
+
+describe("paidInTime", () => {
+  const expiresAt = new Date("2026-11-23T06:15:00Z");
+  const utc = (iso: string) => new Date(`2026-11-23T${iso}Z`);
+
+  it("keeps the place for money paid inside the window", () => {
+    expect(paidInTime({ paidAt: utc("06:14:59"), expiresAt, now: utc("06:14:59") })).toBe(true);
+  });
+
+  it("still keeps it when the news arrives a little late", () => {
+    expect(paidInTime({ paidAt: utc("06:14:00"), expiresAt, now: utc("06:40:00") })).toBe(true);
+  });
+
+  it("turns money paid after the window into credit", () => {
+    expect(paidInTime({ paidAt: utc("06:15:01"), expiresAt, now: utc("06:15:02") })).toBe(false);
+  });
+
+  it("turns very late news into credit, since the customer has gone", () => {
+    expect(paidInTime({ paidAt: utc("06:14:00"), expiresAt, now: utc("06:46:00") })).toBe(false);
   });
 });

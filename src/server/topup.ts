@@ -1,9 +1,9 @@
 import "server-only";
-import { and, asc, desc, eq, gte, lt } from "drizzle-orm";
+import { and, asc, desc, eq, gte, isNotNull, lt } from "drizzle-orm";
 import { type Database, schema as s } from "@/db";
 import { MemberError, topupRows } from "@/domain/membership";
 import { numberSetting } from "@/server/enqueue";
-import type { PaymentEvent, PaymentProvider } from "@/server/payments";
+import { type PaymentEvent, type PaymentProvider, paymentProvider } from "@/server/payments";
 
 /** At most this many unpaid top-ups a member can start in one hour. */
 const MAX_PER_HOUR = 5;
@@ -139,8 +139,52 @@ export async function settleTopup(db: Database, event: PaymentEvent, now: Date):
   });
 }
 
+/** Asks the gateway about top-ups it never told us were paid, and settles the paid ones. */
+export async function reconcileTopups(
+  db: Database,
+  payments: PaymentProvider,
+  rows: { id: string; paymentId: string | null }[],
+  now: Date,
+): Promise<TopupSettlement[]> {
+  return Promise.all(
+    rows.map(async ({ id, paymentId }) => {
+      if (!paymentId) return "ignored";
+      const news = await payments.getStatus(paymentId).catch((error: unknown) => {
+        console.error("Payment status check failed", paymentId, error);
+        return null;
+      });
+      if (news?.status !== "paid") return "ignored";
+      return settleTopup(
+        db,
+        { reference: id, paymentId, status: "paid", amount: news.amount, paidAt: news.paidAt },
+        now,
+      );
+    }),
+  );
+}
+
 /** One of the member's own top-ups, for its pay page. Unpaid ones past their time show as expired. */
-export async function getTopupOrder(db: Database, id: string, userId: string, now: Date) {
+export async function getTopupOrder(
+  db: Database,
+  id: string,
+  userId: string,
+  now: Date,
+  payments: PaymentProvider = paymentProvider(),
+) {
+  if (payments.name !== "demo") {
+    const due = await db
+      .select({ id: s.topupOrders.id, paymentId: s.topupOrders.paymentId })
+      .from(s.topupOrders)
+      .where(
+        and(
+          eq(s.topupOrders.status, "pending"),
+          lt(s.topupOrders.expiresAt, now),
+          isNotNull(s.topupOrders.paymentId),
+        ),
+      )
+      .limit(10);
+    await reconcileTopups(db, payments, due, now);
+  }
   await db
     .update(s.topupOrders)
     .set({ status: "expired" })

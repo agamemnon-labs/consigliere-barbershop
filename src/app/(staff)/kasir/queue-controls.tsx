@@ -2,6 +2,7 @@
 
 import { useActionState, useEffect, useState } from "react";
 import { buttonClass } from "@/components/button";
+import { PlusIcon } from "@/components/icons";
 import { addWalkIn, type QueueActionState, queueAction } from "@/server/actions/queue";
 
 type Op = Parameters<typeof queueAction>[0];
@@ -10,19 +11,19 @@ type Props = {
   op: Op;
   entryId: string;
   label: string;
-  variant?: "primary" | "accent" | "quiet" | "text";
+  variant?: "primary" | "dark" | "quiet" | "text";
   /** ISO time before which the button stays disabled (the late grace period). */
   enableAt?: string | null;
   block?: boolean;
 };
 
 /** One tap, one action. Errors show right under the button. */
-export function QueueButton({ op, entryId, label, variant = "primary", enableAt, block }: Props) {
+export function QueueButton({ op, entryId, label, variant = "dark", enableAt, block }: Props) {
   const [state, action, pending] = useActionState<QueueActionState>(queueAction.bind(null, op, entryId), {});
   const ready = useReadyAt(enableAt);
   const cls =
     variant === "text"
-      ? "label min-h-11 px-2 hover:text-fg disabled:opacity-40"
+      ? "min-h-11 rounded-lg px-2 text-sm font-medium text-muted hover:bg-sunk hover:text-fg disabled:opacity-40"
       : `${buttonClass(variant, block)} min-h-11 px-4`;
   return (
     <form action={action} className={block ? "w-full" : ""}>
@@ -43,12 +44,13 @@ export function WalkInForm({ barberId, barberName }: { barberId: string; barberN
   const [state, action, pending] = useActionState<QueueActionState, FormData>(addWalkIn, {});
   return (
     <details className="row border-t border-rule" key={state.ok}>
-      <summary className="flex min-h-12 items-center justify-center text-sm font-medium tracking-[0.02em] text-muted hover:bg-bg hover:text-fg">
-        + Walk-in
+      <summary className="flex min-h-12 items-center justify-center gap-1.5 rounded-b-2xl text-sm font-medium text-muted hover:bg-bg hover:text-fg">
+        <PlusIcon size={18} />
+        Walk-in
       </summary>
       <form action={action} className="grid gap-3 px-4 pt-2 pb-4">
         <input type="hidden" name="barberId" value={barberId} />
-        <label className="label" htmlFor={`walkin-${barberId}`}>
+        <label className="text-sm font-medium" htmlFor={`walkin-${barberId}`}>
           Nama (boleh kosong)
         </label>
         <input
@@ -56,9 +58,9 @@ export function WalkInForm({ barberId, barberName }: { barberId: string; barberN
           name="name"
           autoComplete="off"
           maxLength={40}
-          className="min-h-11 border-0 border-b border-rule-strong bg-transparent text-lg outline-none focus:border-fg"
+          className="min-h-11 rounded-xl border border-rule-strong bg-surface px-3 outline-none focus:border-blue focus:ring-3 focus:ring-blue-soft"
         />
-        <button type="submit" className={`${buttonClass("primary", true)} min-h-11`} disabled={pending}>
+        <button type="submit" className={`${buttonClass("dark", true)} min-h-11`} disabled={pending}>
           {pending ? "Menambahkan…" : `Tambah ke antrean ${barberName}`}
         </button>
         {state.error ? (

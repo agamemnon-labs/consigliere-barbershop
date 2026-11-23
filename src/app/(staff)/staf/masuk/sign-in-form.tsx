@@ -8,7 +8,7 @@ import { type SignInState, signInStaff } from "@/server/actions/auth";
 export function SignInForm() {
   const [state, action, pending] = useActionState<SignInState, FormData>(signInStaff, {});
   return (
-    <form action={action} className="mt-12 grid gap-8" noValidate>
+    <form action={action} className="mt-6 grid gap-5" noValidate>
       <Field
         label="Email"
         name="email"
@@ -20,11 +20,11 @@ export function SignInForm() {
       />
       <Field label="Kata sandi" name="password" type="password" autoComplete="current-password" required />
       {state.error ? (
-        <p role="alert" className="border-l-2 border-accent pl-3 text-sm text-accent-ink">
+        <p role="alert" className="rounded-xl bg-accent-soft px-3 py-2 text-[0.9375rem] text-accent-ink">
           {state.error}
         </p>
       ) : null}
-      <Button type="submit" block disabled={pending}>
+      <Button type="submit" variant="dark" block disabled={pending} className="mt-1">
         {pending ? "Memeriksa…" : "Masuk"}
       </Button>
     </form>

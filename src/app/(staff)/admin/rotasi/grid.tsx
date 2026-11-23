@@ -15,18 +15,18 @@ export function Grid({ dates, branches, rows }: Props) {
   );
   const original = (rowId: string, i: number) => rows.find((r) => r.id === rowId)?.cells[i] ?? "";
   return (
-    <div className="overflow-x-auto">
+    <div className="overflow-x-auto rounded-2xl border border-rule bg-surface p-3">
       <table className="w-full min-w-[52rem] border-collapse text-sm">
         <thead>
           <tr>
-            <th scope="col" className="label py-2 text-left font-medium">
+            <th scope="col" className="py-2 text-left font-medium text-muted">
               Barber
             </th>
             {dates.map((d) => (
               <th
                 key={d.date}
                 scope="col"
-                className={`py-2 text-left font-medium ${d.today ? "text-fg" : "text-muted"}`}
+                className={`py-2 text-left font-medium ${d.today ? "text-accent-ink" : "text-muted"}`}
               >
                 {d.day} <span className="num">{d.date.slice(8)}</span>
               </th>
@@ -36,7 +36,7 @@ export function Grid({ dates, branches, rows }: Props) {
         <tbody>
           {rows.map((r) => (
             <tr key={r.id} className="border-t border-rule">
-              <th scope="row" className="py-1.5 pr-3 text-left font-normal">
+              <th scope="row" className="py-1.5 pr-3 text-left font-medium">
                 {r.name}
               </th>
               {dates.map((d, i) => {
@@ -54,8 +54,12 @@ export function Grid({ dates, branches, rows }: Props) {
                         next.set(key, e.currentTarget.value);
                         setValues(next);
                       }}
-                      className={`min-h-10 w-full rounded-sm border bg-surface px-1.5 ${
-                        changed ? "border-fg" : "border-rule"
+                      className={`min-h-10 w-full rounded-lg border px-1.5 outline-none focus:ring-3 focus:ring-blue-soft ${
+                        changed
+                          ? "border-blue bg-blue-soft"
+                          : value === ""
+                            ? "border-rule bg-bg"
+                            : "border-rule-strong bg-surface"
                       } ${value === "off" ? "text-muted" : ""}`}
                     >
                       <option value="">—</option>

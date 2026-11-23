@@ -18,12 +18,12 @@ beforeAll(async () => {
 
 describe("online payments list", () => {
   it("lists bookings and top-ups together, newest first, and counts only money that came in", async () => {
-    const options = await bookingOptions(db, "juanda", at("14:00"));
+    const options = await bookingOptions(db, "pulau-kalimantan", at("14:00"));
     const haircut = options?.services.find((x) => x.slug === "haircut");
     const bookingId = await createBooking(
       db,
       {
-        branchSlug: "juanda",
+        branchSlug: "pulau-kalimantan",
         barber: "any",
         services: [{ serviceId: haircut!.id }],
         name: "Dewi",

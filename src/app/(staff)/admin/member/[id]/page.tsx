@@ -66,17 +66,17 @@ async function Detail({ params }: { params: PageProps<"/admin/member/[id]">["par
       </Link>
       <div className="mt-4 grid items-start gap-6 lg:grid-cols-2">
         <div>
-          <div className="pinstripe rounded-2xl p-5 text-navy-fg">
-            <p className="condensed num text-lg text-navy-muted">{m.memberNo}</p>
+          <div className="pinstripe rounded-2xl p-5 text-suit-fg">
+            <p className="condensed num text-lg text-suit-muted">{m.memberNo}</p>
             <p className="mt-1 text-2xl font-semibold">{m.name}</p>
-            <p className="num text-navy-muted">{m.phone ? phoneLabel(m.phone) : ""}</p>
+            <p className="num text-suit-muted">{m.phone ? phoneLabel(m.phone) : ""}</p>
             <dl className="mt-5 grid grid-cols-2 gap-3">
               <div>
-                <dt className="text-sm text-navy-muted">Poin</dt>
+                <dt className="text-sm text-suit-muted">Poin</dt>
                 <dd className="num text-xl font-semibold">{m.points}</dd>
               </div>
               <div>
-                <dt className="text-sm text-navy-muted">Saldo</dt>
+                <dt className="text-sm text-suit-muted">Saldo</dt>
                 <dd className="num text-xl font-semibold">{formatRupiah(m.balance)}</dd>
               </div>
             </dl>

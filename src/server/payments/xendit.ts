@@ -1,7 +1,7 @@
 import "server-only";
 import { timingSafeEqual } from "node:crypto";
 import { z } from "zod";
-import { PaymentError, type PaymentEvent, type PaymentProvider } from "./types";
+import { PaymentError, type PaymentEvent, type PaymentProvider, type PaymentStatus } from "./types";
 
 /**
  * Xendit Payments API v3 (api-version 2024-11-11): one-off QRIS payment
@@ -25,8 +25,14 @@ export function xenditProvider(secretKey: string): PaymentProvider {
     "content-type": "application/json",
   };
 
-  async function call(url: string, body: unknown) {
-    const res = await fetch(url, { method: "POST", headers, body: JSON.stringify(body) });
+  async function call(url: string, body?: unknown) {
+    const res = await fetch(url, {
+      method: body === undefined ? "GET" : "POST",
+      headers,
+      body: body === undefined ? undefined : JSON.stringify(body),
+      // A page waits on some of these calls; never let a slow gateway hang it.
+      signal: AbortSignal.timeout(8_000),
+    });
     const json: unknown = await res.json().catch(() => null);
     if (!res.ok) {
       const message = z.object({ message: z.string() }).safeParse(json);
@@ -64,7 +70,39 @@ export function xenditProvider(secretKey: string): PaymentProvider {
       // The result arrives later as a `payment.capture` webhook.
       await call(`${API}/${paymentId}/simulate`, { amount });
     },
+
+    async getStatus(paymentId) {
+      const json = await call(`${API}/${encodeURIComponent(paymentId)}`);
+      return statusOf(requestStatus.parse(json));
+    },
   };
+}
+
+const requestStatus = z.object({
+  status: z.string(),
+  request_amount: z.number().optional(),
+  updated: z.string().optional(),
+});
+
+/** Payment request statuses: ACCEPTING_PAYMENTS, REQUIRES_ACTION, AUTHORIZED, CANCELED, EXPIRED, SUCCEEDED, FAILED. */
+function statusOf(pr: z.infer<typeof requestStatus>): PaymentStatus {
+  switch (pr.status) {
+    case "SUCCEEDED":
+      return { status: "paid", amount: pr.request_amount ?? null, paidAt: when(pr.updated) };
+    case "EXPIRED":
+    case "CANCELED":
+      return { status: "expired" };
+    case "FAILED":
+      return { status: "failed" };
+    default:
+      return { status: "pending" };
+  }
+}
+
+function when(iso: string | undefined): Date | null {
+  if (!iso) return null;
+  const date = new Date(iso);
+  return Number.isNaN(date.getTime()) ? null : date;
 }
 
 const webhook = z.object({
@@ -74,6 +112,8 @@ const webhook = z.object({
     payment_request_id: z.string(),
     status: z.string(),
     request_amount: z.number().optional(),
+    captures: z.array(z.object({ capture_timestamp: z.string().optional() })).optional(),
+    updated: z.string().optional(),
   }),
 });
 
@@ -102,6 +142,7 @@ export function readXenditWebhook(
     paymentId: data.payment_request_id,
     status,
     amount: data.request_amount ?? null,
+    paidAt: status === "paid" ? when(data.captures?.[0]?.capture_timestamp ?? data.updated) : null,
   };
 }
 

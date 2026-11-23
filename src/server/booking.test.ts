@@ -4,8 +4,26 @@ import type { Database } from "@/db";
 import { createDemoDb } from "@/db/demo";
 import * as s from "@/db/schema";
 import { BookingError } from "@/domain/booking";
-import { bookingOptions, createBooking, expireStale, getTicket, settlePayment } from "./booking";
-import { demoProvider } from "./payments";
+import {
+  bookingOptions,
+  createBooking,
+  expireStale,
+  getTicket,
+  reconcileBookings,
+  settlePayment,
+} from "./booking";
+import { demoProvider, type PaymentProvider, type PaymentStatus } from "./payments";
+
+/** A gateway that answers status checks from a table, for missed-webhook cases. */
+function gatewaySaying(answers: Record<string, PaymentStatus>): PaymentProvider {
+  return {
+    ...demoProvider,
+    name: "xendit",
+    async getStatus(paymentId) {
+      return answers[paymentId] ?? { status: "pending" };
+    },
+  };
+}
 
 const DAY = "2026-11-23";
 const at = (clock: string) => new Date(`${DAY}T${clock}:00+08:00`);
@@ -32,15 +50,15 @@ async function haircutFor(branch: string, phone: string, barber = "any") {
 
 describe("online booking", () => {
   it("offers only prepayable services and the barbers on duty", async () => {
-    const options = await bookingOptions(db, "juanda", at("14:00"));
+    const options = await bookingOptions(db, "pulau-kalimantan", at("14:00"));
     expect(options?.barbers.length).toBeGreaterThan(0);
     expect(options?.services.some((x) => x.priceType === "from")).toBe(false);
     expect(options?.services.find((x) => x.slug === "curly-perm")?.variants).toHaveLength(2);
   });
 
   it("prices by the chosen barber's level and holds no place until paid", async () => {
-    const booking = await haircutFor("juanda", "6281111111111");
-    const options = await bookingOptions(db, "juanda", at("14:00"));
+    const booking = await haircutFor("pulau-kalimantan", "6281111111111");
+    const options = await bookingOptions(db, "pulau-kalimantan", at("14:00"));
     const barber = options?.barbers.find((b) => b.id === booking.barberId);
     expect(booking.status).toBe("pending");
     expect(booking.amount).toBe(barber?.haircutPrice);
@@ -50,13 +68,13 @@ describe("online booking", () => {
   });
 
   it("gives back the same unpaid booking instead of a second QR", async () => {
-    const first = await haircutFor("pramuka", "6282222222222");
-    const again = await haircutFor("pramuka", "6282222222222");
+    const first = await haircutFor("belatuk", "6282222222222");
+    const again = await haircutFor("belatuk", "6282222222222");
     expect(again.id).toBe(first.id);
   });
 
   it("joins the queue once when paid, even if the webhook comes twice", async () => {
-    const booking = await haircutFor("tepian", "6283333333333");
+    const booking = await haircutFor("citra-niaga", "6283333333333");
     const event = {
       reference: booking.id,
       paymentId: booking.paymentId ?? "",
@@ -72,11 +90,11 @@ describe("online booking", () => {
 
     const ticket = await getTicket(db, booking.id, at("14:02"));
     expect(ticket?.status).toBe("paid");
-    expect(ticket?.place?.ticket).toMatch(/^T \d{3}$/);
+    expect(ticket?.place?.ticket).toMatch(/^C \d{3}$/);
   });
 
   it("ignores news that doesn't match the booking", async () => {
-    const booking = await haircutFor("juanda", "6284444444444");
+    const booking = await haircutFor("pulau-kalimantan", "6284444444444");
     const base = { reference: booking.id, status: "paid" as const, amount: booking.amount };
     expect(await settlePayment(db, { ...base, paymentId: "someone-else" }, at("14:01"))).toBe("ignored");
     expect(
@@ -88,7 +106,7 @@ describe("online booking", () => {
   });
 
   it("turns money for an expired booking into 30-day credit on the number", async () => {
-    const booking = await haircutFor("juanda", "6285555555555");
+    const booking = await haircutFor("pulau-kalimantan", "6285555555555");
     await expireStale(db, at("14:30"));
     const result = await settlePayment(
       db,
@@ -103,14 +121,65 @@ describe("online booking", () => {
     expect(credit[0]?.delta).toBe(booking.amount);
   });
 
+  it("credits a late payment even when nothing marked the booking expired yet", async () => {
+    const booking = await haircutFor("belatuk", "6286666666666");
+    const result = await settlePayment(
+      db,
+      { reference: booking.id, paymentId: booking.paymentId ?? "", status: "paid", amount: booking.amount },
+      at("14:16"),
+    );
+    expect(result).toBe("credited");
+    const entries = await db.select().from(s.queueEntries).where(eq(s.queueEntries.bookingId, booking.id));
+    expect(entries).toHaveLength(0);
+  });
+
+  it("counts money paid in time even when the news comes after the window", async () => {
+    const booking = await haircutFor("citra-niaga", "6287777777777");
+    const result = await settlePayment(
+      db,
+      {
+        reference: booking.id,
+        paymentId: booking.paymentId ?? "",
+        status: "paid",
+        amount: booking.amount,
+        paidAt: at("14:14"),
+      },
+      at("14:20"),
+    );
+    expect(result).toBe("queued");
+  });
+
+  it("asks the gateway before expiring, so a missed webhook still gets its place", async () => {
+    const paid = await haircutFor("pulau-kalimantan", "6288888888881");
+    const unpaid = await haircutFor("pulau-kalimantan", "6288888888882");
+    const gateway = gatewaySaying({
+      [paid.paymentId ?? ""]: { status: "paid", amount: paid.amount, paidAt: at("14:10") },
+    });
+    await expireStale(db, at("14:16"), gateway);
+
+    const [after] = await db.select().from(s.bookings).where(eq(s.bookings.id, paid.id));
+    expect(after?.status).toBe("paid");
+    const [left] = await db.select().from(s.bookings).where(eq(s.bookings.id, unpaid.id));
+    expect(left?.status).toBe("expired");
+  });
+
+  it("credits a missed payment found much later", async () => {
+    const booking = await haircutFor("belatuk", "6288888888883");
+    await expireStale(db, at("14:16"));
+    const gateway = gatewaySaying({
+      [booking.paymentId ?? ""]: { status: "paid", amount: booking.amount, paidAt: at("14:10") },
+    });
+    expect(await reconcileBookings(db, gateway, [booking], at("23:45"))).toEqual(["credited"]);
+  });
+
   it("stops taking numbers 45 minutes before closing", async () => {
-    const options = await bookingOptions(db, "juanda", at("20:20"));
+    const options = await bookingOptions(db, "pulau-kalimantan", at("20:20"));
     const haircut = options?.services.find((x) => x.slug === "haircut");
     await expect(
       createBooking(
         db,
         {
-          branchSlug: "juanda",
+          branchSlug: "pulau-kalimantan",
           barber: "any",
           services: [{ serviceId: haircut?.id ?? "" }],
           name: "Late",
@@ -125,13 +194,13 @@ describe("online booking", () => {
 
 describe("the public demo", () => {
   it("can waive opening hours so visitors can try it at night", async () => {
-    const options = await bookingOptions(db, "juanda", at("23:30"));
+    const options = await bookingOptions(db, "pulau-kalimantan", at("23:30"));
     expect(options?.online.ok).toBe(false);
     const haircut = options?.services.find((x) => x.slug === "haircut");
     const id = await createBooking(
       db,
       {
-        branchSlug: "juanda",
+        branchSlug: "pulau-kalimantan",
         barber: "any",
         services: [{ serviceId: haircut?.id ?? "" }],
         name: "Malam",

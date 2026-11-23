@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   activeEntries,
+  branchPrefix,
   call,
   callable,
   cancel,
@@ -139,8 +140,17 @@ describe("estimates", () => {
   });
 });
 
+describe("branchPrefix", () => {
+  it("uses the branch's own first letter, not the street word", () => {
+    expect(branchPrefix("Jl. Pulau Kalimantan")).toBe("P");
+    expect(branchPrefix("Jl. Belatuk")).toBe("B");
+    expect(branchPrefix("Citra Niaga")).toBe("C");
+    expect(branchPrefix("jalan merdeka")).toBe("M");
+  });
+});
+
 describe("ticketLabel", () => {
   it("pads the daily number", () => {
-    expect(ticketLabel("J", 14)).toBe("J 014");
+    expect(ticketLabel("P", 14)).toBe("P 014");
   });
 });

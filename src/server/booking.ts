@@ -1,11 +1,12 @@
 import "server-only";
-import { and, count, eq, gte, inArray, lt } from "drizzle-orm";
+import { and, count, eq, gte, inArray, isNotNull, lt } from "drizzle-orm";
 import { type Database, schema as s } from "@/db";
 import {
   BookingError,
   bookableOnline,
   type LineItem,
   onlineOpen,
+  paidInTime,
   priceItem,
   shortestWait,
   totals,
@@ -13,8 +14,9 @@ import {
 import { ticketLabel } from "@/domain/queue";
 import { shopDate, weekday } from "@/domain/time";
 import { enqueue, numberSetting } from "@/server/enqueue";
-import type { PaymentEvent, PaymentProvider } from "@/server/payments";
+import { type PaymentEvent, type PaymentProvider, paymentProvider } from "@/server/payments";
 import { branchPrefix, getBranchQueue } from "@/server/queue";
+import { ratingFor } from "@/server/rating";
 
 /*
  * Online booking: price → pending booking + QRIS → paid webhook → queue entry.
@@ -226,7 +228,11 @@ export async function settlePayment(db: Database, event: PaymentEvent, now: Date
 
     const [customer] = await tx.select().from(s.customers).where(eq(s.customers.id, booking.customerId));
 
-    if (booking.status !== "pending" || !booking.barberId) {
+    // Judge by when the customer paid, not when the news came: a webhook can be slow,
+    // and expiry is only written on reads, so the stored status can lag either way.
+    const waiting = booking.status === "pending" || booking.status === "expired";
+    const inTime = paidInTime({ paidAt: event.paidAt ?? now, expiresAt: booking.expiresAt, now });
+    if (!waiting || !inTime || !booking.barberId) {
       const days = await numberSetting(tx, "credit_valid_days", 30);
       if (customer?.phone) {
         await tx.insert(s.creditLedger).values({
@@ -262,8 +268,48 @@ export async function settlePayment(db: Database, event: PaymentEvent, now: Date
   });
 }
 
-/** Unpaid bookings past their time stop waiting. Cheap; runs on reads. */
-export async function expireStale(db: Database, now: Date) {
+/**
+ * Asks the gateway about bookings it never told us were paid, and settles the paid ones.
+ * A safety net for a missed webhook; the webhook stays the normal path.
+ */
+export async function reconcileBookings(
+  db: Database,
+  payments: PaymentProvider,
+  rows: { id: string; paymentId: string | null }[],
+  now: Date,
+): Promise<Settlement[]> {
+  return Promise.all(
+    rows.map(async ({ id, paymentId }) => {
+      if (!paymentId) return "ignored";
+      const news = await payments.getStatus(paymentId).catch((error: unknown) => {
+        console.error("Payment status check failed", paymentId, error);
+        return null;
+      });
+      if (news?.status !== "paid") return "ignored";
+      return settlePayment(
+        db,
+        { reference: id, paymentId, status: "paid", amount: news.amount, paidAt: news.paidAt },
+        now,
+      );
+    }),
+  );
+}
+
+/**
+ * Unpaid bookings past their time stop waiting. Runs on reads. With a real gateway it
+ * first asks about the ones about to expire, so a missed webhook doesn't lose a paid place.
+ */
+export async function expireStale(db: Database, now: Date, payments: PaymentProvider = paymentProvider()) {
+  if (payments.name !== "demo") {
+    const due = await db
+      .select({ id: s.bookings.id, paymentId: s.bookings.paymentId })
+      .from(s.bookings)
+      .where(
+        and(eq(s.bookings.status, "pending"), lt(s.bookings.expiresAt, now), isNotNull(s.bookings.paymentId)),
+      )
+      .limit(10);
+    await reconcileBookings(db, payments, due, now);
+  }
   await db
     .update(s.bookings)
     .set({ status: "expired" })
@@ -298,6 +344,7 @@ export async function getTicket(db: Database, bookingId: string, now: Date) {
     ahead: number;
     waitMin: number;
   } | null = null;
+  let rating: number | null = null;
   if (entry) {
     const prefix = branchPrefix(branch.name);
     const queue = await getBranchQueue(branch.slug, entry.date, now, db);
@@ -310,6 +357,7 @@ export async function getTicket(db: Database, bookingId: string, now: Date) {
       ahead: live?.ahead ?? 0,
       waitMin: live?.waitMin ?? 0,
     };
+    if (place.status === "done") rating = await ratingFor(db, entry.id);
   }
 
   return {
@@ -323,6 +371,8 @@ export async function getTicket(db: Database, bookingId: string, now: Date) {
     barber: barber?.name ?? null,
     name: firstName(customer.name),
     place,
+    /** The customer's 1–5 for this visit, once given. */
+    rating,
   };
 }
 

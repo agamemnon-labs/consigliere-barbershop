@@ -1,11 +1,11 @@
 import { expect, test } from "@playwright/test";
 import { clearColumn, signInAsCashier } from "./helpers";
 
-// Uses the Pramuka counter so it never races the Juanda cashier test.
+// Uses the Belatuk counter so it never races the Pulau Kalimantan cashier test.
 test("the counter signs up a member, tops up, and the member pays from balance with their PIN", async ({
   page,
 }) => {
-  await signInAsCashier(page, "pramuka");
+  await signInAsCashier(page, "belatuk");
   await page.getByRole("link", { name: "Member", exact: true }).click();
   await expect(page).toHaveURL(/\/kasir\/member$/);
 
@@ -63,7 +63,7 @@ test("the counter signs up a member, tops up, and the member pays from balance w
 });
 
 test("a birthday member gets half off the haircut at the counter", async ({ page }) => {
-  await signInAsCashier(page, "pramuka");
+  await signInAsCashier(page, "belatuk");
   const column = page.getByRole("region", { name: /^Antrean / }).nth(1);
   await expect(column).toBeVisible();
   await clearColumn(column);

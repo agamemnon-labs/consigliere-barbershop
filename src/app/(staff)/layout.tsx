@@ -1,4 +1,5 @@
 import type { Viewport } from "next";
+import { DemoRibbon } from "@/components/demo-ribbon";
 import { brand } from "@/config/brand";
 
 export const viewport: Viewport = { themeColor: brand.palette.paper };
@@ -7,6 +8,7 @@ export const viewport: Viewport = { themeColor: brand.palette.paper };
 export default function StaffLayout({ children }: LayoutProps<"/">) {
   return (
     <div data-theme="paper" className="min-h-dvh bg-bg text-fg">
+      <DemoRibbon />
       {children}
     </div>
   );

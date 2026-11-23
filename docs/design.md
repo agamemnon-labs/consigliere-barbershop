@@ -189,7 +189,7 @@ Each phase ends deployed and usable.
    - Every change writes the audit log; price and rotation edits refresh the public site at once (`updateTag`).
    - Commission is paid on what the shop earned per service (price minus discount): haircuts at the barber's level share on the day of the sale, everything else at the flat share from Aturan.
    - Deferred: staff accounts and tablet tokens (the tablet is public and needs none), credits & refunds screen.
-8. **Polish & portfolio** — demo mode ribbon, guided demo accounts ("login as cashier / tablet / owner"), Playwright e2e, Lighthouse ≥ 90 on mobile, case-study page for Agamemnon.
+8. **Polish & portfolio** ✅ — demo ribbon on customer and staff screens (`DEMO_MODE`, always on without a database), one-tap demo logins at `/demo` (member, cashier, owner; customer and tablet need none), nightly demo reset by Vercel Cron (`/api/demo/reset`, bearer `CRON_SECRET`), four weeks of seeded sales, case study at `/studi-kasus` (linked from the credits), favicon, `faint` colour raised to pass WCAG AA. Lighthouse on mobile: performance 91–98, accessibility, best practices and SEO 100 on public pages (noindex pages score SEO 60 by design).
 
 Phases 1–3 are the MVP that proves the idea.
 

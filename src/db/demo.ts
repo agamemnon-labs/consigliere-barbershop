@@ -7,12 +7,11 @@ import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { PGlite } from "@electric-sql/pglite";
 import { drizzle } from "drizzle-orm/pglite";
+import { DEMO_MEMBER_PIN, DEMO_STAFF_PASSWORD } from "./demo-credentials.ts";
 import * as schema from "./schema.ts";
 import { seed } from "./seed/seed.ts";
 
-export const DEMO_STAFF_PASSWORD = "consigliere-demo";
-/** PIN for the demo members (Bram 0812-0000-0001, Rizal 0812-0000-0002). */
-export const DEMO_MEMBER_PIN = "482913";
+export { DEMO_MEMBER_PIN, DEMO_STAFF_PASSWORD };
 
 export async function createDemoDb(options: { from?: string; days?: number; staffPassword?: string } = {}) {
   const client = new PGlite();

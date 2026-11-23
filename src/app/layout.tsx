@@ -1,4 +1,7 @@
+import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import type { Metadata, Viewport } from "next";
+import { Suspense } from "react";
 import { brand } from "@/config/brand";
 import { archivo, slab } from "./fonts";
 import "./globals.css";
@@ -22,7 +25,14 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="id" className={`${archivo.variable} ${slab.variable}`}>
-      <body className="min-h-dvh">{children}</body>
+      <body className="min-h-dvh">
+        {children}
+        {/* Cookieless visit counts and real-device Core Web Vitals, on Vercel only. */}
+        <Suspense fallback={null}>
+          <Analytics />
+          <SpeedInsights />
+        </Suspense>
+      </body>
     </html>
   );
 }

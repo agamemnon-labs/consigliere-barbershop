@@ -184,7 +184,8 @@ pnpm e2e         # Playwright, after a build
 3. After the first migration, make `postgres` own `public.broadcast_queue_change()` so it may call `realtime.send`, and revoke `execute` on it from `public, anon, authenticated`.
 4. Optional: add Xendit development keys (`XENDIT_SECRET_KEY`, `XENDIT_WEBHOOK_TOKEN`) and point the webhook at `<origin>/api/pembayaran/xendit`. Without them, payments stay in demo mode.
 5. Turn on Web Analytics and Speed Insights in the Vercel project (the components are already in the root layout).
-6. Optional: add the Sentry integration from the Vercel Marketplace and redeploy. It sets `NEXT_PUBLIC_SENTRY_DSN` (error reports on) and `SENTRY_AUTH_TOKEN`, `SENTRY_ORG`, `SENTRY_PROJECT` (readable stack traces). Without them the SDK never loads.
+6. Optional: WhatsApp. Register the shop's number on the WhatsApp Cloud API, get the templates `kode_pin` (authentication, copy-code) and `antrean_dekat` (utility) approved in Indonesian, then set `WHATSAPP_TOKEN` (a system user's permanent token) and `WHATSAPP_PHONE_NUMBER_ID`. Without them, messages are only logged in Admin → Pesan. `WHATSAPP_ALLOWLIST` limits real sending to a few numbers while testing.
+7. Optional: add the Sentry integration from the Vercel Marketplace and redeploy. It sets `NEXT_PUBLIC_SENTRY_DSN` (error reports on) and `SENTRY_AUTH_TOKEN`, `SENTRY_ORG`, `SENTRY_PROJECT` (readable stack traces). Without them the SDK never loads.
 
 The cron in `vercel.json` resets the demo every night at 00.00 WITA.
 

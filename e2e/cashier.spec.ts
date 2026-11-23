@@ -13,6 +13,7 @@ test("the cashier adds a walk-in, calls, seats, takes payment and prints a recei
   const name = `Uji ${Date.now() % 10_000}`;
   await column.locator("summary", { hasText: "Walk-in" }).click();
   await column.getByLabel("Nama (boleh kosong)").fill(name);
+  await column.getByLabel("WhatsApp (boleh kosong)").fill("0813-0000-0099");
   await column.getByRole("button", { name: /^Tambah ke antrean/ }).click();
   const row = column.getByRole("listitem").filter({ hasText: name });
   await expect(row).toBeVisible();

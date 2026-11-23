@@ -10,6 +10,7 @@ import { normalizePhone } from "@/domain/booking";
 import { MemberError } from "@/domain/membership";
 import { auth } from "@/server/auth";
 import { createMember, requestPinReset, resetPin, topUp } from "@/server/membership";
+import { deliverLater } from "@/server/notify-after";
 import { requireStaff } from "@/server/session";
 
 export type FormState = { error?: string; values?: Record<string, string> };
@@ -126,8 +127,9 @@ export async function forgotPin(prev: ResetState, data: FormData): Promise<Reset
   if (!normalizePhone(phone)) return { error: "Nomor WhatsApp belum benar.", values };
 
   if (!prev.sent || data.get("step") === "send") {
-    const code = await requestPinReset(db, phone, now);
-    return { sent: true, values, ...(code && isDemoDatabase() ? { demoCode: code } : {}) };
+    const reset = await requestPinReset(db, phone, now);
+    if (reset) deliverLater([reset.messageId]);
+    return { sent: true, values, ...(reset && isDemoDatabase() ? { demoCode: reset.code } : {}) };
   }
 
   const pin = String(data.get("pin") ?? "").trim();

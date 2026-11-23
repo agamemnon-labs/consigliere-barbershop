@@ -44,3 +44,8 @@ export function weekday(date: string): number {
 export function clockLabel(time: string): string {
   return time.slice(0, 5).replace(":", ".");
 }
+
+/** The instant a shop day (YYYY-MM-DD, WITA) begins. */
+export function shopDayStart(date: string): Date {
+  return new Date(`${date}T00:00:00+08:00`);
+}

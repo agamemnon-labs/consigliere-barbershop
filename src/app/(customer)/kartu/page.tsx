@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { BackLink } from "@/components/back-link";
+import { ButtonLink } from "@/components/button";
 import { Credits } from "@/components/credits";
 import { QrCode } from "@/components/qr-code";
 import { Rule } from "@/components/rule";
@@ -77,6 +78,11 @@ async function Card() {
           ? `Bisa ditukar ${vouchers} × ${formatRupiah(rule.redeemValue)} di kasir`
           : `${toNext} poin lagi ke potongan ${formatRupiah(rule.redeemValue)}`}
       </p>
+      <div className="mt-6">
+        <ButtonLink href="/kartu/isi" variant="quiet" block>
+          Isi saldo
+        </ButtonLink>
+      </div>
       {card.birthday ? (
         <p className="mt-4 border-l-2 border-accent pl-4">
           Selamat ulang tahun. Haircut bulan ini setengah harga

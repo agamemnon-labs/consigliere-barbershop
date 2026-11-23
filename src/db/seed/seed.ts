@@ -3,7 +3,7 @@
  * Works with any Drizzle Postgres driver (postgres.js in scripts, PGlite in tests).
  */
 import { hashPassword } from "better-auth/crypto";
-import { and, eq, sql } from "drizzle-orm";
+import { and, desc, eq, inArray, sql } from "drizzle-orm";
 import type { PgDatabase, PgQueryResultHKT } from "drizzle-orm/pg-core";
 import { addDays, shopDate, weekday } from "../../domain/time.ts";
 import * as s from "../schema.ts";
@@ -196,6 +196,7 @@ export async function seed(db: AnyDb, options: SeedOptions) {
 
     if (options.demoQueueAt) {
       await seedDemoSales(tx, from, branchRows, barberRows, levelRows);
+      await linkMemberVisits(tx);
       await seedDemoQueue(tx, from, options.demoQueueAt, shifts, branchRows);
       await payDoneVisits(tx, from);
     }
@@ -406,6 +407,41 @@ async function seedDemoSales(
         score: demoScore(stars()),
       }));
     if (rated.length) await tx.insert(s.ratings).values(rated);
+  }
+}
+
+/**
+ * Gives each demo member a few of the seeded past visits, so their card shows a
+ * history that fits their points instead of "0 visits". Every member keeps to one
+ * branch, the way regulars do.
+ */
+async function linkMemberVisits(tx: Tx) {
+  const members = await tx
+    .select({ id: s.members.id, customerId: s.members.customerId })
+    .from(s.members)
+    .orderBy(s.members.memberNo);
+  const branches = await tx.select({ id: s.branches.id }).from(s.branches).orderBy(s.branches.name);
+  for (const [i, m] of members.entries()) {
+    const branch = branches[i % branches.length];
+    if (!branch) continue;
+    const recent = await tx
+      .select({ id: s.transactions.id })
+      .from(s.transactions)
+      .where(and(eq(s.transactions.branchId, branch.id), sql`${s.transactions.memberId} is null`))
+      .orderBy(desc(s.transactions.createdAt))
+      .limit(60);
+    // About one visit every ten days or so: every 9th sale at their branch, newest first.
+    const picks = recent.filter((_, n) => n % 9 === i % 9).slice(0, 6 - i);
+    if (picks.length === 0) continue;
+    await tx
+      .update(s.transactions)
+      .set({ memberId: m.id, customerId: m.customerId })
+      .where(
+        inArray(
+          s.transactions.id,
+          picks.map((p) => p.id),
+        ),
+      );
   }
 }
 

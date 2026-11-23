@@ -108,6 +108,8 @@ describe("pay and finish at the counter", () => {
       delta: 50_000,
       reason: "cancel",
       expiresAt: new Date(now.getTime() + 30 * 86_400_000),
+      // Pinned to the test clock: a real-time default made this fail after 14.00 WITA.
+      createdAt: new Date(now.getTime() - 60_000),
     });
     expect(await creditFor(db, "6281200000001", now)).toBe(50_000);
 

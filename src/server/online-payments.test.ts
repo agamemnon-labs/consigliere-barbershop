@@ -43,10 +43,14 @@ describe("online payments list", () => {
     const [pkg] = await topupPackages(db);
     await createTopupOrder(db, { userId: member!.userId!, packageId: pkg!.id }, at("14:05"), demoProvider);
 
+    // A booking's createdAt is the real clock, a top-up's the test clock, so don't rely on order here.
     const rows = await onlinePayments(db, at("14:10"));
-    expect(rows.map((r) => r.kind).slice(0, 2)).toEqual(["topup", "booking"]);
-    expect(rows[0]).toMatchObject({ status: "pending", detail: "C00001", amount: pkg!.pay });
-    expect(rows[1]).toMatchObject({ status: "paid", who: "Dewi", amount: booking!.amount });
-    expect(receivedTotal(rows.slice(0, 2))).toBe(booking!.amount);
+    const topup = rows.find((r) => r.kind === "topup" && r.detail === "C00001" && r.status === "pending");
+    const paid = rows.find((r) => r.id === bookingId);
+    expect(topup).toMatchObject({ amount: pkg!.pay });
+    expect(paid).toMatchObject({ kind: "booking", status: "paid", who: "Dewi", amount: booking!.amount });
+    expect(receivedTotal([topup!, paid!])).toBe(booking!.amount);
+    const times = rows.map((r) => r.createdAt.getTime());
+    expect(times).toEqual([...times].sort((a, b) => b - a));
   });
 });

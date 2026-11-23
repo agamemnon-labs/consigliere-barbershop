@@ -7,20 +7,26 @@ import { getDb, schema as s } from "@/db";
 import * as q from "@/domain/queue";
 import { shopDate } from "@/domain/time";
 import { enqueue, numberSetting, type Tx } from "@/server/enqueue";
+import { paymentProvider } from "@/server/payments";
+import { type Release, releasePrepaid, sendRefund, type Unserved } from "@/server/release";
 import { requireStaff, type Staff } from "@/server/session";
 
 export type QueueActionState = { error?: string; ok?: number };
 
 const DEFAULT_GRACE_MIN = 5;
 
-/** One tap on the cashier screen: call, seat, finish, late or cancel an entry. */
+/**
+ * One tap on the cashier screen: call, seat, finish, late or cancel an entry.
+ * `cancel` is the customer cancelling; `shop_cancel` is the shop, which refunds a prepaid place.
+ */
 export async function queueAction(
-  op: "call" | "start" | "finish" | "late" | "cancel",
+  op: "call" | "start" | "finish" | "late" | "cancel" | "shop_cancel",
   entryId: string,
   _prev: QueueActionState,
 ): Promise<QueueActionState> {
   const staff = await requireStaff();
   const now = new Date();
+  let release = { kind: "none" } as Release;
   try {
     const db = await getDb();
     await db.transaction(async (tx) => {
@@ -48,8 +54,15 @@ export async function queueAction(
 
       for (const { id, ...patch } of patches) {
         await tx.update(s.queueEntries).set(patch).where(eq(s.queueEntries.id, id));
+        if (patch.status === "cancelled" || patch.status === "no_show") {
+          const why: Unserved =
+            op === "shop_cancel" ? "shop_cancel" : patch.status === "no_show" ? "no_show" : "customer_cancel";
+          const entry = entries.find((e) => e.id === id);
+          release = await releasePrepaid(tx, entry?.bookingId ?? null, why, now);
+        }
       }
     });
+    if (release.kind === "refund") release = await sendRefund(db, paymentProvider(), release.charge, now);
   } catch (error) {
     if (error instanceof q.QueueError || error instanceof BranchError) return { error: error.message };
     throw error;

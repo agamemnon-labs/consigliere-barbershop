@@ -9,6 +9,7 @@ import { PaymentError, type PaymentEvent, type PaymentProvider } from "./types";
  * https://docs.xendit.co/apidocs/create-payment-request
  */
 const API = "https://api.xendit.co/v3/payment_requests";
+const REFUNDS = "https://api.xendit.co/v3/refunds";
 const VERSION = "2024-11-11";
 
 const created = z.object({
@@ -25,8 +26,13 @@ export function xenditProvider(secretKey: string): PaymentProvider {
     "content-type": "application/json",
   };
 
-  async function call(url: string, body: unknown) {
-    const res = await fetch(url, { method: "POST", headers, body: JSON.stringify(body) });
+  async function call(url: string, body?: unknown) {
+    const res = await fetch(url, {
+      method: body === undefined ? "GET" : "POST",
+      headers,
+      body: body === undefined ? undefined : JSON.stringify(body),
+      signal: AbortSignal.timeout(8_000),
+    });
     const json: unknown = await res.json().catch(() => null);
     if (!res.ok) {
       const message = z.object({ message: z.string() }).safeParse(json);
@@ -63,6 +69,23 @@ export function xenditProvider(secretKey: string): PaymentProvider {
       if (!this.testMode) throw new PaymentError("Simulation is only for test keys.");
       // The result arrives later as a `payment.capture` webhook.
       await call(`${API}/${paymentId}/simulate`, { amount });
+    },
+
+    async refund({ paymentId, reference, amount }) {
+      // Refunds name the payment (py-…), not the payment request (pr-…) we keep.
+      const request = z
+        .object({ latest_payment_id: z.string().nullish() })
+        .parse(await call(`${API}/${encodeURIComponent(paymentId)}`));
+      if (!request.latest_payment_id) throw new PaymentError("Xendit has no payment to refund.");
+      const json = await call(REFUNDS, {
+        reference_id: `refund-${reference}`,
+        payment_id: request.latest_payment_id,
+        amount,
+        reason: "CANCELLATION",
+      });
+      const refund = z.object({ refund_id: z.string(), status: z.string() }).parse(json);
+      if (refund.status === "FAILED") throw new PaymentError("Xendit refused the refund.");
+      return refund.refund_id;
     },
   };
 }

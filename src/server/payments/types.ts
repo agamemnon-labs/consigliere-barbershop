@@ -7,6 +7,8 @@ export interface PaymentProvider {
   createQris(input: QrisInput): Promise<QrisCharge>;
   /** Test mode only: pretend the customer scanned and paid. */
   simulatePaid(charge: { paymentId: string; reference: string; amount: number }): Promise<void>;
+  /** Sends the whole payment back to the customer's bank or e-wallet. Returns the gateway's refund id. */
+  refund(charge: { paymentId: string; reference: string; amount: number }): Promise<string>;
 }
 
 export type QrisInput = { reference: string; amount: number; expiresAt: Date; description: string };

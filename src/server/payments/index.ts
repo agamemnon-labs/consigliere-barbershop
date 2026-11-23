@@ -22,6 +22,9 @@ export const demoProvider: PaymentProvider = {
   async simulatePaid() {
     // Settled by the caller: there is no gateway to send a webhook.
   },
+  async refund({ reference }) {
+    return `demo-refund-${reference}`;
+  },
 };
 
 export function paymentProvider(): PaymentProvider {

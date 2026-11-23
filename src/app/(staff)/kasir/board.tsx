@@ -14,7 +14,7 @@ import { counterCatalog, recentTransactions, todayTakings } from "@/server/check
 import { type BarberQueue, getBranchQueue, type LiveEntry } from "@/server/queue";
 import { requireStaff } from "@/server/session";
 import { type CatalogService, CheckoutPanel } from "./checkout-panel";
-import { QueueButton, WalkInForm } from "./queue-controls";
+import { CancelPrepaid, QueueButton, WalkInForm } from "./queue-controls";
 
 type Props = { searchParams: PageProps<"/kasir">["searchParams"] };
 
@@ -232,6 +232,8 @@ function Column({ queue, catalog }: { queue: BarberQueue; catalog: CatalogServic
               </div>
               {e.status === "waiting" && i === 0 && !someoneCalled ? (
                 <QueueButton op="call" entryId={e.id} label="Panggil" variant="primary" />
+              ) : e.status === "waiting" && e.source === "online" ? (
+                <CancelPrepaid entryId={e.id} />
               ) : e.status === "waiting" ? (
                 <QueueButton op="cancel" entryId={e.id} label="Batal" variant="text" />
               ) : null}

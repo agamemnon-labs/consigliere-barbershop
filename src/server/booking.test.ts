@@ -103,6 +103,18 @@ describe("online booking", () => {
     expect(credit[0]?.delta).toBe(booking.amount);
   });
 
+  it("credits a late payment even when nothing marked the booking expired yet", async () => {
+    const booking = await haircutFor("pramuka", "6286666666666");
+    const result = await settlePayment(
+      db,
+      { reference: booking.id, paymentId: booking.paymentId ?? "", status: "paid", amount: booking.amount },
+      at("14:16"),
+    );
+    expect(result).toBe("credited");
+    const entries = await db.select().from(s.queueEntries).where(eq(s.queueEntries.bookingId, booking.id));
+    expect(entries).toHaveLength(0);
+  });
+
   it("stops taking numbers 45 minutes before closing", async () => {
     const options = await bookingOptions(db, "juanda", at("20:20"));
     const haircut = options?.services.find((x) => x.slug === "haircut");

@@ -25,6 +25,9 @@ export const demoProvider: PaymentProvider = {
   async getStatus() {
     return { status: "unknown" };
   },
+  async refund({ reference }) {
+    return `demo-refund-${reference}`;
+  },
 };
 
 export function paymentProvider(): PaymentProvider {

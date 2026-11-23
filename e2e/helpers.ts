@@ -36,6 +36,15 @@ export async function clearColumn(column: Locator) {
         break;
       }
     }
+    // A prepaid online entry asks who cancels first.
+    const prepaid = column.locator("summary", { hasText: "Batal" }).first();
+    if (!clicked && (await prepaid.isVisible())) {
+      const before = await column.textContent();
+      await prepaid.click();
+      await column.getByRole("button", { name: "Pelanggan, uang jadi kredit" }).first().click();
+      await expect.poll(() => column.textContent()).not.toBe(before);
+      continue;
+    }
     if (!clicked) return;
   }
 }

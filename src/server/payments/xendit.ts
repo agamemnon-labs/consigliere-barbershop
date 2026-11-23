@@ -9,6 +9,7 @@ import { PaymentError, type PaymentEvent, type PaymentProvider, type PaymentStat
  * https://docs.xendit.co/apidocs/create-payment-request
  */
 const API = "https://api.xendit.co/v3/payment_requests";
+const REFUNDS = "https://api.xendit.co/v3/refunds";
 const VERSION = "2024-11-11";
 
 const created = z.object({
@@ -74,6 +75,23 @@ export function xenditProvider(secretKey: string): PaymentProvider {
     async getStatus(paymentId) {
       const json = await call(`${API}/${encodeURIComponent(paymentId)}`);
       return statusOf(requestStatus.parse(json));
+    },
+
+    async refund({ paymentId, reference, amount }) {
+      // Refunds name the payment (py-…), not the payment request (pr-…) we keep.
+      const request = z
+        .object({ latest_payment_id: z.string().nullish() })
+        .parse(await call(`${API}/${encodeURIComponent(paymentId)}`));
+      if (!request.latest_payment_id) throw new PaymentError("Xendit has no payment to refund.");
+      const json = await call(REFUNDS, {
+        reference_id: `refund-${reference}`,
+        payment_id: request.latest_payment_id,
+        amount,
+        reason: "CANCELLATION",
+      });
+      const refund = z.object({ refund_id: z.string(), status: z.string() }).parse(json);
+      if (refund.status === "FAILED") throw new PaymentError("Xendit refused the refund.");
+      return refund.refund_id;
     },
   };
 }

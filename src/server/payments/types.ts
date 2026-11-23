@@ -9,6 +9,8 @@ export interface PaymentProvider {
   simulatePaid(charge: { paymentId: string; reference: string; amount: number }): Promise<void>;
   /** Asks the gateway directly, for when its webhook never arrived. */
   getStatus(paymentId: string): Promise<PaymentStatus>;
+  /** Sends the whole payment back to the customer's bank or e-wallet. Returns the gateway's refund id. */
+  refund(charge: { paymentId: string; reference: string; amount: number }): Promise<string>;
 }
 
 /** What the gateway says about one charge right now. */

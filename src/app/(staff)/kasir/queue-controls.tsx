@@ -39,6 +39,38 @@ export function QueueButton({ op, entryId, label, variant = "dark", enableAt, bl
   );
 }
 
+/**
+ * "Batal" on a prepaid online entry asks who is cancelling, because the money goes
+ * different ways: the customer cancelling keeps it as credit (or member balance),
+ * the shop cancelling sends it back to their bank or e-wallet.
+ */
+export function CancelPrepaid({ entryId }: { entryId: string }) {
+  return (
+    <details className="relative">
+      <summary className="flex min-h-11 cursor-pointer list-none items-center rounded-lg px-2 text-sm font-medium text-muted hover:bg-sunk hover:text-fg [&::-webkit-details-marker]:hidden">
+        Batal
+      </summary>
+      <div className="absolute top-full right-0 z-20 mt-1 grid w-64 gap-1 rounded-xl border border-rule-strong bg-surface p-2">
+        <p className="px-2 pt-1 pb-2 text-sm text-muted">Sudah bayar online. Siapa yang membatalkan?</p>
+        <QueueButton
+          op="cancel"
+          entryId={entryId}
+          label="Pelanggan, uang jadi kredit"
+          variant="quiet"
+          block
+        />
+        <QueueButton
+          op="shop_cancel"
+          entryId={entryId}
+          label="Toko, uang dikembalikan"
+          variant="quiet"
+          block
+        />
+      </div>
+    </details>
+  );
+}
+
 /** "+ Walk-in" opens a one-field form downward; the name is optional. */
 export function WalkInForm({ barberId, barberName }: { barberId: string; barberName: string }) {
   const [state, action, pending] = useActionState<QueueActionState, FormData>(addWalkIn, {});

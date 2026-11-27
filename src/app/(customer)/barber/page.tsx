@@ -107,7 +107,7 @@ function TodayLabel({ day, branchName }: { day: DayPlan; branchName: Map<string,
     case "off":
       return <>Hari ini libur</>;
     case "closed":
-      return <span className="text-accent-ink">Hari ini tutup</span>;
+      return <span className="font-medium text-muted">Hari ini tutup</span>;
     case "unknown":
       return <>Belum dijadwalkan</>;
   }
@@ -120,7 +120,7 @@ function DayLabel({ day, branchName }: { day: DayPlan; branchName: Map<string, s
     case "off":
       return <span className="text-faint">Libur</span>;
     case "closed":
-      return <span className="text-accent-ink">Tutup, {day.reason}</span>;
+      return <span className="font-medium text-muted">Tutup, {day.reason}</span>;
     case "unknown":
       return <span className="text-faint">Belum dijadwalkan</span>;
   }

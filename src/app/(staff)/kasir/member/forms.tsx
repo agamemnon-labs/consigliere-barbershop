@@ -75,7 +75,7 @@ export function SignUpForm({ fee, phone }: { fee: number; phone: string }) {
         {state.error ? (
           <p
             role="alert"
-            className="rounded-xl bg-accent-soft px-3 py-2 text-[0.9375rem] text-accent-ink sm:col-span-2"
+            className="rounded-xl bg-danger-soft px-3 py-2 text-[0.9375rem] text-danger sm:col-span-2"
           >
             {state.error}
           </p>
@@ -119,7 +119,7 @@ export function TopUpForm({ memberId, packages }: { memberId: string; packages: 
       </fieldset>
       <EdcChoice />
       {state.error ? (
-        <p role="alert" className="rounded-xl bg-accent-soft px-3 py-2 text-[0.9375rem] text-accent-ink">
+        <p role="alert" className="rounded-xl bg-danger-soft px-3 py-2 text-[0.9375rem] text-danger">
           {state.error}
         </p>
       ) : null}

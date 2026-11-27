@@ -15,7 +15,7 @@ type Props = {
 };
 
 /**
- * The queue number as a take-a-number ticket: pole red, a huge slab number, a perforated
+ * The queue number as a take-a-number ticket: bottle green, a huge slab number, a perforated
  * tear with punched notches, and the turn time under it.
  */
 export function Ticket({

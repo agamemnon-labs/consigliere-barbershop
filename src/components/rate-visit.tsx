@@ -58,7 +58,7 @@ export function RateVisit({ bookingId, barber, given, rate }: Props) {
         })}
       </fieldset>
       {error ? (
-        <p role="alert" className="mt-2 text-sm text-accent-ink">
+        <p role="alert" className="mt-2 text-sm text-danger">
           {error}
         </p>
       ) : done ? null : (

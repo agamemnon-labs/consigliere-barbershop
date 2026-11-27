@@ -68,7 +68,7 @@ async function Channels() {
               {connected ? `tersambung ke ${telegram?.url}` : "belum tersambung ke situs ini"}
             </p>
             {telegram?.lastError ? (
-              <p className="mt-2 text-sm text-accent-ink">Error terakhir: {telegram.lastError}</p>
+              <p className="mt-2 text-sm text-danger">Error terakhir: {telegram.lastError}</p>
             ) : null}
             <AdminForm
               action={connectTelegramAction}

@@ -62,7 +62,7 @@ async function Members({ searchParams }: { searchParams: PageProps<"/admin/membe
                   {m.phone ? phoneLabel(m.phone) : ""}
                 </span>
                 {m.status !== "active" ? (
-                  <span className="rounded-md bg-accent-soft px-1.5 py-0.5 text-xs font-medium text-accent-ink">
+                  <span className="rounded-md bg-danger-soft px-1.5 py-0.5 text-xs font-medium text-danger">
                     Nonaktif
                   </span>
                 ) : null}

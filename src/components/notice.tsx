@@ -6,7 +6,7 @@ const tones: Record<Tone, string> = {
   info: "bg-blue-soft text-fg [&_.notice-title]:text-blue",
   warn: "bg-butter text-fg [&_.notice-title]:text-butter-ink",
   ok: "bg-mint text-fg [&_.notice-title]:text-mint-ink",
-  alert: "bg-accent-soft text-fg [&_.notice-title]:text-accent-ink",
+  alert: "bg-danger-soft text-fg [&_.notice-title]:text-danger",
 };
 
 /** A short announcement on a soft fill: closures, demo notes, confirmations. */

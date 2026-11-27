@@ -7,7 +7,7 @@ const base =
   "inline-flex min-h-13 items-center justify-center gap-2 rounded-xl px-5 text-base font-medium transition-[background-color,border-color,color,scale] duration-150 ease-(--ease-out-quiet) active:scale-[0.98] disabled:pointer-events-none disabled:opacity-45";
 
 const variants: Record<Variant, string> = {
-  /** The one action of a screen: pole red. Taking a number, paying, calling the next customer. */
+  /** The one action of a screen: bottle green. Taking a number, paying, calling the next customer. */
   primary: "bg-accent text-accent-fg hover:bg-accent-hover",
   /** A strong action that isn't money: espresso ink. */
   dark: "bg-fg text-bg hover:bg-fg/88",

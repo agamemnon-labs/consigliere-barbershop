@@ -92,7 +92,7 @@ async function Desk({ searchParams }: { searchParams: PageProps<"/kasir/member">
               </p>
             ) : null}
             {member.status !== "active" ? (
-              <p className="mt-4 rounded-lg bg-accent-soft px-3 py-2 text-sm font-medium text-accent-ink">
+              <p className="mt-4 rounded-lg bg-danger-soft px-3 py-2 text-sm font-medium text-danger">
                 Kartu dinonaktifkan
               </p>
             ) : null}

@@ -31,7 +31,7 @@ export function QueueButton({ op, entryId, label, variant = "dark", enableAt, bl
         {pending ? "…" : ready || !enableAt ? label : `${label} ${countdown(enableAt)}`}
       </button>
       {state.error ? (
-        <p role="alert" className="mt-2 text-sm text-accent-ink">
+        <p role="alert" className="mt-2 text-sm text-danger">
           {state.error}
         </p>
       ) : null}
@@ -114,7 +114,7 @@ export function WalkInForm({ barberId, barberName }: { barberId: string; barberN
           {pending ? "Menambahkan…" : `Tambah ke antrean ${barberName}`}
         </button>
         {state.error ? (
-          <p role="alert" className="text-sm text-accent-ink">
+          <p role="alert" className="text-sm text-danger">
             {state.error}
           </p>
         ) : null}

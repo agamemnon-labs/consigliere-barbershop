@@ -22,7 +22,10 @@ export const brand = {
   palette: {
     page: "#f4ebdc",
     ink: "#2b1f17",
-    poleRed: "#b5261c",
+    /** The one action colour: bottle green. */
+    accent: "#1d5c46",
+    /** Errors and destructive actions only. */
+    danger: "#b42318",
     poleBlue: "#284b9e",
     chairMint: "#d9eddf",
     suit: "#1f3a2e",

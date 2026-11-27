@@ -20,7 +20,7 @@ export function SignInForm() {
       />
       <Field label="Kata sandi" name="password" type="password" autoComplete="current-password" required />
       {state.error ? (
-        <p role="alert" className="rounded-xl bg-accent-soft px-3 py-2 text-[0.9375rem] text-accent-ink">
+        <p role="alert" className="rounded-xl bg-danger-soft px-3 py-2 text-[0.9375rem] text-danger">
           {state.error}
         </p>
       ) : null}

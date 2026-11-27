@@ -24,7 +24,7 @@ export function AdminForm({ action, children, submit, className = "", variant = 
           {pending ? "Menyimpan…" : submit}
         </button>
         {state.error ? (
-          <p role="alert" className="rounded-lg bg-accent-soft px-2.5 py-1 text-sm text-accent-ink">
+          <p role="alert" className="rounded-lg bg-danger-soft px-2.5 py-1 text-sm text-danger">
             {state.error}
           </p>
         ) : state.ok ? (

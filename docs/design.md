@@ -1,6 +1,6 @@
 # Consigliere Barbershop — Design Doc
 
-Status: v2.1, 2026-11-23. Design language replaced with the daylight barbershop look (see §8). v2.0, 2026-11-22: stack re-audited from scratch (see §1). Earlier: v1.2 folded in birthday scope, durations, queue-now booking, refund/credit policy, repo. Source of truth for decisions is `consigliere-brief.md`; this doc says **how** we build it. Owner of technical decisions: Claude (full control granted by Nopal, 2026-11-22).
+Status: v2.2, 2026-11-27. Action colour is bottle green, red only for errors (see §8). v2.1, 2026-11-23: design language replaced with the daylight barbershop look (see §8). v2.0, 2026-11-22: stack re-audited from scratch (see §1). Earlier: v1.2 folded in birthday scope, durations, queue-now booking, refund/credit policy, repo. Source of truth for decisions is `consigliere-brief.md`; this doc says **how** we build it. Owner of technical decisions: Claude (full control granted by Nopal, 2026-11-22).
 
 ---
 
@@ -207,7 +207,8 @@ Phases 1–3 are the MVP that proves the idea.
 
 - **Colour** (CSS tokens in `src/app/globals.css`, one light theme):
   - Neutrals: page cream `#F4EBDC`, surface warm white `#FFFCF6`, sunk kraft `#EADFCB`, espresso ink `#2B1F17`, muted and faint inks that pass 4.5:1 even on kraft.
-  - Pole red `#B5261C` is the one action colour: the primary button, the ticket number, money, the call action, errors. One red button per screen at most. White on it is 6.4:1.
+  - Bottle green `#1D5C46` is the one action colour (`accent`): the primary button, the ticket, money, the call action, the active tab. It is the brighter sibling of the suit green, so the brand reads as one family of greens on cream. One green button per screen at most. White on it is 7.9:1; its ink `#1A5741` on cream is 7.2:1.
+  - Red `#B42318` (`danger`, soft `#FBE4E0`) only means something went wrong or can't be undone: form and payment errors, a failed message, a deactivated card. Never brand, decoration, "closed" or "called" (closed is muted text, called is butter). Red reads as danger or error to users, so a red button or ticket made the happy path look like a warning (Nopal, 2026-11-27).
   - Meaning colours, each with a soft fill and a readable ink: pole blue (selected, focus, links), mint (free chair, paid, done), butter (called, needs attention).
   - Suit green `#1F3A2E` with chalk pinstripes (`.pinstripe`): the member card, the owner's money figure, the tablet's "scan to take a number" strip. The dark "Lanjut" button is espresso ink.
   - `.floor`: black-and-cream checker tiles, one thin band at the foot of the home hero (the shop window). Nowhere else.
@@ -215,7 +216,7 @@ Phases 1–3 are the MVP that proves the idea.
   - Banned: dark pages, gradients, gold/brass, neon, glow, glassmorphism, emoji, stock illustration, drop shadows, pill buttons.
 - **Type:** two faces, one job each. Alfa Slab One is the sign painter: wordmark, every page title (`h1`), the member's name on the card and every ticket number (P 021). It has one heavy weight and is never used small. Archivo does all reading: labels, lists, section titles at 600, prices and buttons; every number is tabular. Sentence case everywhere, no tracked capitals.
 - **Shape:** controls `rounded-xl`, cards `rounded-2xl`, hero and member card `rounded-3xl`, barber monograms round. Hairline rules only between rows of a list. No shadows: surfaces separate by tone (warm white on cream, kraft for the hero).
-- **Signature pieces:** the red claim ticket (notched, with a tear line, slab number); the striped barber pole that turns while something is live; the suit-green pinstripe member card ("Orang dalam") with its QR; barbers as round slab monograms.
+- **Signature pieces:** the bottle-green claim ticket (notched, with a tear line, slab number); the striped barber pole that turns while something is live; the suit-green pinstripe member card ("Orang dalam") with its QR; barbers as round slab monograms.
 - **Branches and tickets:** Jl. Pulau Kalimantan, Jl. Belatuk and Citra Niaga. A ticket's letter is the branch's own first letter, skipping the street word: P, B, C (`branchPrefix` in `src/domain/queue.ts`).
 - **Flow:** one job per screen. Booking is four steps with a progress bar (cabang, barber, layanan, nama + bayar) and a fixed bottom bar showing the total and the one next action. Detail folds behind native `<details>` that open downward.
 - **Layout:** phone-first single column (max ~28 rem), vertical only, no carousels or sideways swipes. Tap targets >= 48 px. A bottom tab bar (Beranda, Ambil nomor or Tiketku once you hold a ticket, Member) hides inside flows.

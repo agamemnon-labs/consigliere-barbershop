@@ -86,7 +86,7 @@ function Rows({
               </span>
               <span className="shrink-0 text-right">
                 {closed ? (
-                  <span className="text-sm font-semibold text-accent-ink">Tutup</span>
+                  <span className="text-sm font-semibold text-muted">Tutup</span>
                 ) : q ? (
                   q.waitMin === 0 ? (
                     <span className="block text-[0.9375rem] font-semibold text-mint-ink">Langsung duduk</span>

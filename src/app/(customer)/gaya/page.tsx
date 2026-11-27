@@ -20,11 +20,17 @@ const swatches: { name: string; cls: string; use: string; ink?: string }[] = [
   { name: "surface", cls: "bg-surface", use: "Kartu dan daftar" },
   { name: "sunk", cls: "bg-sunk", use: "Kertas kraft, isian, kerangka muat" },
   { name: "fg", cls: "bg-fg", use: "Tinta espresso, tombol gelap", ink: "text-bg" },
-  { name: "accent", cls: "bg-accent", use: "Merah tiang: tiket, bayar, panggil", ink: "text-accent-fg" },
+  { name: "accent", cls: "bg-accent", use: "Hijau botol: tiket, bayar, panggil", ink: "text-accent-fg" },
   { name: "blue", cls: "bg-blue", use: "Pilihan, fokus, tautan", ink: "text-white" },
   { name: "mint", cls: "bg-mint", use: "Kursi kosong, lunas, selesai", ink: "text-mint-ink" },
   { name: "butter", cls: "bg-butter", use: "Dipanggil, perhatian", ink: "text-butter-ink" },
   { name: "suit", cls: "pinstripe", use: "Jas garis: kartu member", ink: "text-suit-fg" },
+  {
+    name: "danger",
+    cls: "bg-danger",
+    use: "Hanya galat dan aksi yang tak bisa dibatalkan",
+    ink: "text-white",
+  },
 ];
 
 export default function StyleSheet() {
@@ -33,9 +39,9 @@ export default function StyleSheet() {
       <p className="label">Lembar gaya</p>
       <h1 className="mt-1 text-[2rem]">Barbershop keluarga, di siang hari</h1>
       <p className="mt-3 text-muted">
-        Ubin krem, tiket kertas, papan nama lukis tangan, jas bergaris, tiang merah-putih-biru, dan lantai
-        catur. Halaman tetap tenang; warna muncul di beberapa momen saja. Merah hanya untuk aksi: tiket,
-        bayar, panggil.
+        Ubin krem, tiket kertas, papan nama lukis tangan, jas hijau botol bergaris, dan lantai catur. Halaman
+        tetap tenang; warna muncul di beberapa momen saja. Hijau botol untuk aksi: tiket, bayar, panggil.
+        Merah hanya muncul kalau ada yang salah.
       </p>
 
       <Part title="Warna">
@@ -121,7 +127,7 @@ export default function StyleSheet() {
           </div>
         </div>
         <p className="mt-2 text-sm text-faint">
-          Merah untuk uang dan antrean, espresso untuk lanjut, satu utama per layar
+          Hijau untuk uang dan antrean, espresso untuk lanjut, satu utama per layar
         </p>
       </Part>
 

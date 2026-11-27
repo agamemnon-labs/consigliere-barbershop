@@ -24,7 +24,7 @@ export default function OutboxPage() {
 const STATUS = {
   pending: { label: "Menunggu dikirim", className: "text-muted" },
   sent: { label: "Terkirim", className: "text-mint-ink" },
-  failed: { label: "Gagal", className: "text-accent-ink" },
+  failed: { label: "Gagal", className: "text-danger" },
   logged: { label: "Hanya dicatat", className: "text-faint" },
   skipped: { label: "Tidak dikirim", className: "text-butter-ink" },
 } as const;

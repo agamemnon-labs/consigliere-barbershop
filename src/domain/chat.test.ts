@@ -167,6 +167,18 @@ describe("ruleReply", () => {
   it("sends complaints to the shop's WhatsApp", () => {
     expect(ruleReply("aku kecewa", facts)).toContain("0812-0000-0000");
   });
+  it("answers a combined service question with each service, its price and the total time", () => {
+    const reply = ruleReply(
+      "ehh mau nanya misal aku mau potong rambut terus mau perming ke wavy gitu terus mau aku kasih warna ke dark brown gitu rambutku bisa kah?",
+      facts,
+    );
+    expect(reply).toContain("Bisa, semuanya ada di Consigliere");
+    expect(reply).toContain("Haircut: Regular 80K, Executive 125K");
+    expect(reply).toContain("Curly perm: pendek 400K, panjang 600K, ± 150 menit");
+    expect(reply).toContain("Coloring fashion: mulai 300K, ± 120 menit");
+    expect(reply).toContain("Total waktunya kira-kira 5 jam 10 menit");
+    expect(reply).toContain("dipesan langsung di kasir");
+  });
   it("never leaves an unknown question without a way forward", () => {
     expect(ruleReply("qwerty", facts)).toContain("Coba tanya");
   });

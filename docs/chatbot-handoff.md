@@ -36,7 +36,7 @@ The bot can't take a number, pay, cancel or change anything; it links to `/antre
 | `TELEGRAM_WEBHOOK_SECRET` | Telegram | Any random 16+ chars of A-Z a-z 0-9 _ - (`openssl rand -hex 24`) |
 | `CHAT_AI` | AI answers | `1` to turn on; anything else = rules only |
 | `AI_GATEWAY_API_KEY` | AI answers outside Vercel | On Vercel, OIDC works without it. Gateway usage is billed |
-| `CHAT_MODEL` | optional | Default `anthropic/claude-haiku-5.5` |
+| `CHAT_MODEL` | optional | Comma-separated models tried in order until one is allowed (free-tier accounts cannot use every model). Default: Gemini Flash first, Claude Haiku 5.5 last |
 | `CHAT_AI_DAILY_CAP` | optional | Default 300 AI answers per shop day |
 
 After setting the Telegram pair and redeploying: Admin → Chat → "Sambungkan Telegram" (needs the https site).

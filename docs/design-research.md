@@ -81,3 +81,10 @@ Nopal: the daylight redesign was clean but plain, still "AI". The fix was charac
 - **The wink lives in copy.** "Jadi orang dalam" (become an insider) for membership and "Keluarga kami" for the barbers carry the gangster theme in Indonesian without costumes. Keep it to a few phrases; instructions stay plain.
 - **Labels above titles are a tell.** "Cabang" over the branch name and the tracked "CONSIGLIERE" over the member promo were cut.
 - **Hydration bug found by instrumenting React.** The live home threw #418 with no component name. Patching the production React chunk in Playwright to log the fiber chain showed the bottom nav: its prerendered copy marked no tab, while the browser marked Beranda. Path-dependent UI in a shared layout now renders per request.
+
+## No red for brand or action (2026-11-27)
+
+- **Red means danger.** Users read red as error, warning or a destructive action (Nopal's UI-expert friend; also the convention behind Material, Apple HIG and GOV.UK error styles). A red primary button and a red queue ticket made the happy path look like something had gone wrong. Red is now its own `danger` token, used only for errors, failed states and destructive confirmations.
+- **Green for go, in the brand's own family.** The action colour is bottle green `#1D5C46`, the brighter sibling of the suit green, so the brand reads as one family of greens on cream. Indonesian users already know green as the main action colour from the apps they use daily (ride-hailing, marketplaces, WhatsApp), so it reads as "go" without explanation.
+- **Keep green meanings apart by form.** Mint (free chair, paid, done) stays a pale fill with dark ink; the action is a solid deep green. The barber monogram tints no longer include a green-on-green option; the fourth tint is kraft.
+- **Contrast checked:** white on bottle green 7.9:1, green ink on cream 7.2:1, red ink on its soft fill 5.4:1, all AA (most AAA).

@@ -8,7 +8,7 @@ const tints = [
   "bg-mint text-mint-ink",
   "bg-blue-soft text-blue",
   "bg-butter text-butter-ink",
-  "bg-accent-soft text-accent-ink",
+  "bg-sunk text-fg",
 ] as const;
 
 function tintFor(name: string) {

@@ -24,7 +24,7 @@ export function Field({ label, hint, error, id, name, className = "", ...props }
         {...props}
       />
       {error ? (
-        <p id={`${fieldId}-error`} className="text-sm text-accent-ink">
+        <p id={`${fieldId}-error`} className="text-sm text-danger">
           {error}
         </p>
       ) : hint ? (
@@ -37,4 +37,4 @@ export function Field({ label, hint, error, id, name, className = "", ...props }
 }
 
 export const inputClass =
-  "min-h-13 w-full rounded-xl border border-rule-strong bg-surface px-4 text-lg text-fg outline-none transition-colors placeholder:text-faint hover:border-faint focus:border-blue focus:ring-3 focus:ring-blue-soft aria-invalid:border-accent-ink";
+  "min-h-13 w-full rounded-xl border border-rule-strong bg-surface px-4 text-lg text-fg outline-none transition-colors placeholder:text-faint hover:border-faint focus:border-blue focus:ring-3 focus:ring-blue-soft aria-invalid:border-danger";

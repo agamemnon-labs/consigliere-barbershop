@@ -127,9 +127,9 @@ export default function CaseStudyPage() {
 
       <h2 className="mt-10 text-xl">Rupa</h2>
       <p className="mt-2 text-[1.0625rem] leading-relaxed text-muted">
-        Barbershop lama di siang hari: ubin putih, tiang merah-putih-biru, kursi mint, dan tiket nomor antrean
-        yang merah. Satu huruf, Archivo, lebar untuk papan nama dan sempit untuk nomor. Tiap layar punya satu
-        tugas.
+        Barbershop keluarga ala film mafia, di siang hari: ubin krem, tiket kertas hijau botol, jas bergaris,
+        dan kursi mint. Huruf slab lukis tangan untuk nama dan nomor, Archivo untuk dibaca. Merah hanya muncul
+        kalau ada yang salah. Tiap layar punya satu tugas.
       </p>
 
       <div className="mt-10 grid gap-3">

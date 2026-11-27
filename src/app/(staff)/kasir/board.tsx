@@ -214,7 +214,7 @@ function Column({ queue, catalog }: { queue: BarberQueue; catalog: CatalogServic
         {line.map((e, i) => (
           <li
             key={e.id}
-            className={`border-b border-rule px-4 py-3 last:border-b-0 ${e.status === "called" ? "bg-accent-soft" : ""}`}
+            className={`border-b border-rule px-4 py-3 last:border-b-0 ${e.status === "called" ? "bg-butter/50" : ""}`}
           >
             <div className="flex items-center gap-3">
               <span className="slab w-16 shrink-0 text-lg leading-none">{e.ticket}</span>
@@ -241,7 +241,7 @@ function Column({ queue, catalog }: { queue: BarberQueue; catalog: CatalogServic
             {e.status === "called" ? (
               <>
                 {e.calledAt ? (
-                  <p className="mt-2 text-sm font-medium text-accent-ink">
+                  <p className="mt-2 text-sm font-medium text-butter-ink">
                     Dipanggil {shopClock(e.calledAt)}
                     {e.graceUntil ? `, tunggu sampai ${shopClock(e.graceUntil)}` : ""}
                   </p>

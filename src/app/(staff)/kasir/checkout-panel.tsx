@@ -206,7 +206,7 @@ export function CheckoutPanel({ entryId, haircutPrice, catalog, preset, label, v
               {checking ? "…" : "Cek"}
             </button>
           </div>
-          {payer.error ? <p className="text-accent-ink">{payer.error}</p> : null}
+          {payer.error ? <p className="text-danger">{payer.error}</p> : null}
           {payer.phone ? <input type="hidden" name="phone" value={payer.phone} /> : null}
 
           {member && rules ? (
@@ -343,7 +343,7 @@ export function CheckoutPanel({ entryId, haircutPrice, catalog, preset, label, v
           </div>
         </dl>
         {state.error ? (
-          <p role="alert" className="text-accent-ink">
+          <p role="alert" className="text-danger">
             {state.error}
           </p>
         ) : null}

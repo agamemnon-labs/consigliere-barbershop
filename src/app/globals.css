@@ -9,10 +9,11 @@
  * suit-green member card and a wink in the copy, never in a dark costume.
  *
  * Chrome stays quiet: cream page, warm white cards, espresso ink. Colour lives in a few
- * moments: the red claim ticket, the suit-green member card, the mint "free chair" and the
- * pole that turns while something is live.
+ * moments: the bottle-green claim ticket, the suit-green member card and the mint "free chair".
  *
- * Red (pole red) is the one action colour: the primary button, the ticket, money.
+ * Bottle green is the one action colour: the primary button, the ticket, money. It is the
+ * brighter sibling of the suit, so the brand reads as one family of greens on cream.
+ * Red is never decoration: it only means something went wrong or can't be undone (`danger`).
  * Blue, mint and butter only carry meaning (selected, free/done, called/attention).
  */
 
@@ -27,12 +28,16 @@
   --rule: rgb(43 31 23 / 0.11);
   --rule-strong: rgb(43 31 23 / 0.24);
 
-  /* Pole red: the one action colour. White text on it is 6.4:1. */
-  --accent: #b5261c;
-  --accent-hover: #9b2018;
+  /* Bottle green: the one action colour. White on it is 7.9:1, the ink on cream 7.2:1. */
+  --accent: #1d5c46;
+  --accent-hover: #164a38;
   --accent-fg: #ffffff;
-  --accent-ink: #a1221a;
-  --accent-soft: #f6dad3;
+  --accent-ink: #1a5741;
+  --accent-soft: #dfeae3;
+
+  /* Danger: errors and destructive actions only, never brand or decoration. Ink on its soft fill 5.4:1. */
+  --danger: #b42318;
+  --danger-soft: #fbe4e0;
 
   /* Meaning colours, each with a soft fill and an ink that reads on it. */
   --blue: #284b9e;
@@ -70,6 +75,8 @@
   --color-accent-fg: var(--accent-fg);
   --color-accent-ink: var(--accent-ink);
   --color-accent-soft: var(--accent-soft);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
   --color-blue: var(--blue);
   --color-blue-soft: var(--blue-soft);
   --color-mint: var(--mint);
@@ -227,7 +234,7 @@
   }
 
   /*
-   * Take-a-number ticket: pole red, with punched notches on both sides of the tear line.
+   * Take-a-number ticket: bottle green, with punched notches on both sides of the tear line.
    * The notches are cut with a mask, so whatever is behind shows through.
    */
   .ticket {

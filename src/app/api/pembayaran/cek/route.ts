@@ -2,7 +2,6 @@ import { timingSafeEqual } from "node:crypto";
 import { connection } from "next/server";
 import { getDb } from "@/db";
 import { env } from "@/server/env";
-import { cronJob } from "@/server/monitor";
 import { paymentProvider } from "@/server/payments";
 import { reconcileRecent } from "@/server/reconcile";
 
@@ -10,6 +9,8 @@ import { reconcileRecent } from "@/server/reconcile";
  * Vercel Cron: asks the gateway about the last day's unpaid QRIS charges and
  * settles any that were paid but whose webhook never arrived. Pages already do
  * this for a charge as it expires; this catches the ones nobody reopened.
+ * Not a Sentry cron monitor: the free Sentry plan has one monitor slot, used by the
+ * demo reset. A crash here still reaches Sentry as an error.
  */
 export async function GET(request: Request) {
   // Never prerender: without CRON_SECRET at build time the 404 below would be baked in.
@@ -21,8 +22,6 @@ export async function GET(request: Request) {
   if (given.length !== expected.length || !timingSafeEqual(given, expected)) {
     return new Response("Unauthorized", { status: 401 });
   }
-  const result = await cronJob("pembayaran-cek", "45 15 * * *", async () =>
-    reconcileRecent(await getDb(), paymentProvider(), new Date()),
-  );
+  const result = await reconcileRecent(await getDb(), paymentProvider(), new Date());
   return Response.json({ result });
 }

@@ -68,7 +68,32 @@ async function once(model: string, facts: ShopFacts, history: Turn[], text: stri
     maxRetries: 0,
     timeout: 12_000,
   });
-  const clean = answer.trim();
+  return guardOutput(answer);
+}
+
+/** Text that only the instructions contain: seeing it in an answer means the prompt leaked. */
+const LEAK_MARKERS = [
+  /DATA TOKO:/,
+  /Cara menjawab:/,
+  /Keamanan:/,
+  /PROMPT_VERSION/,
+  /\b[A-Z][A-Z0-9_]*_(KEY|TOKEN|SECRET|URL)\b/,
+];
+export const MAX_ANSWER_LENGTH = 1200;
+
+/**
+ * Last check before an AI answer reaches a customer: plain text, a sane length, and no
+ * piece of the instructions or a secret's name. A failed check throws, so the rule
+ * brain answers instead.
+ */
+export function guardOutput(answer: string): string {
+  const clean = answer
+    .replace(/\*\*|__|^#+\s*/gm, "")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
   if (!clean) throw new Error("Empty AI answer");
-  return clean;
+  if (LEAK_MARKERS.some((m) => m.test(clean))) throw new Error("AI answer leaked its instructions");
+  if (clean.length <= MAX_ANSWER_LENGTH) return clean;
+  const cut = clean.slice(0, MAX_ANSWER_LENGTH);
+  return `${cut.slice(0, Math.max(cut.lastIndexOf("\n"), cut.lastIndexOf(". ") + 1))}`.trim() || cut;
 }

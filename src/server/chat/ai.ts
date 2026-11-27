@@ -53,7 +53,7 @@ export async function aiReply(facts: ShopFacts, history: Turn[], text: string): 
 }
 
 async function once(model: string, facts: ShopFacts, history: Turn[], text: string): Promise<string> {
-  const { text: answer } = await generateText({
+  const { text: answer, finishReason } = await generateText({
     model,
     instructions: instructions(facts),
     messages: [
@@ -63,12 +63,26 @@ async function once(model: string, facts: ShopFacts, history: Turn[], text: stri
       })),
       { role: "user" as const, content: text },
     ],
-    maxOutputTokens: 500,
+    // Room for a full answer; thinking models (Gemini Flash) spend output tokens on
+    // reasoning, so thinking is switched off where the provider allows it.
+    maxOutputTokens: 1200,
+    providerOptions: { google: { thinkingConfig: { thinkingBudget: 0 } } },
     temperature: 0.4,
     maxRetries: 0,
     timeout: 12_000,
   });
-  return guardOutput(answer);
+  return guardOutput(finishReason === "length" ? wholeSentences(answer) : answer);
+}
+
+/** Drops a sentence the model was cut off in the middle of. */
+export function wholeSentences(text: string): string {
+  const end = Math.max(
+    text.lastIndexOf(". "),
+    text.lastIndexOf(".\n"),
+    text.lastIndexOf("?"),
+    text.lastIndexOf("!"),
+  );
+  return end > 0 ? text.slice(0, end + 1) : text;
 }
 
 /** Text that only the instructions contain: seeing it in an answer means the prompt leaked. */
@@ -89,6 +103,7 @@ export const MAX_ANSWER_LENGTH = 1200;
 export function guardOutput(answer: string): string {
   const clean = answer
     .replace(/\*\*|__|^#+\s*/gm, "")
+    .replace(/^(\s*)[-*•]\s+/gm, "$1- ")
     .replace(/\n{3,}/g, "\n\n")
     .trim();
   if (!clean) throw new Error("Empty AI answer");

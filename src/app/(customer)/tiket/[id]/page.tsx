@@ -4,10 +4,10 @@ import { connection } from "next/server";
 import { type ReactNode, Suspense } from "react";
 import { ButtonLink } from "@/components/button";
 import { CheckIcon, ChevronDownIcon } from "@/components/icons";
+import { LiveDot } from "@/components/live-dot";
 import { LiveRefresh } from "@/components/live-refresh";
 import { Notice } from "@/components/notice";
 import { SimulatePay } from "@/components/pay-controls";
-import { Pole } from "@/components/pole";
 import { PollRefresh } from "@/components/poll-refresh";
 import { QrisPanel } from "@/components/qris-panel";
 import { RateVisit } from "@/components/rate-visit";
@@ -168,7 +168,7 @@ function InLine({ ticket, place, now }: { ticket: Ticket; place: Place; now: Dat
     case "called":
       return (
         <section className="step-in">
-          <Status tone="butter" icon={<Pole turning />}>
+          <Status tone="butter" icon={<LiveDot live />}>
             Dipanggil sekarang
           </Status>
           <h1 className="mt-2 text-[1.75rem]">Giliranmu, {ticket.name}</h1>
@@ -181,7 +181,7 @@ function InLine({ ticket, place, now }: { ticket: Ticket; place: Place; now: Dat
     case "in_service":
       return (
         <section className="step-in">
-          <Status tone="mint" icon={<Pole turning />}>
+          <Status tone="mint" icon={<LiveDot live />}>
             Di kursi
           </Status>
           <h1 className="mt-2 text-[1.75rem]">Selamat menikmati</h1>

@@ -4,9 +4,9 @@ import { Avatar } from "@/components/avatar";
 import { BranchList } from "@/components/branch-list";
 import { ButtonLink } from "@/components/button";
 import { ChatIcon, ChevronRightIcon } from "@/components/icons";
+import { LiveDot } from "@/components/live-dot";
 import { LiveRefresh } from "@/components/live-refresh";
 import { MyTicketBanner } from "@/components/my-ticket-banner";
-import { Pole } from "@/components/pole";
 import { Screen } from "@/components/screen";
 import { SectionTitle } from "@/components/section-title";
 import { brand } from "@/config/brand";
@@ -47,7 +47,7 @@ export default async function Home() {
       right={
         hours ? (
           <span className="inline-flex items-center gap-2 text-sm text-muted">
-            <Pole turning className="h-3.5! w-1.5!" />
+            <LiveDot live className="text-mint-ink" />
             Buka <span className="num">{`${clockLabel(hours[0])}–${clockLabel(hours[1])}`}</span>
           </span>
         ) : null

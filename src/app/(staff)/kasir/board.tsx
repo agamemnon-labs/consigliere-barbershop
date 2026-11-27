@@ -1,9 +1,9 @@
 import Link from "next/link";
 import { Avatar } from "@/components/avatar";
 import { ChartIcon, ChevronRightIcon } from "@/components/icons";
+import { LiveDot } from "@/components/live-dot";
 import { LiveRefresh } from "@/components/live-refresh";
 import { Notice } from "@/components/notice";
-import { Pole } from "@/components/pole";
 import { getDb } from "@/db";
 import { METHOD_LABEL } from "@/domain/checkout";
 import { formatRupiah } from "@/domain/money";
@@ -167,7 +167,7 @@ function Column({ queue, catalog }: { queue: BarberQueue; catalog: CatalogServic
         {chair ? (
           <div className="rounded-xl bg-butter px-3 py-3">
             <div className="flex items-center gap-2 text-sm font-medium text-butter-ink">
-              <Pole turning className="h-3.5! w-1.5!" />
+              <LiveDot live />
               Di kursi
               {chair.startedAt ? (
                 <span className="num ml-auto font-normal">sejak {shopClock(chair.startedAt)}</span>

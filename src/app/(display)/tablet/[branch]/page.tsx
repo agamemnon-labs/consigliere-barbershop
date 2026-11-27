@@ -6,7 +6,7 @@ import { Suspense } from "react";
 import { Avatar } from "@/components/avatar";
 import { Clock } from "@/components/clock";
 import { LiveRefresh } from "@/components/live-refresh";
-import { Pole } from "@/components/pole";
+import { Mark } from "@/components/mark";
 import { QrCode } from "@/components/qr-code";
 import { Wordmark } from "@/components/wordmark";
 import { shopDate } from "@/domain/time";
@@ -55,7 +55,7 @@ async function Board({ slug }: { slug: string }) {
   if (queue.closedReason) {
     return (
       <div className="flex flex-1 flex-col items-center justify-center text-center">
-        <Pole off className="h-16! w-8!" />
+        <Mark className="h-24 text-suit" />
         <p className="mt-6 text-5xl font-semibold">Hari ini kami tutup</p>
         <p className="mt-3 text-2xl text-muted">{queue.closedReason}</p>
       </div>

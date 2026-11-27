@@ -4,12 +4,13 @@
  * Consigliere design tokens (v3, 2026-11-23).
  *
  * Direction: the neighbourhood barbershop of a mob film, in daylight. Cream wall tiles and
- * kraft-paper claim tickets, a sign-painted window, pinstripe suits, the striped pole and a
+ * kraft-paper claim tickets, a sign-painted window, pinstripe suits, the comb-C mark and a
  * checkered floor. Warm and light everywhere; the gangster side lives in the lettering, the
  * suit-green member card and a wink in the copy, never in a dark costume.
  *
  * Chrome stays quiet: cream page, warm white cards, espresso ink. Colour lives in a few
- * moments: the bottle-green claim ticket, the suit-green member card and the mint "free chair".
+ * moments: the bottle-green claim ticket, the suit-green member card, the mint "free chair" and
+ * the dot that breathes while something is live.
  *
  * Bottle green is the one action colour: the primary button, the ticket, money. It is the
  * brighter sibling of the suit, so the brand reads as one family of greens on cream.
@@ -204,33 +205,28 @@
   }
 
   /*
-   * The barber pole. Red, white and blue stripes in a small rounded post; it only turns
-   * when what it labels is live (an open shop, an updating queue, someone in the chair).
+   * Live status dot, in the text colour. While what it labels is live (an open shop, a queue that
+   * updates itself, someone in the chair) a ring breathes out of it, so "live" is felt, not read.
    */
-  .pole {
+  .live-dot {
+    position: relative;
     display: inline-block;
     flex: none;
     width: 0.5rem;
-    height: 1rem;
-    border-radius: 0.25rem;
-    box-shadow: inset 0 0 0 1px rgb(43 31 23 / 0.16);
-    background:
-      repeating-linear-gradient(
-        -45deg,
-        var(--accent) 0 3px,
-        var(--surface) 3px 6px,
-        var(--blue) 6px 9px,
-        var(--surface) 9px 12px
-      )
-      0 0 / 100% 17px;
+    height: 0.5rem;
+    border-radius: 9999px;
+    background: currentColor;
   }
-  .pole[data-live="true"] {
-    animation: pole-turn 1.6s linear infinite;
+  .live-dot[data-live="true"]::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: currentColor;
+    animation: live-ring 2s var(--ease-out-quiet) infinite;
   }
-  .pole[data-off="true"] {
-    filter: grayscale(1);
-    opacity: 0.55;
-    animation: none;
+  .live-dot[data-off="true"] {
+    opacity: 0.4;
   }
 
   /*
@@ -292,9 +288,14 @@
   }
 }
 
-@keyframes pole-turn {
+@keyframes live-ring {
+  from {
+    opacity: 0.5;
+    scale: 1;
+  }
   to {
-    background-position: 0 17px;
+    opacity: 0;
+    scale: 2.75;
   }
 }
 

@@ -7,8 +7,8 @@ import { buttonClass } from "@/components/button";
 import { Choice } from "@/components/choice";
 import { Field } from "@/components/field";
 import { ArrowLeftIcon, ChevronDownIcon, ScissorsIcon } from "@/components/icons";
+import { Mark } from "@/components/mark";
 import { Notice } from "@/components/notice";
-import { Pole } from "@/components/pole";
 import { Steps } from "@/components/steps";
 import { type LineItem, priceItem, shortestWait, totals } from "@/domain/booking";
 import { formatRupiah, formatShort } from "@/domain/money";
@@ -136,7 +136,7 @@ export function BookingFlow({
                 onChange={() => setBarberId("any")}
                 lead={
                   <span className="inline-flex size-12 shrink-0 items-center justify-center rounded-2xl bg-sunk">
-                    <Pole turning className="h-6! w-3!" />
+                    <Mark className="h-6 text-suit" />
                   </span>
                 }
                 title="Siapa saja, paling cepat"

@@ -77,7 +77,7 @@ Nopal: the daylight redesign was clean but plain, still "AI". The fix was charac
 - **Where generic came from.** Cool grey page, one neutral grotesque, colour-tile avatars, white rounded cards everywhere: every queue app looks like that. Nothing said barbershop, and nothing said Consigliere.
 - **Warm without the cliche.** Nopal asked for cream and light brown. The common generated look is cream plus a thin high-contrast serif plus terracotta. We kept cream and kraft for the neutrals but paired them with a heavy slab (sign painter, tonic label, fight poster), a true pole red (not clay) and bottle green, so the palette comes from a barbershop, not from a template.
 - **One loud face, used rarely.** Alfa Slab One has a single heavy weight, so it only appears big: the name, page titles, ticket numbers. Sections, lists and buttons stay in Archivo. Twelve candidates (Rokkitt, Zilla Slab, Alfa Slab One, Bevan, Corben, Ultra, Young Serif, Arvo, Big Shoulders, Limelight, Archivo condensed, Yellowtail) were rendered side by side on the cream page before choosing.
-- **Motifs from the world, each with one place.** Pole (live status), claim ticket (your number), pinstripe suit (membership), checkered floor (foot of the shop window). Using each once keeps them from turning into wallpaper.
+- **Motifs from the world, each with one place.** Comb C (the logo), claim ticket (your number), pinstripe suit (membership), checkered floor (foot of the shop window). Using each once keeps them from turning into wallpaper.
 - **The wink lives in copy.** "Jadi orang dalam" (become an insider) for membership and "Keluarga kami" for the barbers carry the gangster theme in Indonesian without costumes. Keep it to a few phrases; instructions stay plain.
 - **Labels above titles are a tell.** "Cabang" over the branch name and the tracked "CONSIGLIERE" over the member promo were cut.
 - **Hydration bug found by instrumenting React.** The live home threw #418 with no component name. Patching the production React chunk in Playwright to log the fiber chain showed the bottom nav: its prerendered copy marked no tab, while the browser marked Beranda. Path-dependent UI in a shared layout now renders per request.
@@ -88,3 +88,11 @@ Nopal: the daylight redesign was clean but plain, still "AI". The fix was charac
 - **Green for go, in the brand's own family.** The action colour is bottle green `#1D5C46`, the brighter sibling of the suit green, so the brand reads as one family of greens on cream. Indonesian users already know green as the main action colour from the apps they use daily (ride-hailing, marketplaces, WhatsApp), so it reads as "go" without explanation.
 - **Keep green meanings apart by form.** Mint (free chair, paid, done) stays a pale fill with dark ink; the action is a solid deep green. The barber monogram tints no longer include a green-on-green option; the fourth tint is kraft.
 - **Contrast checked:** white on bottle green 7.9:1, green ink on cream 7.2:1, red ink on its soft fill 5.4:1, all AA (most AAA).
+
+## Logo (2026-11-27)
+
+- **Brand, not category.** Nopal pointed out that the barber pole is every barbershop's symbol, not Consigliere's. Same goes for razors, scissors, mustaches and fedoras. The mark had to say Consigliere first and barbershop second, so it starts from the C.
+- **One idea, two readings.** The C is drawn as a comb: round back = spine, arms = the thick outer teeth real combs have, five fine teeth inside. Three directions were drawn (comb C, a comb as the pocket square of a pinstripe jacket, the barber chair as the Don's throne); the comb C was the only one that still reads at 16 px and Nopal picked it.
+- **Test at the real sizes.** Seven fine teeth looked best at 96 px but turned to grey mush at 16 to 32 px; three teeth read as an "E". Five teeth hold up from favicon to avatar, so one geometry ships everywhere instead of a separate small version.
+- **Round crops.** Telegram and WhatsApp crop profile photos to a circle, so the avatar is a full-bleed square with the mark inside the circle, nudged right of centre because the open side of a C weighs less.
+

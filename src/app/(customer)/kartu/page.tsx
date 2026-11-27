@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 import { ButtonLink } from "@/components/button";
 import { ChevronDownIcon, LogOutIcon, PlusIcon } from "@/components/icons";
+import { Mark } from "@/components/mark";
 import { Notice } from "@/components/notice";
-import { Pole } from "@/components/pole";
 import { QrCode } from "@/components/qr-code";
 import { Screen } from "@/components/screen";
 import { brand } from "@/config/brand";
@@ -48,7 +48,7 @@ async function Card() {
       >
         <div className="flex items-center justify-between">
           <span className="inline-flex items-center gap-2">
-            <Pole />
+            <Mark className="h-5" />
             <span className="slab text-lg leading-none">{brand.name}</span>
           </span>
           <span className="text-sm text-suit-muted">Orang dalam</span>

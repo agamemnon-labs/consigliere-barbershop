@@ -4,8 +4,9 @@ import { Avatar } from "@/components/avatar";
 import { Button } from "@/components/button";
 import { Field } from "@/components/field";
 import { CardIcon, ChartIcon, ClockIcon, MapPinIcon, ScissorsIcon, TicketIcon } from "@/components/icons";
+import { LiveDot } from "@/components/live-dot";
+import { Mark } from "@/components/mark";
 import { Notice } from "@/components/notice";
-import { Pole } from "@/components/pole";
 import { PriceList } from "@/components/price-list";
 import { Screen } from "@/components/screen";
 import { Steps } from "@/components/steps";
@@ -91,16 +92,24 @@ export default function StyleSheet() {
         </div>
       </Part>
 
-      <Part title="Tiang, lantai, dan tiket">
-        <div className="flex items-center gap-6 rounded-2xl border border-rule bg-surface p-4">
+      <Part title="Tanda, status, lantai, dan tiket">
+        <div className="flex items-end gap-5 rounded-2xl border border-rule bg-surface p-4 text-suit">
+          <Mark className="h-16" title="Tanda Consigliere: huruf C yang sekaligus sisir" />
+          <Mark className="h-10" />
+          <Mark className="h-6" />
+          <span className="pinstripe ml-auto grid size-16 place-items-center rounded-2xl text-suit-fg">
+            <Mark className="h-9" />
+          </span>
+        </div>
+        <div className="mt-4 flex items-center gap-6 rounded-2xl border border-rule bg-surface p-4">
           <span className="flex items-center gap-2 text-sm">
-            <Pole turning /> Langsung
+            <LiveDot live className="text-mint-ink" /> Langsung
           </span>
           <span className="flex items-center gap-2 text-sm">
-            <Pole /> Diam
+            <LiveDot /> Diam
           </span>
           <span className="flex items-center gap-2 text-sm">
-            <Pole off /> Tutup
+            <LiveDot off /> Tutup
           </span>
         </div>
         <div aria-hidden className="floor mt-4 rounded-sm" />

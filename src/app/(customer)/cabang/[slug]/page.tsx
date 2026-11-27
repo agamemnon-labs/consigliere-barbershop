@@ -6,9 +6,9 @@ import { Suspense } from "react";
 import { Avatar } from "@/components/avatar";
 import { ButtonLink } from "@/components/button";
 import { ClockIcon, MapPinIcon } from "@/components/icons";
+import { LiveDot } from "@/components/live-dot";
 import { LiveRefresh } from "@/components/live-refresh";
 import { Notice } from "@/components/notice";
-import { Pole } from "@/components/pole";
 import { Screen } from "@/components/screen";
 import { SectionTitle } from "@/components/section-title";
 import { brand } from "@/config/brand";
@@ -182,7 +182,7 @@ function Chair({ q }: { q: Live }) {
     <span className="inline-flex items-center gap-1.5">
       {q.chair ? (
         <>
-          <Pole turning className="h-3! w-1.5!" />
+          <LiveDot live className="text-butter-ink" />
           <span>
             Mencukur <span className="num font-medium text-fg">{q.chair}</span>
           </span>

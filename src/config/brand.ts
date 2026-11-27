@@ -26,8 +26,10 @@ export const brand = {
     accent: "#1d5c46",
     /** Errors and destructive actions only. */
     danger: "#b42318",
-    poleBlue: "#284b9e",
+    /** Selected, focus and links. */
+    blue: "#284b9e",
     chairMint: "#d9eddf",
+    /** The comb-C mark and the name (`brand/`, `components/mark.tsx`). */
     suit: "#1f3a2e",
   },
 } as const;

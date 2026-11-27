@@ -3,7 +3,7 @@
 import { createClient, type RealtimeChannel } from "@supabase/supabase-js";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Pole } from "./pole";
+import { LiveDot } from "./live-dot";
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const SUPABASE_KEY = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
@@ -18,7 +18,7 @@ type Props = { branchId: string; className?: string };
 /**
  * Keeps a queue screen current. Listens to the branch's Supabase broadcast
  * channel and re-renders the server data on every change; falls back to polling.
- * Renders a small status label next to the barber pole, which turns while the socket is live.
+ * Renders a small status label next to a dot that breathes while the socket is live.
  */
 export function LiveRefresh({ branchId, className = "" }: Props) {
   const router = useRouter();
@@ -58,7 +58,7 @@ export function LiveRefresh({ branchId, className = "" }: Props) {
 
   return (
     <span className={`label inline-flex items-center gap-2 ${className}`} aria-live="polite">
-      <Pole turning={live} className="h-3.5! w-1.5!" />
+      <LiveDot live={live} className={live ? "text-mint-ink" : "text-faint"} />
       {live ? "Langsung" : "Diperbarui tiap 15 detik"}
     </span>
   );

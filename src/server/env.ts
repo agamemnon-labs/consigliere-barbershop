@@ -53,8 +53,16 @@ const schema = z.object({
   CHAT_AI: z.enum(["0", "1"]).optional(),
   /** Vercel AI Gateway key. On Vercel, OIDC works without it. */
   AI_GATEWAY_API_KEY: z.string().min(1).optional(),
-  /** Gateway model id. */
-  CHAT_MODEL: z.string().min(3).default("anthropic/claude-haiku-5.5"),
+  /**
+   * Gateway model ids to try in order, comma separated. The first one the account may
+   * use answers: Claude Haiku with gateway credits, a free-tier model without them.
+   */
+  CHAT_MODEL: z
+    .string()
+    .min(3)
+    .default(
+      "anthropic/claude-haiku-5.5,google/gemini-3.8-flash,google/gemini-2.5-flash,deepseek/deepseek-v4-flash,alibaba/qwen3.7-flash",
+    ),
   /** Most AI answers per shop day across all chats; past it the rule brain answers. */
   CHAT_AI_DAILY_CAP: z.coerce.number().int().min(0).default(300),
 });

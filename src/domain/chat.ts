@@ -391,8 +391,21 @@ export function ruleReply(text: string, facts: ShopFacts): string {
       ].filter(Boolean);
       return `${lines.join("\n")}\n\nKartu member: ${site}/kartu`;
     }
-    case "unknown":
+    case "unknown": {
+      // "Mau potong terus perming terus warna, bisa?": no price word, but it names services.
+      const found = servicesIn(text, facts.services);
+      if (found.length > 0) {
+        const lines = found.map((s) => `${servicePrice(s, facts.levels)}, ± ${s.durationMin} menit`);
+        const total = found.reduce((n, s) => n + s.durationMin, 0);
+        const counter = found.some((s) => !s.bookableOnline)
+          ? "\nYang chemical dipesan langsung di kasir, belum bisa lewat situs."
+          : "";
+        const time =
+          found.length > 1 ? `\nTotal waktunya kira-kira ${waitLabel(total).replace("± ", "")}.` : "";
+        return `Bisa, semuanya ada di ${facts.brand}:\n${lines.join("\n")}${time}${counter}\n\nDaftar lengkap: ${site}/harga`;
+      }
       return `Maaf, aku belum nangkep maksudnya. ${SUGGEST}`;
+    }
   }
 }
 

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { ShopFacts } from "@/domain/chat";
-import { chatModels, guardOutput, MAX_ANSWER_LENGTH, modelUnavailable } from "./ai";
+import { chatModels, guardOutput, MAX_ANSWER_LENGTH, modelUnavailable, wholeSentences } from "./ai";
 import { instructions } from "./prompt";
 
 describe("chatModels", () => {
@@ -24,6 +24,9 @@ describe("modelUnavailable", () => {
 });
 
 describe("guardOutput", () => {
+  it("tidies list markers", () => {
+    expect(guardOutput("Pilihan:\n-   Textured crop\n*  Fade")).toBe("Pilihan:\n- Textured crop\n- Fade");
+  });
   it("passes a normal answer through as plain text", () => {
     expect(guardOutput("**Bisa banget**, kak.\n\n\n\nPerm mulai 400K.")).toBe(
       "Bisa banget, kak.\n\nPerm mulai 400K.",
@@ -81,5 +84,14 @@ describe("instructions", () => {
   });
   it("keeps prices and schedules to the shop's own data", () => {
     expect(text).toContain("HANYA dari DATA TOKO");
+  });
+});
+
+describe("wholeSentences", () => {
+  it("drops the half sentence a cut-off answer ends with", () => {
+    expect(wholeSentences("Bisa banget, kak. Perm dulu baru di-")).toBe("Bisa banget, kak.");
+  });
+  it("keeps an answer with no full stop as it is", () => {
+    expect(wholeSentences("Bisa banget kak")).toBe("Bisa banget kak");
   });
 });

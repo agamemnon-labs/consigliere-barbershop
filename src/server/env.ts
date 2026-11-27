@@ -61,7 +61,7 @@ const schema = z.object({
     .string()
     .min(3)
     .default(
-      "anthropic/claude-haiku-5.5,google/gemini-3.8-flash,google/gemini-2.5-flash,deepseek/deepseek-v4-flash,alibaba/qwen3.7-flash",
+      "anthropic/claude-haiku-5.5,google/gemini-2.5-flash,google/gemini-3.8-flash,deepseek/deepseek-v4-flash,alibaba/qwen3.7-flash",
     ),
   /** Most AI answers per shop day across all chats; past it the rule brain answers. */
   CHAT_AI_DAILY_CAP: z.coerce.number().int().min(0).default(300),

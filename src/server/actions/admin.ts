@@ -1,10 +1,12 @@
 "use server";
 
 import { revalidatePath, updateTag } from "next/cache";
+import { headers } from "next/headers";
 import { getDb } from "@/db";
 import { AdminError, type Cell } from "@/domain/report";
 import { shopDate } from "@/domain/time";
 import * as bo from "@/server/backoffice";
+import { connectWebhook, TelegramError } from "@/server/chat/telegram";
 import { requireStaff } from "@/server/session";
 
 export type AdminState = { error?: string; ok?: number; message?: string };
@@ -178,4 +180,20 @@ export async function savePackageAction(_p: AdminState, data: FormData): Promise
       actor,
     );
   });
+}
+
+/** Points the Telegram bot at this deployment. Telegram refuses anything but https. */
+export async function connectTelegramAction(_p: AdminState, _data: FormData): Promise<AdminState> {
+  await requireStaff(["admin", "owner"]);
+  const h = await headers();
+  const host = h.get("x-forwarded-host") ?? h.get("host");
+  const proto = h.get("x-forwarded-proto") ?? "https";
+  try {
+    const url = await connectWebhook(`${proto}://${host}`);
+    revalidatePath("/admin/chat");
+    return { ok: Date.now(), message: `Tersambung ke ${url}` };
+  } catch (error) {
+    if (error instanceof TelegramError) return { error: error.message };
+    throw error;
+  }
 }

@@ -563,3 +563,25 @@ export const outbox = pgTable(
   },
   (t) => [index().on(t.to, t.createdAt)],
 ).enableRLS();
+
+/**
+ * The chatbot's conversation log, one row per message, for every channel. Feeds the
+ * AI brain's short memory, the per-chat daily limit and the admin's view of what
+ * customers ask. `chatId` is the channel's own id (a browser id, a Telegram chat id).
+ */
+export const chatMessages = pgTable(
+  "chat_messages",
+  {
+    id: id(),
+    /** "web", "telegram", later "whatsapp". */
+    channel: text().notNull(),
+    chatId: text().notNull(),
+    /** "user" or "bot". */
+    role: text().notNull(),
+    body: text().notNull(),
+    /** For bot rows: which brain answered, "rules" or "ai". */
+    brain: text(),
+    createdAt: createdAt(),
+  },
+  (t) => [index().on(t.channel, t.chatId, t.createdAt), index().on(t.createdAt)],
+).enableRLS();

@@ -39,6 +39,24 @@ const schema = z.object({
   WHATSAPP_TEMPLATE_LANG: z.string().min(2).default("id"),
   /** Optional: only these numbers get real messages (comma separated). Empty = everyone. */
   WHATSAPP_ALLOWLIST: z.string().optional(),
+  /** Telegram @BotFather token. Unset = the Telegram channel is off. */
+  TELEGRAM_BOT_TOKEN: z
+    .string()
+    .regex(/^\d+:[\w-]+$/)
+    .optional(),
+  /** Random string Telegram sends back on every webhook call (1–256 of A-Z a-z 0-9 _ -). */
+  TELEGRAM_WEBHOOK_SECRET: z
+    .string()
+    .regex(/^[\w-]{16,256}$/)
+    .optional(),
+  /** "1" lets the chatbot answer with a language model; anything else uses the rule brain only. */
+  CHAT_AI: z.enum(["0", "1"]).optional(),
+  /** Vercel AI Gateway key. On Vercel, OIDC works without it. */
+  AI_GATEWAY_API_KEY: z.string().min(1).optional(),
+  /** Gateway model id. */
+  CHAT_MODEL: z.string().min(3).default("anthropic/claude-haiku-5.5"),
+  /** Most AI answers per shop day across all chats; past it the rule brain answers. */
+  CHAT_AI_DAILY_CAP: z.coerce.number().int().min(0).default(300),
 });
 
 export type Env = z.infer<typeof schema>;

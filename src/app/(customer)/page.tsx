@@ -3,7 +3,7 @@ import { Suspense } from "react";
 import { Avatar } from "@/components/avatar";
 import { BranchList } from "@/components/branch-list";
 import { ButtonLink } from "@/components/button";
-import { ChevronRightIcon } from "@/components/icons";
+import { ChatIcon, ChevronRightIcon } from "@/components/icons";
 import { LiveRefresh } from "@/components/live-refresh";
 import { MyTicketBanner } from "@/components/my-ticket-banner";
 import { Pole } from "@/components/pole";
@@ -113,6 +113,20 @@ export default async function Home() {
           </span>
         </Link>
       </section>
+
+      <Link
+        href="/tanya"
+        className="mt-10 flex items-center gap-3 rounded-2xl bg-surface p-4 hover:ring-1 hover:ring-rule-strong"
+      >
+        <span className="inline-flex size-11 items-center justify-center rounded-xl bg-sunk">
+          <ChatIcon size={22} />
+        </span>
+        <span className="flex-1">
+          <span className="block font-medium">Ada pertanyaan?</span>
+          <span className="block text-[0.9375rem] text-muted">Tanya harga, antrean, atau jadwal barber</span>
+        </span>
+        <ChevronRightIcon size={20} />
+      </Link>
 
       <section className="pinstripe mt-10 rounded-3xl px-5 py-6 text-suit-fg" aria-labelledby="member">
         <h2 id="member" className="slab text-[1.875rem] leading-tight">

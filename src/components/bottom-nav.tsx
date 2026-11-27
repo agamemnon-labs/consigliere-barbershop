@@ -7,7 +7,15 @@ import { CardIcon, HomeIcon, TicketIcon } from "./icons";
 import { type MyTicket, onMyTicketChange, readMyTicket } from "./my-ticket";
 
 /** Screens that are a step of a flow keep their own bottom bar instead. */
-const HIDDEN = [/^\/antre/, /^\/cabang\//, /^\/kartu\/isi/, /^\/demo/, /^\/gaya/, /^\/studi-kasus/];
+const HIDDEN = [
+  /^\/antre/,
+  /^\/tanya/,
+  /^\/cabang\//,
+  /^\/kartu\/isi/,
+  /^\/demo/,
+  /^\/gaya/,
+  /^\/studi-kasus/,
+];
 
 /**
  * The customer app's three places, in thumb reach: home, your number, your member card.

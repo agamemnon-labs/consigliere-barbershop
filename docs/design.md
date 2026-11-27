@@ -95,6 +95,7 @@ balance_ledger(member_id, delta, reason[topup|bonus|spend|refund|adjust], ref, c
 topup_packages(id, pay, get, is_active)                 -- 300K→330K, 500K→575K
 settings(key, value)                                     -- birthday discount scope, grace minutes, TV strip, etc.
 audit_log(actor_id, action, entity, before, after, created_at)
+chat_messages(channel[web|telegram|whatsapp], chat_id, role[user|bot], body, brain[rules|ai|limit], created_at)
 ```
 
 Balances and points are **ledgers** (sum of rows), never a single mutable number. Every admin edit (including member numbers) writes `audit_log`.
@@ -194,6 +195,8 @@ Each phase ends deployed and usable.
 8. **Polish & portfolio** ✅ — demo ribbon on customer and staff screens (`DEMO_MODE`, always on without a database), one-tap demo logins at `/demo` (member, cashier, owner; customer and tablet need none), nightly demo reset by Vercel Cron (`/api/demo/reset`, bearer `CRON_SECRET`), four weeks of seeded sales, case study at `/studi-kasus` (linked from the credits), favicon, `faint` colour raised to pass WCAG AA. Lighthouse on mobile: performance 91–98, accessibility, best practices and SEO 100 on public pages (noindex pages score SEO 60 by design).
 9. **Rating** ✅ (2026-11-23) — after a finished online visit the ticket page asks "Gimana cukuran {barber}?" with five star buttons; one tap saves it (table `ratings`, one row per queue entry, score 1-5, rules in `src/domain/rating.ts`). Laporan shows each barber's average and count for the date range. The demo seeds ratings on about half of the past online visits.
 
+10. **Chatbot** (2026-11-27, on branch `feat/chatbot`) — one bot brain for every channel (`src/server/chat/answer.ts`): it answers prices, the live queue, branches and hours, where a barber is and their days off, membership and how to take a number, from a fresh snapshot of the shop's own data (`src/server/chat/facts.ts`). Two brains share that snapshot: a rule brain that always works (`src/domain/chat.ts`, unit tested) and an optional AI brain through Vercel AI Gateway (`src/server/chat/ai.ts`, instructions in `prompt.ts`), off until `CHAT_AI=1`, capped per day, falling back to the rules on any error. Channels: web chat at `/tanya` (linked from home) and Telegram (`/api/telegram`, checked with Telegram's secret-token header, connected from Admin → Chat). WhatsApp plugs into the same `ask()` once Meta verifies the business. Every message is logged in `chat_messages`; one chat may send 40 messages per shop day. Admin → Chat shows the channels' status and the latest conversations. The bot can't take a number, pay or change anything.
+
 Phases 1–3 are the MVP that proves the idea.
 
 ---
@@ -225,6 +228,7 @@ Phases 1–3 are the MVP that proves the idea.
 
 - **Stored value (balance):** before any real use, check Bank Indonesia rules on stored value / e-money (closed-loop limits). Portfolio is fine.
 - **WhatsApp:** built on the WhatsApp Cloud API. Real sending needs a Meta app, the shop's number registered on the Cloud API (it must not be on the WhatsApp app), and two approved templates: `kode_pin` (authentication, copy-code button) and `antrean_dekat` (utility, four values: name, branch, how near, ticket). Meta charges per delivered template message. The in-memory demo still shows the forgot-PIN code on screen.
+- **Chatbot:** the AI brain only sees the shop-data snapshot and the chat's last six lines, and is told never to invent prices, hours or policies, never to ask for PINs or codes, and that it can't book or pay. Gateway usage is billed per token; `CHAT_AI_DAILY_CAP` (default 300 answers a day) bounds it, and past the cap the rule brain answers. The web chat's per-chat limit is keyed on a browser id, so it slows casual misuse rather than stopping a determined one; the AI cap is what protects cost.
 - **Clock and day boundaries:** all "today" logic in WITA, queue resets at close.
 - **Abuse:** booking rate limit per phone number; payment required before queue spot blocks fake bookings.
 - **Realtime drop:** tablet and cashier show a "reconnecting" badge and fall back to polling.

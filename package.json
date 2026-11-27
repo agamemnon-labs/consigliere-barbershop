@@ -27,6 +27,7 @@
     "@supabase/supabase-js": "2.119.2",
     "@vercel/analytics": "2.0.1",
     "@vercel/speed-insights": "2.1.0",
+    "ai": "7.0.183",
     "better-auth": "1.7.27",
     "drizzle-orm": "0.45.4",
     "next": "16.4.6",

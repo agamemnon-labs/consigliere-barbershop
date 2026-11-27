@@ -138,6 +138,11 @@ export function barbersIn(text: string, barbers: FactBarber[]): FactBarber[] {
   return barbers.filter((b) => t.includes(` ${normalize(b.name)} `));
 }
 
+const QUEUE_WORDS = ["antre", "antri", "antrian", "antrean", "nunggu", "tunggu"];
+/** "Which one is quietest": answered with a single branch, not the whole list. */
+const QUIET_WORDS = ["sepi", "tersepi", "kosong", "lowong", "lengang", "longgar", "cepat", "tercepat"];
+const BUSY_WORDS = ["rame", "ramai", "penuh", "padat", "teramai", "terame", "terpadat"];
+
 /** What the customer is asking about. The first match wins, most specific first. */
 export function intentOf(text: string, facts: Pick<ShopFacts, "barbers">): Intent {
   const t = normalize(text);
@@ -145,14 +150,25 @@ export function intentOf(text: string, facts: Pick<ShopFacts, "barbers">): Inten
   if (has(t, ["komplain", "keluhan", "kecewa", "protes", "lapor"])) return "complaint";
   if (has(t, ["member", "poin", "point", "saldo", "top up", "topup", "ulang tahun", "ultah", "kartu"]))
     return "member";
-  if (has(t, ["antre", "antri", "antrian", "antrean", "rame", "ramai", "sepi", "nunggu", "tunggu", "penuh"]))
-    return "queue";
+  if (has(t, QUEUE_WORDS) || has(t, QUIET_WORDS) || has(t, BUSY_WORDS)) return "queue";
   if (has(t, ["booking", "book", "pesan", "reservasi", "ambil nomor", "daftar antre", "cara antre"]))
     return "book";
   if (barbersIn(t, facts.barbers).length > 0) return "barber";
   if (has(t, ["buka", "tutup", "jam", "libur"])) return "hours";
   if (
-    has(t, ["harga", "berapa", "biaya", "tarif", "price", "pricelist", "mahal", "murah", "layanan", "menu"])
+    has(t, [
+      "harga",
+      "berapa",
+      "biaya",
+      "tarif",
+      "price",
+      "pricelist",
+      "mahal",
+      "murah",
+      "termurah",
+      "layanan",
+      "menu",
+    ])
   )
     return "price";
   if (has(t, ["cabang", "alamat", "lokasi", "dimana", "di mana", "maps", "arah"])) return "branches";
@@ -210,6 +226,32 @@ function categoryFloors(services: FactService[]): string[] {
   });
 }
 
+/** Open branches with someone on duty, quietest first: shortest wait, then fewest people. */
+function openByQuiet(branches: FactBranch[]) {
+  return branches
+    .filter((b) => !b.closedReason && b.barbers.length > 0)
+    .map((b) => ({
+      branch: b,
+      best: b.barbers.reduce((a, x) => (x.waitMin < a.waitMin ? x : a)),
+      waiting: b.barbers.reduce((n, x) => n + x.waiting, 0),
+    }))
+    .sort((a, b) => a.best.waitMin - b.best.waitMin || a.waiting - b.waiting);
+}
+
+function whereLine(b: FactBranch): string {
+  return `Alamat: ${b.address}${b.mapsUrl ? ` (${b.mapsUrl})` : ""}`;
+}
+
+/** Which day of the coming week the message means: 0 today, 1 tomorrow, or a named day. */
+function dayIndex(text: string, week: FactBarber["week"]): number {
+  // "minggu ini" is "this week", not Sunday.
+  const t = text.replace(/minggu (ini|depan|lalu)/g, "");
+  if (has(t, ["lusa"])) return 2;
+  if (has(t, ["besok", "besoknya"])) return 1;
+  const named = week.findIndex((d) => has(t, [normalize(d.day)]));
+  return Math.max(named, 0);
+}
+
 /** A plain-text answer for one message, from the facts alone. Works with no AI at all. */
 export function ruleReply(text: string, facts: ShopFacts): string {
   const intent = intentOf(text, facts);
@@ -222,16 +264,44 @@ export function ruleReply(text: string, facts: ShopFacts): string {
     case "complaint":
       return `Maaf banget kalau ada yang kurang. Ceritain langsung ke tim kami lewat WhatsApp ${waLabel(facts.complaintsWa)}, nanti dibantu.`;
     case "price": {
-      const found = servicesIn(text, facts.services);
+      const t = normalize(text);
+      const level = facts.levels.find((l) => {
+        const n = normalize(l.name);
+        return (
+          has(t, [n]) ||
+          (n === "regular" && has(t, ["reguler"])) ||
+          (n === "executive" && has(t, ["eksekutif"]))
+        );
+      });
+      const named = servicesIn(text, facts.services);
+      if (level && named.every((s) => s.category === "haircut")) {
+        return `Haircut sama barber ${level.name}: ${formatShort(level.price)}.\n\nDaftar lengkapnya: ${site}/harga`;
+      }
+      const found = named;
       if (found.length > 0) {
         const lines = found.map((s) => servicePrice(s, facts.levels));
         return `${lines.join("\n")}\n\nDaftar lengkapnya: ${site}/harga`;
       }
       const haircut = facts.services.find((s) => s.category === "haircut");
+      const cheapest = facts.levels.reduce<ShopFacts["levels"][number] | null>(
+        (a, l) => (!a || l.price < a.price ? l : a),
+        null,
+      );
+      if (has(t, ["murah", "termurah"]) && haircut && cheapest) {
+        return `Paling murah: ${haircut.name} sama barber ${cheapest.name}, ${formatShort(cheapest.price)}.\n\nSemua harga: ${site}/harga`;
+      }
       const lines = [haircut ? servicePrice(haircut, facts.levels) : null, ...categoryFloors(facts.services)];
       return `${lines.filter(Boolean).join("\n")}\n\nSemua harga: ${site}/harga`;
     }
     case "queue": {
+      const t = normalize(text);
+      const barber = barbersIn(text, facts.barbers)[0];
+      if (barber) {
+        const at = facts.branches.find((b) => b.barbers.some((x) => x.name === barber.name));
+        const live = at?.barbers.find((x) => x.name === barber.name);
+        if (!at || !live) return `${barber.name} nggak jaga hari ini. Jadwalnya: ${site}/barber`;
+        return `${barber.name} hari ini di ${at.name}: ${live.waiting} antre, ${waitLabel(live.waitMin)}.\n\nAmbil nomor: ${site}/antre?cabang=${at.slug}`;
+      }
       const named = branchesIn(text, facts.branches);
       if (named.length === 1) {
         const b = named[0] as FactBranch;
@@ -241,28 +311,57 @@ export function ruleReply(text: string, facts: ShopFacts): string {
         );
         return `Antrean ${b.name} sekarang:\n${rows.join("\n")}\n\nAmbil nomor dari HP: ${site}/antre`;
       }
+      const ranked = openByQuiet(facts.branches);
+      const wantsBusy =
+        has(t, ["teramai", "terame", "terpadat"]) ||
+        (has(t, ["paling", "mana", "yang"]) && has(t, ["rame", "ramai", "penuh", "padat"]));
+      if ((has(t, QUIET_WORDS) || wantsBusy) && ranked.length === 0) {
+        return `Sekarang belum ada cabang yang buka.\n\n${facts.branches.map(branchQueue).join("\n")}`;
+      }
+      if (wantsBusy && !has(t, QUIET_WORDS)) {
+        const busiest = [...ranked].sort((a, b) => b.waiting - a.waiting)[0];
+        const quiet = ranked[0];
+        if (busiest && quiet) {
+          const alt =
+            quiet.branch !== busiest.branch
+              ? `\n\nMau lebih cepat? ${quiet.branch.name} paling sepi, ${quiet.best.name} ${waitLabel(quiet.best.waitMin)}.`
+              : "";
+          return `Paling rame sekarang: ${busiest.branch.name}, ${busiest.waiting} orang antre.${alt}`;
+        }
+      }
+      if (has(t, QUIET_WORDS) && ranked[0]) {
+        const q = ranked[0];
+        const wait =
+          q.best.waitMin <= 0
+            ? `${q.best.name} (${q.best.level}) bisa langsung duduk`
+            : `${q.best.name} (${q.best.level}) paling cepat, ${waitLabel(q.best.waitMin)}`;
+        return `Paling sepi sekarang: ${q.branch.name}. ${wait}, total ${q.waiting} orang antre.\n${whereLine(q.branch)}\n\nAmbil nomor: ${site}/antre?cabang=${q.branch.slug}`;
+      }
       const rows = facts.branches.map(branchQueue);
       return `Antrean sekarang:\n${rows.join("\n")}\n\nAmbil nomor dari HP, bayar QRIS, datang pas giliranmu: ${site}/antre`;
     }
     case "book":
       return `Ambil nomor lewat ${site}/antre: pilih cabang, pilih barber atau yang paling cepat, pilih layanan, isi nama dan nomor WhatsApp, lalu bayar QRIS. Nomormu langsung masuk antrean.\n\nAku belum bisa ambil nomor dari chat ini.`;
     case "barber": {
+      const t = normalize(text);
       const lines = barbersIn(text, facts.barbers).map((b) => {
-        const today = b.week[0]?.where;
+        const i = dayIndex(t, b.week);
+        const label = i === 0 ? "hari ini" : i === 1 ? "besok" : `hari ${b.week[i]?.day ?? ""}`.trim();
+        const day = b.week[i]?.where;
         const where =
-          today === "libur"
-            ? "libur hari ini"
-            : today
-              ? `hari ini di ${today}`
-              : "jadwal hari ini belum diatur";
+          day === "libur" ? `libur ${label}` : day ? `${label} di ${day}` : `jadwal ${label} belum diatur`;
+        if (i > 0) return `${b.name} (${b.level}, haircut ${formatShort(b.price)}): ${where}.`;
         const off = b.week.filter((d) => d.where === "libur").map((d) => d.day);
         const offText = off.length ? ` Libur minggu ini: ${off.join(", ")}.` : "";
-        return `${b.name} (${b.level}, haircut ${formatShort(b.price)}): ${where}.${offText}`;
+        const live = facts.branches.flatMap((x) => x.barbers).find((x) => x.name === b.name);
+        const liveText = live ? ` Antrean sekarang ${live.waiting} orang, ${waitLabel(live.waitMin)}.` : "";
+        return `${b.name} (${b.level}, haircut ${formatShort(b.price)}): ${where}.${liveText}${offText}`;
       });
       return `${lines.join("\n")}\n\nJadwal semua barber: ${site}/barber`;
     }
     case "hours": {
-      const rows = facts.branches.map((b) =>
+      const named = branchesIn(text, facts.branches);
+      const rows = (named.length > 0 ? named : facts.branches).map((b) =>
         b.closedReason
           ? `${b.name}: tutup hari ini (${b.closedReason})`
           : `${b.name}: ${b.hoursToday ?? "tutup"}`,
@@ -270,6 +369,14 @@ export function ruleReply(text: string, facts: ShopFacts): string {
       return `Jam buka hari ini:\n${rows.join("\n")}`;
     }
     case "branches": {
+      const named = branchesIn(text, facts.branches);
+      if (named.length === 1) {
+        const b = named[0] as FactBranch;
+        const open = b.closedReason
+          ? `tutup hari ini (${b.closedReason})`
+          : `buka ${b.hoursToday ?? "-"} hari ini`;
+        return `${b.name}, ${open}.\n${whereLine(b)}\n\nAmbil nomor: ${site}/antre?cabang=${b.slug}`;
+      }
       const rows = facts.branches.map((b) => `${b.name}: ${b.address}${b.mapsUrl ? ` (${b.mapsUrl})` : ""}`);
       return `Cabang ${facts.brand} di ${facts.city}:\n${rows.join("\n")}`;
     }

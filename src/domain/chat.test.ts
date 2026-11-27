@@ -172,6 +172,86 @@ describe("ruleReply", () => {
   });
 });
 
+describe("ruleReply, specific questions", () => {
+  const busy: ShopFacts = {
+    ...facts,
+    branches: [
+      ...facts.branches,
+      {
+        name: "Pulau Kalimantan",
+        slug: "pulau-kalimantan",
+        address: "Jl. Pulau Kalimantan No. 9",
+        mapsUrl: "https://maps.test/kalimantan",
+        hoursToday: "10.00–22.00",
+        closedReason: null,
+        barbers: [
+          { name: "Luca", level: "Senior", price: 95_000, waiting: 5, waitMin: 120 },
+          { name: "Paulie", level: "Regular", price: 80_000, waiting: 4, waitMin: 75 },
+        ],
+      },
+    ],
+  };
+
+  it("names only the quietest branch, with a reason, address and link", () => {
+    const reply = ruleReply("dimana cabang yang paling sepi?", busy);
+    expect(reply).toContain("Paling sepi sekarang: Jl. Belatuk");
+    expect(reply).toContain("Sonny (Regular) bisa langsung duduk");
+    expect(reply).toContain("Alamat: Jl. Belatuk No. 1");
+    expect(reply).toContain("/antre?cabang=belatuk");
+    expect(reply).not.toContain("Pulau Kalimantan");
+    expect(reply).not.toContain("Citra Niaga");
+  });
+  it("treats 'kosong' and 'paling cepat' the same way", () => {
+    expect(ruleReply("barber yang kosong di mana", busy)).toContain("Paling sepi sekarang: Jl. Belatuk");
+    expect(ruleReply("mana yang paling cepat", busy)).toContain("Paling sepi sekarang: Jl. Belatuk");
+  });
+  it("names the busiest branch and points to a quicker one", () => {
+    const reply = ruleReply("cabang mana yang paling rame", busy);
+    expect(reply).toContain("Paling rame sekarang: Pulau Kalimantan, 9 orang antre");
+    expect(reply).toContain("Jl. Belatuk paling sepi");
+  });
+  it("says so when no branch is open", () => {
+    const shut = { ...facts, branches: facts.branches.filter((b) => b.closedReason) };
+    expect(ruleReply("cabang paling sepi", shut)).toContain("belum ada cabang yang buka");
+  });
+  it("gives one barber's live line", () => {
+    const reply = ruleReply("antrean vito berapa", busy);
+    expect(reply).toContain("Vito hari ini di Jl. Belatuk: 3 antre, ± 1 jam 30 menit");
+    expect(reply).not.toContain("Sonny");
+  });
+  it("answers a barber's schedule for tomorrow or a named day", () => {
+    expect(ruleReply("vito besok kerja di mana", facts)).toContain(
+      "Vito (Executive, haircut 125K): libur besok",
+    );
+    expect(ruleReply("hari minggu vito di mana", facts)).toContain("hari Minggu di Citra Niaga");
+  });
+  it("does not read 'minggu ini' as Sunday", () => {
+    expect(ruleReply("vito libur minggu ini kapan", facts)).toContain("hari ini di Jl. Belatuk");
+  });
+  it("adds a barber's live line when they are on today", () => {
+    expect(ruleReply("vito hari ini di mana", facts)).toContain("Antrean sekarang 3 orang");
+  });
+  it("gives one branch's address or hours when one is named", () => {
+    const address = ruleReply("alamat cabang kalimantan di mana", busy);
+    expect(address).toContain("Pulau Kalimantan, buka 10.00–22.00 hari ini");
+    expect(address).toContain("https://maps.test/kalimantan");
+    expect(address).not.toContain("Belatuk");
+    const hours = ruleReply("belatuk buka jam berapa", busy);
+    expect(hours).toContain("Jl. Belatuk: 10.00–21.00");
+    expect(hours).not.toContain("Kalimantan");
+  });
+  it("prices one barber level", () => {
+    const reply = ruleReply("harga potong executive berapa", facts);
+    expect(reply).toContain("Haircut sama barber Executive: 125K");
+    expect(reply).not.toContain("Regular");
+  });
+  it("names the cheapest haircut", () => {
+    expect(ruleReply("yang paling murah berapa", facts)).toContain(
+      "Paling murah: Haircut sama barber Regular, 80K",
+    );
+  });
+});
+
 describe("waLabel", () => {
   it("formats an Indonesian number for people", () => {
     expect(waLabel("6281200000000")).toBe("0812-0000-0000");
